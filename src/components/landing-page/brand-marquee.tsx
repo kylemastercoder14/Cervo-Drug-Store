@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+/* eslint-disable @next/next/no-img-element */
 import Marquee from "../magic-ui/marquee";
 
 const reviews = [
