@@ -6,6 +6,7 @@ export enum FormFieldType {
   SELECT = "select",
   DYNAMICSELECT = "dynamicSelect",
   DYNAMICSELECTARRAY = "dynamicSelectArray",
+  RICHTEXT = "richText",
   RADIO = "radio",
   CHECKBOX = "checkbox",
   SWITCH = "switch",

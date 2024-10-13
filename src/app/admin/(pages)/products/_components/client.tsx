@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { columns, ProductColumn } from "./column";
 import { format } from "date-fns";
 import { useGetProducts } from "@/data/product";
+import { formatPrice } from "@/lib/utils";
 
 const ProductClient = () => {
   const { data: productData, error, isLoading } = useGetProducts();
@@ -26,10 +27,15 @@ const ProductClient = () => {
       id: item.id,
       name: item.name,
       image: item.image,
-      price: item.price,
+      tags: item.tags,
+      categoryId: item.categoryId,
+      description: item.description,
+      stocks: item.stocks,
+      price: formatPrice(item.price),
       isFeatured: item.isFeatured,
       isPrescription: item.isPrescriptionRequired,
       category: item.category.name,
+      discountedPrice: formatPrice(item?.discountedPrice ?? 0),
       createdAt: format(item.createdAt, "MMMM do, yyyy"),
     })) || [];
 

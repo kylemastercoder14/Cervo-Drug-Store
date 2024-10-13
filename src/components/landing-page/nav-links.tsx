@@ -5,28 +5,36 @@ import { Categories } from "@prisma/client";
 import { IconChevronDown } from "@tabler/icons-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { BarLoader } from "react-spinners";
 
 const NavLinks = () => {
   const [items, setItems] = useState<Categories[]>([]);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    const fetchPromotions = async () => {
+    const fetchCategories = async () => {
+      setLoading(true);
       const response = await getCategoriesNavbar();
-      if (response.data) {
+      if (response && response.data) {
         setItems(response.data);
       } else {
-        toast.error(response.error || "An error occurred");
+        return null;
       }
+      setLoading(false);
     };
 
-    fetchPromotions();
+    fetchCategories();
   }, []);
+
   const subItems = [
-    "Specialty Medicines",
-    "Track Your Order",
-    "FAQs",
-    "Blogs & Announcements",
+    { name: "Specialty Medicines", href: "/specialty-medicines" },
+    { name: "Track Your Order", href: "/track-order" },
+    { name: "FAQs", href: "/faqs" },
+    { name: "Blogs & Announcements", href: "/blogs-announcements" },
   ];
+
+  if (loading) return <BarLoader loading color="#437634" />;
+
   return (
     <div className="flex items-center gap-10">
       {items.map((item) => (
@@ -43,9 +51,9 @@ const NavLinks = () => {
         <Link
           key={index}
           className="flex items-center gap-2 font-semibold"
-          href="/"
+          href={item.href}
         >
-          <span>{item}</span>
+          <span>{item.name}</span>
         </Link>
       ))}
     </div>

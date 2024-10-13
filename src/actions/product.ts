@@ -2,8 +2,8 @@
 "use server";
 
 import db from "@/lib/db";
-// import { CategoryValidation } from "@/lib/validators";
-// import { z } from "zod";
+import { ProductValidation } from "@/lib/validators";
+import { z } from "zod";
 
 export const getAllProducts = async () => {
   try {
@@ -27,126 +27,203 @@ export const getAllProducts = async () => {
   }
 };
 
-// export const getCategoriesNavbar = async () => {
-//   try {
-//     const data = await db.categories.findMany({
-//       orderBy: {
-//         createdAt: "asc",
-//       },
-//       take: 6,
-//     });
+export const getProductByTag = async (tags: string) => {
+  try {
+    const data = await db.products.findFirst({
+      orderBy: {
+        createdAt: "asc",
+      },
+      where: {
+        tags,
+      },
+      include: {
+        category: true,
+      },
+    });
 
-//     if (!data) {
-//       return { error: "No categories found." };
-//     }
+    if (!data) {
+      return { error: "No product found." };
+    }
 
-//     return { data };
-//   } catch (error) {
-//     console.error(error);
-//     return { error: "Something went wrong." };
-//   }
-// };
+    return { data };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong." };
+  }
+};
 
-// export const createCategory = async (
-//   values: z.infer<typeof CategoryValidation>
-// ) => {
-//   const validatedField = CategoryValidation.safeParse(values);
+export const getProductsByCategory = async (categoryTag: string) => {
+  try {
+    let data;
+    if (categoryTag === "all") {
+      data = await db.products.findMany({
+        orderBy: {
+          createdAt: "asc",
+        },
+        include: {
+          category: true,
+        },
+      });
+    } else {
+      data = await db.products.findMany({
+        orderBy: {
+          createdAt: "asc",
+        },
+        where: {
+          categoryTag: categoryTag,
+        },
+        include: {
+          category: true,
+        },
+      });
+    }
 
-//   if (!validatedField.success) {
-//     const errors = validatedField.error.errors.map((err) => err.message);
-//     return { error: `Validation Error: ${errors.join(", ")}` };
-//   }
+    // Check if the data array is empty
+    if (!data || data.length === 0) {
+      return { error: "No products found." };
+    }
 
-//   const { name, image } = validatedField.data;
+    return { data };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong while fetching products." };
+  }
+};
 
-//   const tags = name
-//     .toLowerCase()
-//     .replace(/,/g, "") // Remove commas
-//     .replace(/\s+/g, "-") // Replace spaces with hyphens
-//     .replace(/&/g, "and"); // Replace "&" with "and"
+export const createProduct = async (
+  values: z.infer<typeof ProductValidation>
+) => {
+  const validatedField = ProductValidation.safeParse(values);
 
-//   try {
-//     const data = await db.categories.create({
-//       data: {
-//         name,
-//         image,
-//         tags,
-//       },
-//     });
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
 
-//     return { success: "Category created successfully", data };
-//   } catch (error: any) {
-//     return {
-//       error: `Failed to create category. Please try again. ${
-//         error.message || ""
-//       }`,
-//     };
-//   }
-// };
+  const {
+    name,
+    image,
+    description,
+    price,
+    stocks,
+    category,
+    isFeatured,
+    isPrescriptionRequired,
+    discountedPrice,
+  } = validatedField.data;
 
-// export const updateCategory = async (
-//   values: z.infer<typeof CategoryValidation>,
-//   categoryId: string
-// ) => {
-//   if (!categoryId) {
-//     return { error: "Category ID is required." };
-//   }
+  const tags = name
+    .toLowerCase()
+    .replace(/,/g, "") // Remove commas
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/&/g, "and"); // Replace "&" with "and"
 
-//   const validatedField = CategoryValidation.safeParse(values);
+  try {
+    const data = await db.products.create({
+      data: {
+        name,
+        image,
+        tags,
+        description,
+        categoryTag: category,
+        price,
+        stocks,
+        isFeatured,
+        discountedPrice,
+        isPrescriptionRequired,
+      },
+    });
 
-//   if (!validatedField.success) {
-//     const errors = validatedField.error.errors.map((err) => err.message);
-//     return { error: `Validation Error: ${errors.join(", ")}` };
-//   }
+    return { success: "Product created successfully", data };
+  } catch (error: any) {
+    return {
+      error: `Failed to create product. Please try again. ${
+        error.message || ""
+      }`,
+    };
+  }
+};
 
-//   const { name, image } = validatedField.data;
+export const updateProduct = async (
+  values: z.infer<typeof ProductValidation>,
+  productId: string
+) => {
+  if (!productId) {
+    return { error: "Product ID is required." };
+  }
 
-//   const tags = name
-//     .toLowerCase()
-//     .replace(/,/g, "") // Remove commas
-//     .replace(/\s+/g, "-") // Replace spaces with hyphens
-//     .replace(/&/g, "and"); // Replace "&" with "and"
+  const validatedField = ProductValidation.safeParse(values);
 
-//   try {
-//     const data = await db.categories.update({
-//       where: {
-//         id: categoryId,
-//       },
-//       data: {
-//         name,
-//         image,
-//         tags,
-//       },
-//     });
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
 
-//     return { success: "Category updated successfully", data };
-//   } catch (error: any) {
-//     return {
-//       error: `Failed to update category. Please try again. ${
-//         error.message || ""
-//       }`,
-//     };
-//   }
-// };
+  const {
+    name,
+    image,
+    description,
+    price,
+    stocks,
+    category,
+    isFeatured,
+    isPrescriptionRequired,
+    discountedPrice,
+  } = validatedField.data;
 
-// export const deleteCategory = async (categoryId: string) => {
-//   if (!categoryId) {
-//     return { error: "Category ID is required." };
-//   }
+  const tags = name
+    .toLowerCase()
+    .replace(/,/g, "") // Remove commas
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/&/g, "and"); // Replace "&" with "and"
 
-//   try {
-//     const data = await db.categories.delete({
-//       where: {
-//         id: categoryId,
-//       },
-//     });
+  try {
+    const data = await db.products.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        name,
+        image,
+        tags,
+        description,
+        categoryTag: category,
+        price,
+        stocks,
+        isFeatured,
+        isPrescriptionRequired,
+        discountedPrice,
+      },
+    });
 
-//     return { success: "Category deleted successfully", data };
-//   } catch (error: any) {
-//     return {
-//       error: `Failed to delete category. Please try again. ${
-//         error.message || ""
-//       }`,
-//     };
-//   }
-// };
+    return { success: "Product updated successfully", data };
+  } catch (error: any) {
+    return {
+      error: `Failed to update product. Please try again. ${
+        error.message || ""
+      }`,
+    };
+  }
+};
+
+export const deleteProduct = async (productId: string) => {
+  if (!productId) {
+    return { error: "Product ID is required." };
+  }
+
+  try {
+    const data = await db.products.delete({
+      where: {
+        id: productId,
+      },
+    });
+
+    return { success: "Product deleted successfully", data };
+  } catch (error: any) {
+    return {
+      error: `Failed to delete product. Please try again. ${
+        error.message || ""
+      }`,
+    };
+  }
+};

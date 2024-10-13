@@ -103,3 +103,15 @@ export const CategoryValidation = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   image: z.string().min(1, { message: "Category image is required" }),
 });
+
+export const ProductValidation = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  image: z.string().min(1, { message: "Product image is required" }),
+  category: z.string().min(1, { message: "Category is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  price: z.coerce.number().min(1, { message: "Price is required" }),
+  discountedPrice: z.coerce.number().optional(),
+  stocks: z.coerce.number().min(1, { message: "Stocks is required" }),
+  isFeatured: z.boolean().optional(),
+  isPrescriptionRequired: z.boolean().optional(),
+});

@@ -102,7 +102,7 @@ const Sidebar = () => {
           <span className="text-xs text-muted-foreground">Administrator</span>
         </div>
       </div>
-      <ul>
+      <ul className="list-none ml-0">
         {menuItems.map((item) => (
           <li key={item.title}>
             <span className="text-muted-foreground font-semibold text-sm my-2">

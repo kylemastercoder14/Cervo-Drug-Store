@@ -1,3 +1,5 @@
+"use client";
+
 import Chatbot from "@/components/landing-page/chatbot";
 import Navbar from "@/components/landing-page/navbar";
 import React from "react";
@@ -9,23 +11,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { IconHeart, IconTrashXFilled, IconX } from "@tabler/icons-react";
-import ProductsContent from "@/components/landing-page/products";
+import { IconTrashXFilled } from "@tabler/icons-react";
 import Footer from "@/components/landing-page/footer";
 import Image from "next/image";
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
-import Link from "next/link";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableFooter,
   TableHead,
@@ -33,8 +26,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import useCart from "@/hooks/use-cart";
+import { formatPrice } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const Cart = () => {
+  const router = useRouter();
+  const { items, updateQuantity, removeItem, removeAll } = useCart();
+  const totalItems = items.reduce((total, item) => total + item.quantity, 0);
+  const totalPrice = items.reduce(
+    (total, item) => total + item.quantity * item.discountedPrice,
+    0
+  );
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Chatbot />
@@ -56,7 +59,7 @@ const Cart = () => {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="bg-[#eeeeee] flex justify-between mt-5 items-center rounded-lg py-3 px-5 shadow-md border">
-          <p className="font-semibold text-lg">Shopping Cart</p>
+          <p className="font-semibold text-lg">Shopping Cart ({totalItems})</p>
         </div>
         <div className="flex justify-between mt-5 items-center rounded-lg py-3">
           <Table className="border">
@@ -79,38 +82,59 @@ const Cart = () => {
               </TableRow>
             </TableHeader>
             <TableBody className="border border-zinc-400">
-              <TableRow>
-                <TableCell>
-                  <IconTrashXFilled color="red" />
-                </TableCell>
-                <TableCell>
-                  <Image
-                    src="/featured/forti.webp"
-                    alt="Product"
-                    width={50}
-                    height={50}
-                  />
-                </TableCell>
-                <TableCell className="flex flex-col">
-                  <p className="font-semibold">Forti-D 800 - 30s IU Capsule</p>
-                  <p className="font-semibold text-sm text-muted-foreground">
-                    Vitamins / Supplements
-                  </p>
-                </TableCell>
-                <TableCell>₱172.50</TableCell>
-                <TableCell>
-                  <div className="flex items-center border w-40 bg-white py-2.5 px-5 gap-5">
-                    <MinusIcon color="gray" />
-                    <input
-                      type="text"
-                      value={4}
-                      className="border-none outline-none text-center w-10"
+              {items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <IconTrashXFilled
+                      className="cursor-pointer"
+                      onClick={() => removeItem(item.id)}
+                      color="red"
                     />
-                    <PlusIcon color="gray" />
-                  </div>
-                </TableCell>
-                <TableCell>₱690.00</TableCell>
-              </TableRow>
+                  </TableCell>
+                  <TableCell>
+                    <Image
+                      src={item.image}
+                      alt="Product"
+                      width={50}
+                      height={50}
+                    />
+                  </TableCell>
+                  <TableCell className="flex flex-col">
+                    <p className="font-semibold">{item.name}</p>
+                    <p className="font-semibold text-sm text-muted-foreground">
+                      {item.category}
+                    </p>
+                  </TableCell>
+                  <TableCell>{formatPrice(item.discountedPrice)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center border w-40 bg-white py-2.5 px-5 gap-5">
+                      <MinusIcon
+                        onClick={() =>
+                          updateQuantity(
+                            item.id,
+                            item.quantity > 1 ? item.quantity - 1 : 1
+                          )
+                        }
+                        className="cursor-pointer"
+                        color="gray"
+                      />
+                      <input
+                        type="text"
+                        value={item.quantity}
+                        className="border-none outline-none text-center w-10"
+                      />
+                      <PlusIcon
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }
+                        className="cursor-pointer"
+                        color="gray"
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell>{formatPrice(totalPrice)}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
             <TableFooter className="border border-zinc-400">
               <TableRow>
@@ -120,9 +144,12 @@ const Cart = () => {
                     <Button variant="primary">Apply Coupon</Button>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <Button variant="primary" className="w-full">
-                    Update Cart
+                <TableCell className="flex items-center gap-2">
+                  <Button onClick={removeAll} variant="destructive" className="w-full">
+                    Remove All Cart
+                  </Button>
+                  <Button onClick={() => router.push("/collections/all")} variant="primary" className="w-full">
+                    Continue Shopping
                   </Button>
                 </TableCell>
               </TableRow>
@@ -134,16 +161,20 @@ const Cart = () => {
             <TableBody className="border border-zinc-400">
               <TableRow className="border border-zinc-400">
                 <TableCell className="font-semibold">Subtotal</TableCell>
-                <TableCell>₱690.00</TableCell>
+                <TableCell>{formatPrice(totalPrice)}</TableCell>
               </TableRow>
               <TableRow className="border border-zinc-400">
-                <TableCell className="text-[#437634] font-semibold">Total</TableCell>
-                <TableCell className="text-[#437634] font-semibold">₱690.00</TableCell>
+                <TableCell className="text-[#437634] font-semibold">
+                  Total
+                </TableCell>
+                <TableCell className="text-[#437634] font-semibold">
+                  {formatPrice(totalPrice)}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </div>
-        <Button variant="primary">Proceed To Checkout</Button>
+        <Button onClick={() => router.push("/checkout")} variant="primary" disabled={items.length === 0}>Proceed To Checkout</Button>
       </div>
       <Footer />
     </div>

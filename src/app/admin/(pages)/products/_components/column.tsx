@@ -6,12 +6,19 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
 import Link from "next/link";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
 export type ProductColumn = {
   id: string;
   name: string;
   image: string;
   category: string;
+  categoryId: string;
+  description: string;
+  stocks: any;
+  discountedPrice: any;
+  tags: string;
   price: any;
   isFeatured: boolean;
   isPrescription: boolean;
@@ -20,20 +27,48 @@ export type ProductColumn = {
 
 export const columns: ColumnDef<ProductColumn>[] = [
   {
-    accessorKey: "name",
-    header: "Product",
+    accessorKey: "image",
+    header: "",
+    cell: ({ row }) => (
+      <Image
+        alt="Product image"
+        className="aspect-square rounded-md object-cover"
+        height="70"
+        src={row.original.image}
+        width="70"
+      />
+    ),
   },
   {
-    accessorKey: "image",
-    header: "Image",
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "tags",
+    header: "SKU",
+  },
+  {
+    accessorKey: "price",
+    header: "Price",
+  },
+  {
+    accessorKey: "discountedPrice",
+    header: "Discounted Price",
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
     cell: ({ row }) => (
-      <Link
-        className="cursor-pointer font-semibold text-orange-600"
-        href={row.original.image}
-      >
-        {row.original.image}
-      </Link>
-    ),
+      <Badge variant="outline">{row.original.category}</Badge>
+    )
+  },
+  {
+    accessorKey: "isFeatured",
+    header: "Featured",
+  },
+  {
+    accessorKey: "isPrescription",
+    header: "Prescription Required",
   },
   {
     accessorKey: "createdAt",

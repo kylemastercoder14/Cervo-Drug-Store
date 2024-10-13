@@ -4,8 +4,6 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Image from "next/image";
 
-type Props = {};
-
 const Footer = () => {
   return (
     <>
@@ -30,25 +28,25 @@ const Footer = () => {
         <div className="flex flex-col">
           <p className="font-semibold text-xl mb-2">Quick Links</p>
           <Link
-            href="#"
+            href="/collections/all"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             Products
           </Link>
           <Link
-            href="#"
+            href="/terms-and-conditions"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             Conditions
           </Link>
           <Link
-            href="#"
+            href="/faqs"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             FAQs
           </Link>
           <Link
-            href="#"
+            href="/contact-us"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             Contact Us
@@ -72,25 +70,25 @@ const Footer = () => {
         <div className="flex flex-col">
           <p className="font-semibold text-xl mb-2">Customer Care</p>
           <Link
-            href="#"
+            href="/privacy-policy"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             Privacy Policy
           </Link>
           <Link
-            href="#"
+            href="/terms-and-conditions"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             Terms & Conditions
           </Link>
           <Link
-            href="#"
+            href="/shipping-and-delivery"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             Shipping & Delivery
           </Link>
           <Link
-            href="#"
+            href="/store-locator"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             Store Locator

@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Loader } from "lucide-react";
-import { CategoryValidation } from "@/lib/validators";
+import { ProductValidation } from "@/lib/validators";
 import CustomFormField from "../globals/custom-formfield";
 import { FormFieldType } from "@/constants";
 import { Modal } from "../ui/modal";
-import { useSaveCategory } from "@/data/category";
+import { Categories } from "@prisma/client";
+import { getAllCategories } from "@/actions/category";
+import { useSaveProduct } from "@/data/product";
 
 const ProductForm = ({
   initialData,
@@ -21,38 +23,71 @@ const ProductForm = ({
   initialData: any;
   onClose: () => void;
 }) => {
-  const title = initialData ? "Edit Category" : "Add Category";
+  const [categories, setCategories] = useState<Categories[]>([]);
+
+  const title = initialData ? "Edit Product" : "Add Product";
   const description = initialData
-    ? "Make sure to click save changes after you update the category."
-    : "Please fill the required fields to add a new category.";
-  const action = initialData ? "Save Changes" : "Save Category";
-  const form = useForm<z.infer<typeof CategoryValidation>>({
-    resolver: zodResolver(CategoryValidation),
+    ? "Make sure to click save changes after you update the product."
+    : "Please fill the required fields to add a new product.";
+  const action = initialData ? "Save Changes" : "Save Product";
+
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      const response = await getAllCategories();
+      if (response.data) {
+        setCategories(response.data);
+      } else {
+        setCategories([]);
+      }
+    };
+
+    fetchPromotions();
+  }, []);
+
+  const form = useForm<z.infer<typeof ProductValidation>>({
+    resolver: zodResolver(ProductValidation),
     mode: "onChange",
     defaultValues: initialData
       ? {
-          ...initialData,
+          name: initialData.name ?? "",
+          image: initialData.image ?? "",
+          price: parseFloat(initialData.price.replace("₱", "")) || 0,
+          stocks: initialData.stocks ?? 0,
+          description: initialData.description ?? "",
+          category: initialData?.categoryId ?? "",
+          isFeatured: initialData.isFeatured ?? false,
+          isPrescriptionRequired: initialData.isPrescriptionRequired ?? false,
+          discountedPrice: initialData.discountedPrice ?? 0,
         }
       : {
+          // Initial values when adding a new product
           image: "",
           name: "",
+          description: "",
+          price: 0,
+          stocks: 0,
+          category: "",
+          isFeatured: true,
+          isPrescriptionRequired: false,
+          discountedPrice: 0,
         },
   });
 
-  const { mutate: saveCategory, isPending: isSaving } = useSaveCategory(
+  const { mutate: saveProduct, isPending: isSaving } = useSaveProduct(
     initialData ?? ""
   );
 
-  async function onSubmit(values: z.infer<typeof CategoryValidation>) {
-    saveCategory(values, {
+  async function onSubmit(values: z.infer<typeof ProductValidation>) {
+    saveProduct(values, {
       onSuccess: () => onClose(),
+      onError: () => {},
     });
   }
 
   return (
     <>
       <Modal
-        className="max-w-lg"
+        className="max-w-2xl h-screen overflow-auto"
         isOpen={true}
         onClose={onClose}
         title={title}
@@ -62,13 +97,69 @@ const ProductForm = ({
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="mx-auto grid flex-1 auto-rows-max gap-4">
               <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <CustomFormField
+                    control={form.control}
+                    fieldType={FormFieldType.INPUT}
+                    label="Name"
+                    placeholder="Enter product name"
+                    isRequired={true}
+                    name="name"
+                    disabled={isSaving}
+                  />
+                  <CustomFormField
+                    control={form.control}
+                    fieldType={FormFieldType.SELECT}
+                    label="Category"
+                    placeholder="Select product category"
+                    isRequired={true}
+                    dynamicOptions={categories.map((category) => ({
+                      label: category.name,
+                      value: category.tags,
+                    }))}
+                    name="category"
+                    disabled={isSaving}
+                  />
+                </div>
+                <div className="grid lg:grid-cols-3 grid-cols-1 gap-2">
+                  <CustomFormField
+                    control={form.control}
+                    fieldType={FormFieldType.INPUT}
+                    label="Price"
+                    type="number"
+                    placeholder="Enter product price"
+                    isRequired={true}
+                    name="price"
+                    disabled={isSaving}
+                  />
+                  <CustomFormField
+                    control={form.control}
+                    fieldType={FormFieldType.INPUT}
+                    label="Stocks"
+                    type="number"
+                    placeholder="Enter product stocks"
+                    isRequired={true}
+                    name="stocks"
+                    disabled={isSaving}
+                  />
+                  <CustomFormField
+                    control={form.control}
+                    fieldType={FormFieldType.INPUT}
+                    label="Discounted Price"
+                    type="number"
+                    placeholder="Enter discounted price"
+                    isRequired={true}
+                    name="discountedPrice"
+                    disabled={isSaving}
+                  />
+                </div>
+
                 <CustomFormField
                   control={form.control}
-                  fieldType={FormFieldType.INPUT}
-                  label="Name"
-                  placeholder="Enter category name"
+                  fieldType={FormFieldType.RICHTEXT}
+                  label="Description"
                   isRequired={true}
-                  name="name"
+                  name="description"
                   disabled={isSaving}
                 />
                 <CustomFormField
@@ -77,6 +168,24 @@ const ProductForm = ({
                   label="Image"
                   isRequired={true}
                   name="image"
+                  disabled={isSaving}
+                />
+                <CustomFormField
+                  control={form.control}
+                  fieldType={FormFieldType.SWITCH}
+                  label="Featured"
+                  description="This product will be featured on the homepage."
+                  isRequired={true}
+                  name="isFeatured"
+                  disabled={isSaving}
+                />
+                <CustomFormField
+                  control={form.control}
+                  fieldType={FormFieldType.SWITCH}
+                  label="Prescription Required"
+                  description="Toggle this option if the product requires a valid prescription from a healthcare provider before purchase."
+                  isRequired={true}
+                  name="isPrescriptionRequired"
                   disabled={isSaving}
                 />
                 <Button type="submit" disabled={isSaving} size="sm">

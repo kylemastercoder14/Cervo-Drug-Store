@@ -44,6 +44,7 @@ import { Textarea } from "../ui/textarea";
 import ImageUpload from "./image-uploader";
 import { DynamicArraySelect } from "./dynamic-array-select";
 import { Switch } from "../ui/switch";
+import RichTextEditor from "./rich-text-editor";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
@@ -245,10 +246,10 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
             </SelectTrigger>
 
             <SelectContent>
-              {options &&
-                options.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
+              {dynamicOptions &&
+                dynamicOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
                   </SelectItem>
                 ))}
             </SelectContent>
@@ -377,6 +378,17 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           <ImageUpload
             defaultValue={field.value || ""}
             onImageUpload={(url) => field.onChange(url)}
+          />
+        </FormControl>
+      );
+
+    case FormFieldType.RICHTEXT:
+      return (
+        <FormControl>
+          <RichTextEditor
+            description={field.value}
+            onChange={field.onChange}
+            disabled={disabled}
           />
         </FormControl>
       );

@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { IconFlame } from "@tabler/icons-react";
 import React, { useState, useEffect } from "react";
 
 const CountdownTimer = () => {
-  const promoEndDate = new Date("2024-09-30T23:59:59");
+  const promoEndDate = new Date("2024-10-30T23:59:59");
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,

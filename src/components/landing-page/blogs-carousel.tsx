@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Carousel,
@@ -7,6 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const items = [
   {
@@ -30,6 +33,7 @@ const items = [
 ];
 
 const BlogsCarousel = () => {
+  const router = useRouter();
   return (
     <Carousel className="w-full">
       <CarouselContent className="-ml-2">
@@ -49,7 +53,20 @@ const BlogsCarousel = () => {
                 </p>
               </div>
               <p className="text-sm mt-2 line-clamp-3">{item.description}</p>
-              <p className="mt-2 hover:underline cursor-pointer font-semibold">Read More &rarr;</p>
+              <p
+                onClick={() =>
+                  router.push(
+                    `/blogs/${item.title
+                      .toLowerCase()
+                      .replace(/,/g, "")
+                      .replace(/\s+/g, "-")
+                      .replace(/&/g, "and")}`
+                  )
+                }
+                className="mt-2 hover:underline cursor-pointer font-semibold"
+              >
+                Read More &rarr;
+              </p>
             </div>
           </CarouselItem>
         ))}

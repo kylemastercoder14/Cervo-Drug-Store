@@ -7,7 +7,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { IconLockFilled, IconLogout, IconUser, IconUserFilled } from "@tabler/icons-react";
+import {
+  IconLockFilled,
+  IconLogout,
+  IconUser,
+  IconUserFilled,
+} from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useClerk, useUser } from "@clerk/nextjs";
 
@@ -31,7 +36,9 @@ const UserDropdown = () => {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => router.push("/my-account")}>
+            <DropdownMenuItem
+              onClick={() => router.push(user ? "/my-profile" : "my-account")}
+            >
               <IconLockFilled size={20} color="black" />
               <span className="ml-2">My Account</span>
             </DropdownMenuItem>

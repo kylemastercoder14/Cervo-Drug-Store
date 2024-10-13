@@ -1,6 +1,8 @@
+"use client";
+
 import Chatbot from "@/components/landing-page/chatbot";
 import Navbar from "@/components/landing-page/navbar";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,13 +19,50 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { IconHeart } from "@tabler/icons-react";
-import ProductsContent from "@/components/landing-page/products";
 import Footer from "@/components/landing-page/footer";
 import Image from "next/image";
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
+import { Categories, Products } from "@prisma/client";
+import { getProductByTag } from "@/actions/product";
+import { formatPrice } from "@/lib/utils";
+import parse from "html-react-parser";
+import useCart from "@/hooks/use-cart";
 
-const ViewProduct = () => {
+interface ProductWithCategory extends Products {
+  category: Categories | null;
+}
+
+const ViewProduct = ({ params }: { params: { productTag: string } }) => {
+  const [product, setProduct] = useState<ProductWithCategory | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const addToCart = useCart((state) => state.addItem);
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const response = await getProductByTag(params.productTag);
+      if (!response.error) {
+        if (response?.data) {
+          setProduct(response.data);
+        }
+      } else {
+        console.error(response.error);
+      }
+    };
+    fetchProduct();
+  }, [params.productTag]);
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: product?.id as string,
+      name: product?.name as string,
+      price: product?.price ?? 0,
+      discountedPrice: product?.discountedPrice ?? 0,
+      quantity,
+      category: product?.category?.name as string,
+      image: product?.image as string,
+      description: product?.description as string,
+    });
+  };
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Chatbot />
@@ -39,7 +78,7 @@ const ViewProduct = () => {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="text-[16px]">
-                Forti-D 800 - 30s IU Capsule
+                {product?.name}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -47,7 +86,7 @@ const ViewProduct = () => {
         <div className="grid grid-cols-2 gap-10 mt-5">
           <div className="relative w-full h-[700px]">
             <Image
-              src="/featured/forti.webp"
+              src={product?.image as string}
               alt="Forti"
               fill
               className="w-full h-full object-contain"
@@ -56,9 +95,7 @@ const ViewProduct = () => {
           <div>
             <div className="border-b pb-5 border-zinc-300">
               <div className="flex items-center justify-between">
-                <p className="text-3xl font-semibold">
-                  Forti-D 800 - 30s IU Capsule
-                </p>
+                <p className="text-3xl font-semibold">{product?.name}</p>
                 <Button
                   variant="outline"
                   className="border-[#437634] hover:text-[#437634] text-[#437634]"
@@ -67,45 +104,41 @@ const ViewProduct = () => {
                   Add To Wishlist
                 </Button>
               </div>
-              <p className="text-2xl font-semibold mt-2">₱172.50</p>
+              <div className="flex items-center gap-2 mt-2">
+                {product?.discountedPrice !== null && (
+                  <p className="font-semibold text-2xl">
+                    {formatPrice(product?.discountedPrice ?? 0)} -{" "}
+                  </p>
+                )}
+                <p className="text-muted-foreground text-2xl line-through">
+                  {product?.price !== undefined
+                    ? formatPrice(product.price)
+                    : "N/A"}{" "}
+                </p>
+              </div>
               <p className="text-muted-foreground mt-2 text-sm">
                 Shipping calculated at checkout.
               </p>
             </div>
             <div className="flex items-center gap-3 mt-10">
               <div className="flex items-center border py-2.5 px-5 gap-5">
-                <MinusIcon color="gray" />
+                <MinusIcon className="cursor-pointer" onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)} color="gray" />
                 <input
                   type="text"
-                  value={1}
+                  value={quantity}
+                  readOnly
                   className="border-none outline-none text-center w-10"
                 />
-                <PlusIcon color="gray" />
+                <PlusIcon onClick={() => setQuantity(quantity + 1)} className="cursor-pointer" color="gray" />
               </div>
-              <Button variant="primary" className="w-full py-6">
+              <Button onClick={handleAddToCart} variant="primary" className="w-full py-6">
                 Add To Cart
               </Button>
             </div>
-            <p className="my-4 font-semibold text-xl">About the Product</p>
+            <p className="mt-4 mb-1 font-semibold text-xl">About the Product</p>
             <p>
-              Forti-D is the vital vitamin because it can help keep all your 36
-              vital organs healthy. How? Because our body is full of Vitamin D
-              receptors which are found in cells. This allows us to process
-              Vitamin D we get from the sun, food, and supplements and thereby
-              helps our body organs with their functions. As such, it is
-              extremely important to have a sufficient amount of Vitamin D in
-              your body.
+              {parse(product?.description ?? "")}
             </p>
-            <p className="mt-2">
-              For the prevention and treatment of Vitamin D deficiency.
-            </p>
-            <ul className="my-2 ml-6 list-disc [&>li]:mt-2">
-              <li>Cholecalciferol</li>
-              <li>Vitamin D3</li>
-              <li>800 IU</li>
-              <li>Vitamins / Minerals</li>
-              <li>30 pcs capsules</li>
-            </ul>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
                 <AccordionTrigger className="text-lg font-semibold">
@@ -139,7 +172,7 @@ const ViewProduct = () => {
               You may also like this products
             </p>
           </div>
-          <ProductsContent />
+          
         </div>
       </div>
       <Footer />

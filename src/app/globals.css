@@ -8,6 +8,16 @@ body {
   height: 100%;
 }
 
+ul {
+  @apply list-disc ml-5;
+}
+ol {
+  @apply list-decimal ml-5;
+}
+li {
+  @apply my-2;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -73,4 +83,12 @@ body {
   50% {
     scale: 1.4 0.6;
   }
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }

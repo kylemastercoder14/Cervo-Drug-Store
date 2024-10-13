@@ -1,6 +1,8 @@
+"use client";
+
 import Chatbot from "@/components/landing-page/chatbot";
 import Navbar from "@/components/landing-page/navbar";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,8 +36,41 @@ import {
 } from "@/components/ui/select";
 import ProductsContent from "@/components/landing-page/products";
 import Footer from "@/components/landing-page/footer";
+import { usePathname } from "next/navigation";
+import { Categories, Products } from "@prisma/client";
+import { getProductsByCategory } from "@/actions/product";
+import Loading from "@/app/loading";
+
+interface ProductWithCategory extends Products {
+  category: Categories | null;
+}
 
 const Collection = () => {
+  const pathname = usePathname();
+  const categoryTag = pathname?.split("/").pop();
+  const [columns, setColumns] = useState(3);
+  const [products, setProducts] = useState<ProductWithCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      const response = await getProductsByCategory(categoryTag as string);
+      if (response.data) {
+        setProducts(response.data);
+      } else {
+        console.error(response.error);
+      }
+      setLoading(false);
+    };
+    fetchProducts();
+  }, [categoryTag]);
+  const handleColumnChange = (col: number) => {
+    setColumns(col);
+  };
+
+  if(loading) return (
+    <Loading />
+  );
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Chatbot />
@@ -50,8 +85,8 @@ const Collection = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-[16px]">
-                Anti-Diarrhea Medicines
+              <BreadcrumbPage className="text-[16px] capitalize">
+                {categoryTag?.split("-").join(" ")}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -114,14 +149,26 @@ const Collection = () => {
           <div className="col-span-3">
             <div className="bg-[#EEEEEE] flex justify-between items-center rounded-lg py-2 px-5 shadow-md border">
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm">
-                  <IconColumns3 color="black" />
+                <Button
+                  variant={columns === 3 ? "primary" : "ghost"}
+                  size="sm"
+                  onClick={() => handleColumnChange(3)}
+                >
+                  <IconColumns3 />
                 </Button>
-                <Button variant="ghost" size="sm">
-                  <IconColumns2 color="gray" />
+                <Button
+                  variant={columns === 2 ? "primary" : "ghost"}
+                  size="sm"
+                  onClick={() => handleColumnChange(2)}
+                >
+                  <IconColumns2 />
                 </Button>
-                <Button variant="ghost" size="sm">
-                  <IconLayoutBottombar color="gray" />
+                <Button
+                  variant={columns === 1 ? "primary" : "ghost"}
+                  size="sm"
+                  onClick={() => handleColumnChange(1)}
+                >
+                  <IconLayoutBottombar />
                 </Button>
               </div>
               <div className="flex items-center gap-5">
@@ -134,19 +181,45 @@ const Collection = () => {
                     <SelectContent>
                       <SelectItem value="Featured">Featured</SelectItem>
                       <SelectItem value="Best Selling">Best Selling</SelectItem>
-                      <SelectItem value="Alphabetically, A-Z">Alphabetically, A-Z</SelectItem>
-                      <SelectItem value="Alphabetically, Z-A">Alphabetically, Z-A</SelectItem>
-                      <SelectItem value="Price, Low to High">Price, Low to High</SelectItem>
-                      <SelectItem value="Price, High to Low">Price, High to Low</SelectItem>
-                      <SelectItem value="Date, Old to New">Date, Old to New</SelectItem>
-                      <SelectItem value="Date, New to Old">Date, New to Old</SelectItem>
+                      <SelectItem value="Alphabetically, A-Z">
+                        Alphabetically, A-Z
+                      </SelectItem>
+                      <SelectItem value="Alphabetically, Z-A">
+                        Alphabetically, Z-A
+                      </SelectItem>
+                      <SelectItem value="Price, Low to High">
+                        Price, Low to High
+                      </SelectItem>
+                      <SelectItem value="Price, High to Low">
+                        Price, High to Low
+                      </SelectItem>
+                      <SelectItem value="Date, Old to New">
+                        Date, Old to New
+                      </SelectItem>
+                      <SelectItem value="Date, New to Old">
+                        Date, New to Old
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <p className="font-semibold text-muted-foreground">4 Products</p>
+                <p className="font-semibold text-muted-foreground">
+                  {products.length} Products
+                </p>
               </div>
             </div>
-            <ProductsContent />
+            {products.length !== 0 ? (
+              <ProductsContent
+                loading={loading}
+                items={products}
+                columns={columns}
+              />
+            ) : (
+              <div className="flex justify-center items-center h-[400px]">
+                <p className="text-lg font-semibold text-muted-foreground">
+                  No products found.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
