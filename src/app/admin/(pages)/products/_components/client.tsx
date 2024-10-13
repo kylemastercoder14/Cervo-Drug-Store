@@ -28,7 +28,7 @@ const ProductClient = () => {
       name: item.name,
       image: item.image,
       tags: item.tags,
-      categoryId: item.categoryId,
+      categoryId: item.categoryTag,
       description: item.description,
       stocks: item.stocks,
       price: formatPrice(item.price),
