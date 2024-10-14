@@ -138,7 +138,7 @@ const ProductForm = ({
                     label="Stocks"
                     type="number"
                     placeholder="Enter product stocks"
-                    isRequired={true}
+                    isRequired={false}
                     name="stocks"
                     disabled={isSaving}
                   />
