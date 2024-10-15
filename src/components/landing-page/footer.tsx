@@ -7,7 +7,7 @@ import Image from "next/image";
 const Footer = () => {
   return (
     <>
-      <footer className="bg-black px-4 md:px-60 gap-20 text-white py-8 grid grid-cols-5">
+      <footer className="bg-black px-4 xl:px-60 gap-20 text-white py-8 grid xl:grid-cols-5 md:grid-cols-2 grid-cols-1">
         <div className="flex flex-col col-span-2">
           <p className="font-semibold text-xl mb-2">About</p>
           <p className="text-md text-muted-foreground">
@@ -95,11 +95,9 @@ const Footer = () => {
           </Link>
         </div>
       </footer>
-      <div className="bg-white px-4 md:px-60 py-5 grid grid-cols-3 gap-20">
+      <div className="bg-white px-4 xl:px-60 py-5 grid xl:grid-cols-3 grid-cols-1 xl:gap-20 gap-10">
         <p className="text-muted-foreground text-sm">
-          Cervo Drugstore and Medical Clinic operates under BOTICA SA TIPAS at
-          No. 7 F. Manalo St., Ligid-Tipas, Taguig City, Metro Manila with FDA
-          LTO No. CDRR-NCR-DS-4870
+          Cervo Drugstore and Medical Clinic
         </p>
         <div className="flex flex-col">
           <p className="text-[#437634] font-semibold">

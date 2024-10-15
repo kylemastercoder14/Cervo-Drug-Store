@@ -51,7 +51,7 @@ const ImageSlider = () => {
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
       <div
-        className="w-full h-[600px] flex transition-transform duration-500 ease-in-out"
+        className="w-full lg:h-[600px] h-screen flex transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(${-imageIndex * 100}%)` }}
       >
         {imageData.map((url, idx) => (

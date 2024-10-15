@@ -59,7 +59,7 @@ const FeaturedProducts = () => {
   };
 
   return (
-    <div className="grid grid-cols-5 gap-5">
+    <div className="grid xl:grid-cols-5 md:grid-cols-3 grid-cols-1 gap-5">
       {items.map((item) => {
         const discountPercentage = calculateDiscountPercentage(
           item.price,

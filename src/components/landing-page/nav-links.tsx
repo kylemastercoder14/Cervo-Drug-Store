@@ -36,7 +36,7 @@ const NavLinks = () => {
   if (loading) return <BarLoader loading color="#437634" />;
 
   return (
-    <div className="flex items-center gap-10">
+    <div className="flex xl:flex-row flex-col xl:mt-0 mt-20 xl:items-center items-start xl:px-0 px-10 gap-10">
       {items.map((item) => (
         <Link
           key={item.id}

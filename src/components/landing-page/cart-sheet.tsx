@@ -54,8 +54,8 @@ const CartSheet = () => {
         <div className="flex items-center gap-3">
           <IconShoppingBag size={30} color="black" />
           <div className="flex flex-col items-start justify-start">
-            <p className="font-semibold">Cart Items ({totalItems})</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="font-semibold lg:block hidden">Cart Items ({totalItems})</p>
+            <p className="text-sm text-muted-foreground lg:block hidden">
               {formatPrice(totalPrice)}
             </p>
           </div>
