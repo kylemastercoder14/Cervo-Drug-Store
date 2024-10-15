@@ -57,6 +57,7 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
       id: product?.id as string,
       name: product?.name as string,
       price: product?.price ?? 0,
+      isPrescriptionRequired: product?.isPrescriptionRequired as boolean,
       discountedPrice: product?.discountedPrice ?? 0,
       quantity,
       category: product?.category?.name as string,
