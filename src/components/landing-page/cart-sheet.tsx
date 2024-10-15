@@ -90,7 +90,7 @@ const CartSheet = () => {
             )}
           </div>
         ) : (
-          <div className="h-[77vh] overflow-auto flex flex-col">
+          <div className="xl:h-[77vh] h-screen overflow-auto flex flex-col">
             {items.map((item) => (
               <div
                 key={item.id}
