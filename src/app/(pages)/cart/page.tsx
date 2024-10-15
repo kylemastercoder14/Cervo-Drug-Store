@@ -35,7 +35,10 @@ const Cart = () => {
   const { items, updateQuantity, removeItem, removeAll } = useCart();
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   const totalPrice = items.reduce(
-    (total, item) => total + item.quantity * item.discountedPrice,
+    (total, item) =>
+      item.discountedPrice === 0
+        ? total + item.price * item.quantity
+        : total + item.discountedPrice * item.quantity,
     0
   );
   return (
@@ -105,7 +108,9 @@ const Cart = () => {
                       {item.category}
                     </p>
                   </TableCell>
-                  <TableCell>{formatPrice(item.discountedPrice)}</TableCell>
+                  <TableCell>{item.discountedPrice === 0
+                      ? formatPrice(item.price)
+                      : formatPrice(item.discountedPrice)}</TableCell>
                   <TableCell>
                     <div className="flex items-center border w-40 bg-white py-2.5 px-5 gap-5">
                       <MinusIcon
@@ -132,7 +137,11 @@ const Cart = () => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell>{formatPrice(totalPrice)}</TableCell>
+                  <TableCell>
+                    {item.discountedPrice === 0
+                      ? formatPrice(item.price * item.quantity)
+                      : formatPrice(item.discountedPrice * item.quantity)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -145,10 +154,18 @@ const Cart = () => {
                   </div>
                 </TableCell>
                 <TableCell className="flex items-center gap-2">
-                  <Button onClick={removeAll} variant="destructive" className="w-full">
+                  <Button
+                    onClick={removeAll}
+                    variant="destructive"
+                    className="w-full"
+                  >
                     Remove All Cart
                   </Button>
-                  <Button onClick={() => router.push("/collections/all")} variant="primary" className="w-full">
+                  <Button
+                    onClick={() => router.push("/collections/all")}
+                    variant="primary"
+                    className="w-full"
+                  >
                     Continue Shopping
                   </Button>
                 </TableCell>
@@ -174,7 +191,13 @@ const Cart = () => {
             </TableBody>
           </Table>
         </div>
-        <Button onClick={() => router.push("/checkout")} variant="primary" disabled={items.length === 0}>Proceed To Checkout</Button>
+        <Button
+          onClick={() => router.push("/checkout")}
+          variant="primary"
+          disabled={items.length === 0}
+        >
+          Proceed To Checkout
+        </Button>
       </div>
       <Footer />
     </div>

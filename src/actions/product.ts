@@ -27,6 +27,32 @@ export const getAllProducts = async () => {
   }
 };
 
+export const getFeaturedProducts = async () => {
+  try {
+    const data = await db.products.findMany({
+      orderBy: {
+        createdAt: "asc",
+      },
+      where: {
+        isFeatured: true,
+      },
+      include: {
+        category: true,
+      },
+      take: 10
+    });
+
+    if (!data) {
+      return { error: "No products found." };
+    }
+
+    return { data };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong." };
+  }
+};
+
 export const getProductByTag = async (tags: string) => {
   try {
     const data = await db.products.findFirst({

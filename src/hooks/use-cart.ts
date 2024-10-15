@@ -8,6 +8,7 @@ interface CartItem {
   image: string;
   price: number;
   discountedPrice: number;
+  isPrescriptionRequired: boolean;
   category: string;
   quantity: number;
   description: string;

@@ -28,7 +28,7 @@ const CartSheet = () => {
   const { items, updateQuantity, removeItem } = useCart();
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   const totalPrice = items.reduce(
-    (total, item) => total + item.quantity * item.discountedPrice,
+    (total, item) => item.discountedPrice === 0 ? total + item.price * item.quantity : total + item.discountedPrice * item.quantity,
     0
   );
 
@@ -90,9 +90,12 @@ const CartSheet = () => {
             )}
           </div>
         ) : (
-          items.map((item) => (
-            <div className="flex flex-col" key={item.id}>
-              <div className="flex h-[73vh] overflow-auto items-start px-6 py-2 mt-10 justify-between gap-10 w-full">
+          <div className="h-[77vh] overflow-auto flex flex-col">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-start px-6 py-2 mt-10 justify-between gap-10 w-full"
+              >
                 <div className="flex items-start gap-2">
                   <Image
                     src={item.image}
@@ -104,7 +107,9 @@ const CartSheet = () => {
                   <div className="flex flex-col">
                     <p className="font-semibold">{item?.name}</p>
                     <p className="font-semibold text-muted-foreground">
-                      {formatPrice(item?.discountedPrice * item?.quantity)}
+                      {item.discountedPrice === 0
+                        ? formatPrice(item?.price * item?.quantity)
+                        : formatPrice(item?.discountedPrice * item?.quantity)}
                     </p>
                   </div>
                 </div>
@@ -143,26 +148,24 @@ const CartSheet = () => {
                   </div>
                 </div>
               </div>
-              <div className="px-6 flex mt-auto items-center justify-between">
-                <p className="font-semibold text-muted-foreground text-lg">
-                  Subtotal ({totalItems})
-                </p>
-                <p className="text-lg font-semibold">
-                  {formatPrice(totalPrice)}
-                </p>
-              </div>
-              <div className="flex items-center justify-end px-6 my-3 space-x-2">
-                <Checkbox id="terms" onCheckedChange={handleCheckboxChange} />
-                <label
-                  htmlFor="terms"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  I agree with the terms and conditions
-                </label>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
+        <div className="px-6 flex mt-auto items-center justify-between">
+          <p className="font-semibold text-muted-foreground text-lg">
+            Subtotal ({totalItems})
+          </p>
+          <p className="text-lg font-semibold">{formatPrice(totalPrice)}</p>
+        </div>
+        <div className="flex items-center justify-end px-6 my-3 space-x-2">
+          <Checkbox id="terms" onCheckedChange={handleCheckboxChange} />
+          <label
+            htmlFor="terms"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            I agree with the terms and conditions
+          </label>
+        </div>
         <SheetFooter className="flex items-center gap-2 px-6 mt-5">
           <Button
             onClick={() => router.push("/cart")}

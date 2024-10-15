@@ -28,6 +28,7 @@ import { getProductByTag } from "@/actions/product";
 import { formatPrice } from "@/lib/utils";
 import parse from "html-react-parser";
 import useCart from "@/hooks/use-cart";
+import FeaturedProducts from "@/components/landing-page/featured-products";
 
 interface ProductWithCategory extends Products {
   category: Categories | null;
@@ -105,16 +106,18 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
                 </Button>
               </div>
               <div className="flex items-center gap-2 mt-2">
-                {product?.discountedPrice !== null && (
+                {product?.discountedPrice === 0 && (
                   <p className="font-semibold text-2xl">
-                    {formatPrice(product?.discountedPrice ?? 0)} -{" "}
+                    {formatPrice(product?.price ?? 0)}
                   </p>
                 )}
-                <p className="text-muted-foreground text-2xl line-through">
-                  {product?.price !== undefined
-                    ? formatPrice(product.price)
-                    : "N/A"}{" "}
-                </p>
+                {product?.discountedPrice !== 0 && (
+                  <p className="text-muted-foreground text-2xl line-through">
+                    {product?.price !== undefined
+                      ? formatPrice(product.price)
+                      : "N/A"}{" "}
+                  </p>
+                )}
               </div>
               <p className="text-muted-foreground mt-2 text-sm">
                 Shipping calculated at checkout.
@@ -122,23 +125,33 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
             </div>
             <div className="flex items-center gap-3 mt-10">
               <div className="flex items-center border py-2.5 px-5 gap-5">
-                <MinusIcon className="cursor-pointer" onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)} color="gray" />
+                <MinusIcon
+                  className="cursor-pointer"
+                  onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}
+                  color="gray"
+                />
                 <input
                   type="text"
                   value={quantity}
                   readOnly
                   className="border-none outline-none text-center w-10"
                 />
-                <PlusIcon onClick={() => setQuantity(quantity + 1)} className="cursor-pointer" color="gray" />
+                <PlusIcon
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="cursor-pointer"
+                  color="gray"
+                />
               </div>
-              <Button onClick={handleAddToCart} variant="primary" className="w-full py-6">
+              <Button
+                onClick={handleAddToCart}
+                variant="primary"
+                className="w-full py-6"
+              >
                 Add To Cart
               </Button>
             </div>
             <p className="mt-4 mb-1 font-semibold text-xl">About the Product</p>
-            <p>
-              {parse(product?.description ?? "")}
-            </p>
+            <p>{parse(product?.description ?? "")}</p>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
                 <AccordionTrigger className="text-lg font-semibold">
@@ -172,7 +185,7 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
               You may also like this products
             </p>
           </div>
-          
+          <FeaturedProducts />
         </div>
       </div>
       <Footer />

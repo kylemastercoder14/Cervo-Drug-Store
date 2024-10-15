@@ -25,9 +25,17 @@ const CheckoutForm = ({ user }: { user: any }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { items, removeAll } = useCart();
   const totalPrice = items.reduce(
-    (total, item) => total + item.quantity * item.discountedPrice,
+    (total, item) =>
+      item.discountedPrice === 0
+        ? total + item.price * item.quantity
+        : total + item.discountedPrice * item.quantity,
     0
   );
+
+  const isPrescriptionRequired = items.some(
+    (item) => item.isPrescriptionRequired
+  );
+
   const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("Gcash");
 
@@ -55,6 +63,11 @@ const CheckoutForm = ({ user }: { user: any }) => {
 
   const onSubmit = async (values: z.infer<typeof CheckoutValidation>) => {
     setIsLoading(true);
+    if (isPrescriptionRequired && !values.prescription) {
+      toast.error("One of the items in your cart requires a prescription.");
+      setIsLoading(false);
+      return;
+    }
     createOrder(values, user.id, items, selectedPaymentMethod)
       .then((data) => {
         if (data.success) {
