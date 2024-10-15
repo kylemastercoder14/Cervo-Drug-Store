@@ -75,7 +75,7 @@ const Collection = () => {
     <div className="flex relative min-h-screen w-full flex-col">
       <Chatbot />
       <Navbar />
-      <div className="px-4 md:px-60 py-10">
+      <div className="px-4 xl:px-60 py-10">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -91,7 +91,7 @@ const Collection = () => {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="grid grid-cols-4 gap-10 mt-5">
+        <div className="grid xl:grid-cols-4 grid-cols-1 gap-10 mt-5">
           <div className="col-span-1">
             <div className="flex justify-between items-center">
               <p className="text-2xl font-semibold">Filter:</p>

@@ -61,7 +61,7 @@ const CartSheet = () => {
           </div>
         </div>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="h-screen xl:pb-0 pb-10 overflow-auto">
         <SheetHeader>
           <SheetTitle className="text-white">
             Cart Items ({totalItems})
@@ -90,7 +90,7 @@ const CartSheet = () => {
             )}
           </div>
         ) : (
-          <div className="xl:h-[77vh] h-screen overflow-auto flex flex-col">
+          <div className="xl:h-[77vh] h-auto flex flex-col">
             {items.map((item) => (
               <div
                 key={item.id}

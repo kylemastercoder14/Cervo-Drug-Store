@@ -45,7 +45,7 @@ const Cart = () => {
     <div className="flex relative min-h-screen w-full flex-col">
       <Chatbot />
       <Navbar />
-      <div className="px-4 md:px-60 py-5 mt-5">
+      <div className="px-4 xl:px-60 py-5 mt-5">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -68,8 +68,8 @@ const Cart = () => {
           <Table className="border">
             <TableHeader>
               <TableRow className="border border-zinc-400">
-                <TableHead className="w-[100px] border-r border-zinc-400"></TableHead>
-                <TableHead className="w-[100px] border-r border-zinc-400"></TableHead>
+                <TableHead className="xl:w-[100px] border-r border-zinc-400"></TableHead>
+                <TableHead className="xl:w-[100px] border-r border-zinc-400"></TableHead>
                 <TableHead className="border-r border-zinc-400">
                   Product
                 </TableHead>
@@ -173,7 +173,7 @@ const Cart = () => {
             </TableFooter>
           </Table>
         </div>
-        <div className="flex justify-between mt-2 w-[30%] items-center rounded-lg py-3">
+        <div className="flex justify-between mt-2 xl:w-[30%] w-full items-center rounded-lg py-3">
           <Table className="border">
             <TableBody className="border border-zinc-400">
               <TableRow className="border border-zinc-400">

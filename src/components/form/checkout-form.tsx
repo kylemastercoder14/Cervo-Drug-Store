@@ -100,13 +100,13 @@ const CheckoutForm = ({ user }: { user: any }) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-2 gap-10 mt-10">
+        <div className="grid xl:grid-cols-2 grid-cols-1 gap-10 mt-10">
           <div>
             <p className="border-b pb-3 border-zinc-300 mb-5">
               Billing Details
             </p>
             <div className="grid gap-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid xl:grid-cols-2 grid-cols-1 gap-3">
                 <CustomFormField
                   control={form.control}
                   fieldType={FormFieldType.INPUT}
@@ -128,7 +128,7 @@ const CheckoutForm = ({ user }: { user: any }) => {
                   disabled={isLoading}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid xl:grid-cols-3 grid-cols-1 gap-3">
                 <div className="col-span-2">
                   <CustomFormField
                     control={form.control}
@@ -221,7 +221,7 @@ const CheckoutForm = ({ user }: { user: any }) => {
                   }
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid xl:grid-cols-2 grid-cols-1 gap-3">
                 <CustomFormField
                   control={form.control}
                   fieldType={FormFieldType.INPUT}

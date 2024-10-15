@@ -27,7 +27,7 @@ const Checkout = () => {
     <div className="flex relative min-h-screen w-full flex-col">
       <Chatbot />
       <Navbar />
-      <div className="px-4 md:px-60 py-5 mt-5">
+      <div className="px-4 xl:px-60 py-5 mt-5">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>

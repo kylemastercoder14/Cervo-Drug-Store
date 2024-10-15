@@ -69,7 +69,7 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
     <div className="flex relative min-h-screen w-full flex-col">
       <Chatbot />
       <Navbar />
-      <div className="px-4 md:px-60 py-10">
+      <div className="px-4 xl:px-60 py-10">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -85,7 +85,7 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="grid grid-cols-2 gap-10 mt-5">
+        <div className="grid xl:grid-cols-2 grid-cols-1 gap-10 mt-5">
           <div className="relative w-full h-[700px]">
             <Image
               src={product?.image as string}
@@ -180,7 +180,7 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
         </div>
       </div>
       <div className="bg-[#eeeeee]">
-        <div className="px-4 md:px-60 py-5 mt-5">
+        <div className="px-4 xl:px-60 py-5 mt-5">
           <div className="bg-white flex justify-between items-center rounded-lg py-3 px-5 shadow-md border">
             <p className="font-semibold text-lg">
               You may also like this products
