@@ -6,29 +6,78 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ChevronsUpDown } from "lucide-react";
 
 export type PromotionColumn = {
   id: string;
   promotion: string;
-  isFeatured: boolean;
+  featured: string;
+  iSFeatured: boolean;
   createdAt: string;
 };
 
 export const columns: ColumnDef<PromotionColumn>[] = [
   {
     accessorKey: "promotion",
-    header: "Promotion",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Promotion</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => (
-      <Link className="cursor-pointer font-semibold text-orange-600" href={row.original.promotion}>{row.original.promotion}</Link>
-  )
+      <Link
+        className="cursor-pointer font-semibold text-orange-600"
+        href={row.original.promotion}
+      >
+        {row.original.promotion}
+      </Link>
+    ),
   },
   {
-    accessorKey: "isFeatured",
-    header: "Featured",
+    accessorKey: "featured",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Featured</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <Badge
+        variant={row.original.featured === "Active" ? "default" : "destructive"}
+      >
+        {row.original.featured}
+      </Badge>
+    ),
   },
   {
     accessorKey: "createdAt",
-    header: "Date Created",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Date Created</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     id: "actions",

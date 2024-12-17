@@ -9,7 +9,7 @@ export const getAllBanner = async () => {
   try {
     const data = await db.banner.findMany({
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
     });
 

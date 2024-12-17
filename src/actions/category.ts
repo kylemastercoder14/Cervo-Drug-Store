@@ -9,7 +9,7 @@ export const getAllCategories = async () => {
   try {
     const data = await db.categories.findMany({
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
     });
 

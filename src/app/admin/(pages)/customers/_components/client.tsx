@@ -3,12 +3,12 @@
 import { DataTable } from "@/components/ui/data-table";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { columns, PromotionColumn } from "./column";
+import { columns, CustomerColumn } from "./column";
 import { format } from "date-fns";
-import { useGetPromotions } from "@/data/promotion";
+import { useGetCustomers } from "@/data/customers";
 
-const PromotionClient = () => {
-  const { data: promotionData, error, isLoading } = useGetPromotions();
+const CustomerClient = () => {
+  const { data: customerData, error, isLoading } = useGetCustomers();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -21,12 +21,13 @@ const PromotionClient = () => {
     }
   }, [error]);
 
-  const formattedData: PromotionColumn[] =
-    promotionData?.data?.map((item) => ({
+  const formattedData: CustomerColumn[] =
+    customerData?.data?.map((item) => ({
       id: item.id,
-      promotion: item.image,
-      featured: item.isFeatured === true ? "Active" : "Inactive",
-      iSFeatured: item.isFeatured,
+      name: item.firstName + " " + item.lastName,
+      contactNumber: item.contactNumber,
+      address: item.zipCode,
+      userType: item.seniorPwdId ? "Senior Citizen" : "Regular",
       createdAt: format(item.createdAt, "MMMM do, yyyy"),
     })) || [];
 
@@ -37,7 +38,7 @@ const PromotionClient = () => {
     <>
       <DataTable
         loading={isLoading}
-        searchKey="promotion"
+        searchKey="banner"
         columns={columns}
         data={formattedData}
       />
@@ -45,4 +46,4 @@ const PromotionClient = () => {
   );
 };
 
-export default PromotionClient;
+export default CustomerClient;

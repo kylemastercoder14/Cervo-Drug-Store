@@ -9,7 +9,7 @@ export const getAllProducts = async () => {
   try {
     const data = await db.products.findMany({
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
       include: {
         category: true,
@@ -131,7 +131,6 @@ export const createProduct = async (
     image,
     description,
     price,
-    stocks,
     category,
     isFeatured,
     isPrescriptionRequired,
@@ -140,9 +139,9 @@ export const createProduct = async (
 
   const tags = name
     .toLowerCase()
-    .replace(/,/g, "") // Remove commas
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/&/g, "and"); // Replace "&" with "and"
+    .replace(/,/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/&/g, "and");
 
   try {
     const data = await db.products.create({
@@ -153,7 +152,6 @@ export const createProduct = async (
         description,
         categoryTag: category,
         price,
-        stocks,
         isFeatured,
         discountedPrice,
         isPrescriptionRequired,
@@ -190,7 +188,6 @@ export const updateProduct = async (
     image,
     description,
     price,
-    stocks,
     category,
     isFeatured,
     isPrescriptionRequired,
@@ -199,9 +196,9 @@ export const updateProduct = async (
 
   const tags = name
     .toLowerCase()
-    .replace(/,/g, "") // Remove commas
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/&/g, "and"); // Replace "&" with "and"
+    .replace(/,/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/&/g, "and");
 
   try {
     const data = await db.products.update({
@@ -215,7 +212,6 @@ export const updateProduct = async (
         description,
         categoryTag: category,
         price,
-        stocks,
         isFeatured,
         isPrescriptionRequired,
         discountedPrice,

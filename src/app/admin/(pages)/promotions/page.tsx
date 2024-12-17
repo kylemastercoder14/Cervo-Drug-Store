@@ -22,7 +22,7 @@ const AdminPromotion = async () => {
   // Hydrate the query data for the client
   const dehydratedState = dehydrate(queryClient);
   return (
-    <div className="grid flex-1 py-5 items-start gap-4 md:gap-8">
+    <div className="grid py-5 items-start gap-4">
       <div className="flex items-center justify-between">
         <Heading
           title="Manage Promotions"

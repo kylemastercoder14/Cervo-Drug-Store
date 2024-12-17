@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CategoryColumn } from "./column";
+import { InventoryColumn } from "./column";
 
 import {
   DropdownMenu,
@@ -14,21 +14,22 @@ import {
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useState } from "react";
 import AlertModal from "@/components/ui/alert-modal";
-import { useDeleteCategory } from "@/data/category";
-import CategoryForm from "@/components/form/category-form";
+import { useDeleteInventory } from "@/data/inventory";
+import InventoryForm from "@/components/form/inventory-form";
 
 interface CellActionProps {
-  data: CategoryColumn;
+  data: InventoryColumn;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [initialData, setInitialData] = useState<CategoryColumn | null>(null);
-  const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
+  const [initialData, setInitialData] = useState<InventoryColumn | null>(null);
+  const { mutate: deleteInventory, isPending: isDeleting } =
+    useDeleteInventory();
 
   const onDelete = async () => {
-    deleteCategory(data.id, {
+    deleteInventory(data.id, {
       onSuccess: () => {
         setOpen(false);
       },
@@ -49,7 +50,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         onConfirm={onDelete}
       />
       {formOpen && (
-        <CategoryForm
+        <InventoryForm
           initialData={initialData}
           onClose={() => setFormOpen(false)}
         />

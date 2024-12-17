@@ -9,7 +9,7 @@ export const getAllPromotion = async () => {
   try {
     const data = await db.promotions.findMany({
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
     });
 

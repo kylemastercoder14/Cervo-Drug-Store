@@ -32,6 +32,7 @@ const BannerForm = ({
     defaultValues: initialData
       ? {
           ...initialData,
+          image: initialData.banner ?? ""
         }
       : {
           image: "",

@@ -32,7 +32,7 @@ const ProductForm = ({
   const action = initialData ? "Save Changes" : "Save Product";
 
   useEffect(() => {
-    const fetchPromotions = async () => {
+    const fetchCategories = async () => {
       const response = await getAllCategories();
       if (response.data) {
         setCategories(response.data);
@@ -41,7 +41,7 @@ const ProductForm = ({
       }
     };
 
-    fetchPromotions();
+    fetchCategories();
   }, []);
 
   const form = useForm<z.infer<typeof ProductValidation>>({
@@ -52,20 +52,17 @@ const ProductForm = ({
           name: initialData.name ?? "",
           image: initialData.image ?? "",
           price: parseFloat(initialData.price.replace("₱", "")) || 0,
-          stocks: initialData.stocks ?? 0,
           description: initialData.description ?? "",
           category: initialData?.categoryId ?? "",
           isFeatured: initialData.isFeatured ?? false,
-          isPrescriptionRequired: initialData.isPrescriptionRequired ?? false,
-          discountedPrice: initialData.discountedPrice ?? 0,
+          isPrescriptionRequired: initialData.isPrescription ?? false,
+          discountedPrice: parseFloat(initialData.discountedPrice.replace("₱", "")) || 0,
         }
       : {
-          // Initial values when adding a new product
           image: "",
           name: "",
           description: "",
           price: 0,
-          stocks: 0,
           category: "",
           isFeatured: true,
           isPrescriptionRequired: false,
@@ -80,14 +77,13 @@ const ProductForm = ({
   async function onSubmit(values: z.infer<typeof ProductValidation>) {
     saveProduct(values, {
       onSuccess: () => onClose(),
-      onError: () => {},
     });
   }
 
   return (
     <>
       <Modal
-        className="max-w-2xl h-screen overflow-auto"
+        className="max-w-2xl max-h-[90vh] overflow-auto"
         isOpen={true}
         onClose={onClose}
         title={title}
@@ -95,7 +91,7 @@ const ProductForm = ({
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="mx-auto grid flex-1 auto-rows-max gap-4">
+            <div className="mx-auto grid auto-rows-max gap-4">
               <div className="grid gap-4">
                 <div className="grid grid-cols-2 gap-2">
                   <CustomFormField
@@ -121,25 +117,15 @@ const ProductForm = ({
                     disabled={isSaving}
                   />
                 </div>
-                <div className="grid lg:grid-cols-3 grid-cols-1 gap-2">
+                <div className="grid lg:grid-cols-2 grid-cols-1 gap-2">
                   <CustomFormField
                     control={form.control}
                     fieldType={FormFieldType.INPUT}
-                    label="Price"
+                    label="Original Price"
                     type="number"
-                    placeholder="Enter product price"
+                    placeholder="Enter product original price"
                     isRequired={true}
                     name="price"
-                    disabled={isSaving}
-                  />
-                  <CustomFormField
-                    control={form.control}
-                    fieldType={FormFieldType.INPUT}
-                    label="Stocks"
-                    type="number"
-                    placeholder="Enter product stocks"
-                    isRequired={false}
-                    name="stocks"
                     disabled={isSaving}
                   />
                   <CustomFormField
@@ -148,7 +134,7 @@ const ProductForm = ({
                     label="Discounted Price"
                     type="number"
                     placeholder="Enter discounted price"
-                    isRequired={true}
+                    isRequired={false}
                     name="discountedPrice"
                     disabled={isSaving}
                   />

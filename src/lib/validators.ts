@@ -111,7 +111,11 @@ export const ProductValidation = z.object({
   description: z.string().min(1, { message: "Description is required" }),
   price: z.coerce.number().min(1, { message: "Price is required" }),
   discountedPrice: z.coerce.number().optional(),
-  stocks: z.coerce.number().min(1, { message: "Stocks is required" }),
   isFeatured: z.boolean().optional(),
   isPrescriptionRequired: z.boolean().optional(),
+});
+
+export const InventoryValidation = z.object({
+  productId: z.string().min(1, { message: "Product is required" }),
+  stock: z.coerce.number().min(1, { message: "Stock is required" }),
 });

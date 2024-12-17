@@ -5,18 +5,36 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { ChevronsUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
-export type CategoryColumn = {
+export type InventoryColumn = {
   id: string;
   name: string;
+  productId: string;
   image: string;
+  tags: string;
+  status: string;
+  stock: number;
   createdAt: string;
 };
 
-export const columns: ColumnDef<CategoryColumn>[] = [
+export const columns: ColumnDef<InventoryColumn>[] = [
+  {
+    accessorKey: "image",
+    header: "",
+    cell: ({ row }) => (
+      <Image
+        alt="Product image"
+        className="aspect-square rounded-md object-cover"
+        height="70"
+        src={row.original.image}
+        width="70"
+      />
+    ),
+  },
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -26,14 +44,14 @@ export const columns: ColumnDef<CategoryColumn>[] = [
           size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          <p>Category</p>
+          <p>Name</p>
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
   {
-    accessorKey: "image",
+    accessorKey: "tags",
     header: ({ column }) => {
       return (
         <Button
@@ -41,19 +59,46 @@ export const columns: ColumnDef<CategoryColumn>[] = [
           size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          <p>Image</p>
+          <p>SKU</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
+  {
+    accessorKey: "stock",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Stock</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Status</p>
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <Link
-        className="cursor-pointer font-semibold text-orange-600"
-        href={row.original.image}
-      >
-        {row.original.image}
-      </Link>
-    ),
+      <Badge variant={row.original.status === "In Stock" ? "default" : "destructive"}>
+        {row.original.status}
+      </Badge>
+    )
   },
   {
     accessorKey: "createdAt",

@@ -1,18 +1,19 @@
+"use client";
+
 import React from "react";
-import Sidebar from "../_components/sidebar";
-import Navbar from "../_components/navbar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { useUser } from "@clerk/nextjs";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useUser();
   return (
-    <div className="flex">
-      <div className="flex-1 p-5 h-screen bg-zinc-50 border-r">
-        <Sidebar />
-      </div>
-      <div className="flex-[4] p-5">
-        <Navbar />
-        {children}
-      </div>
-    </div>
+    <SidebarProvider>
+      <AppSidebar admin={user} />
+      <SidebarInset>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 

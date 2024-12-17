@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CategoryColumn } from "./column";
+import { BannerColumn } from "./column";
 
 import {
   DropdownMenu,
@@ -14,21 +14,21 @@ import {
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useState } from "react";
 import AlertModal from "@/components/ui/alert-modal";
-import { useDeleteCategory } from "@/data/category";
-import CategoryForm from "@/components/form/category-form";
+import { useDeleteBanner } from "@/data/banner";
+import BannerForm from "@/components/form/banner-form";
 
 interface CellActionProps {
-  data: CategoryColumn;
+  data: BannerColumn;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [initialData, setInitialData] = useState<CategoryColumn | null>(null);
-  const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
+  const [initialData, setInitialData] = useState<BannerColumn | null>(null);
+  const { mutate: deleteBanner, isPending: isDeleting } = useDeleteBanner();
 
   const onDelete = async () => {
-    deleteCategory(data.id, {
+    deleteBanner(data.id, {
       onSuccess: () => {
         setOpen(false);
       },
@@ -49,7 +49,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         onConfirm={onDelete}
       />
       {formOpen && (
-        <CategoryForm
+        <BannerForm
           initialData={initialData}
           onClose={() => setFormOpen(false)}
         />

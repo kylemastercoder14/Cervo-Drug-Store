@@ -5,17 +5,16 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import React from "react";
-import { getAllProducts } from "@/actions/product";
-import ProductClient from "./_components/client";
-import AddProduct from "./_components/add-product";
+import { getAllCustomers } from "@/actions/customers";
+import CustomerClient from "./_components/client";
 
-const AdminProducts = async () => {
+const AdminCustomers = async () => {
   const queryClient = new QueryClient();
 
   // Prefetch the data from the server
   await queryClient.prefetchQuery({
-    queryKey: ["products"],
-    queryFn: getAllProducts,
+    queryKey: ["customers"],
+    queryFn: getAllCustomers,
   });
 
   // Hydrate the query data for the client
@@ -24,16 +23,15 @@ const AdminProducts = async () => {
     <div className="grid py-5 items-start gap-4">
       <div className="flex items-center justify-between">
         <Heading
-          title="Manage Products"
-          description="Easily manage and organize your pharmacy's products. Add new products, view existing listings, and keep your stock updated to ensure customers have access to the medications and health products they need."
+          title="Manage Customers"
+          description="Effortlessly and manage customers to keep your platform dynamic and engaging."
         />
-        <AddProduct />
       </div>
       <HydrationBoundary state={dehydratedState}>
-        <ProductClient />
+        <CustomerClient />
       </HydrationBoundary>
     </div>
   );
 };
 
-export default AdminProducts;
+export default AdminCustomers;

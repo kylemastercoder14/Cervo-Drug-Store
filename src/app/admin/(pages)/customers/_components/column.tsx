@@ -3,20 +3,21 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { CellAction } from "./cell-action";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ColumnDef } from "@tanstack/react-table";
 import { ChevronsUpDown } from "lucide-react";
 
-export type CategoryColumn = {
+export type CustomerColumn = {
   id: string;
   name: string;
-  image: string;
+  contactNumber: string;
+  address: string;
+  userType: string;
   createdAt: string;
 };
 
-export const columns: ColumnDef<CategoryColumn>[] = [
+export const columns: ColumnDef<CustomerColumn>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -26,14 +27,14 @@ export const columns: ColumnDef<CategoryColumn>[] = [
           size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          <p>Category</p>
+          <p>Name</p>
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
   {
-    accessorKey: "image",
+    accessorKey: "contactNumber",
     header: ({ column }) => {
       return (
         <Button
@@ -41,18 +42,49 @@ export const columns: ColumnDef<CategoryColumn>[] = [
           size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          <p>Image</p>
+          <p>Contact Number</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
+  {
+    accessorKey: "address",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Address</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
+  {
+    accessorKey: "userType",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>User Type</p>
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <Link
-        className="cursor-pointer font-semibold text-orange-600"
-        href={row.original.image}
+      <Badge
+        variant={
+          row.original.userType === "Senior Citizen" ? "secondary" : "default"
+        }
       >
-        {row.original.image}
-      </Link>
+        {row.original.userType}
+      </Badge>
     ),
   },
   {
@@ -69,10 +101,5 @@ export const columns: ColumnDef<CategoryColumn>[] = [
         </Button>
       );
     },
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];

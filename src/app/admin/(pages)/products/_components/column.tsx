@@ -8,6 +8,8 @@ import { CellAction } from "./cell-action";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ChevronsUpDown } from "lucide-react";
 
 export type ProductColumn = {
   id: string;
@@ -16,12 +18,12 @@ export type ProductColumn = {
   category: string;
   categoryId: string;
   description: string;
-  stocks: any;
   discountedPrice: any;
   tags: string;
   price: any;
   isFeatured: boolean;
   isPrescription: boolean;
+  prescription: string;
   createdAt: string;
 };
 
@@ -41,38 +43,119 @@ export const columns: ColumnDef<ProductColumn>[] = [
   },
   {
     accessorKey: "name",
-    header: "Name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Name</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "tags",
-    header: "SKU",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>SKU</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "price",
-    header: "Price",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Original Price</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "discountedPrice",
-    header: "Discounted Price",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Discounted Price</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Category</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
+  {
+    accessorKey: "prescription",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Prescription</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => (
-      <Badge variant="outline">{row.original.category}</Badge>
-    )
-  },
-  {
-    accessorKey: "isFeatured",
-    header: "Featured",
-  },
-  {
-    accessorKey: "isPrescription",
-    header: "Prescription Required",
+      <Badge
+        variant={
+          row.original.prescription === "Over The Counter"
+            ? "default"
+            : "secondary"
+        }
+      >
+        {row.original.prescription}
+      </Badge>
+    ),
   },
   {
     accessorKey: "createdAt",
-    header: "Date Created",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+          size={"tableButton"}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Date Created</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     id: "actions",

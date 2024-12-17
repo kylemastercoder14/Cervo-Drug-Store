@@ -8,6 +8,7 @@ interface AlertModalProps {
   onClose: () => void;
   onConfirm: () => void;
   loading: boolean;
+  title?: string;
 }
 
 const AlertModal: React.FC<AlertModalProps> = ({
@@ -15,6 +16,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
   onClose,
   onConfirm,
   loading,
+  title
 }) => {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -29,7 +31,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
   return (
     <Modal
       className="max-w-lg"
-      title="Are you sure you want to delete this data?"
+      title={title || "Are you sure you want to delete this data?"}
       description="This action cannot be undone."
       isOpen={isOpen}
       onClose={onClose}

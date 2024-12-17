@@ -32,6 +32,8 @@ const PromotionForm = ({
     defaultValues: initialData
       ? {
           ...initialData,
+          image: initialData.promotion ?? "",
+          isFeatured: initialData.iSFeatured ?? true,
         }
       : {
           image: "",
