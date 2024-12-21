@@ -119,3 +119,16 @@ export const InventoryValidation = z.object({
   productId: z.string().min(1, { message: "Product is required" }),
   stock: z.coerce.number().min(1, { message: "Stock is required" }),
 });
+
+export const NewsEventValidation = z.object({
+  title: z.string().min(1, { message: "Title is required" }),
+  content: z.string().min(1, { message: "Content is required" }),
+  image: z.string().min(1, { message: "Image is required" }),
+});
+
+export const StaffValidation = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().min(1, { message: "Email address is required" }),
+  password: z.string().min(1, { message: "Password is required" }),
+  role: z.string().min(1, { message: "Role is required" }),
+});

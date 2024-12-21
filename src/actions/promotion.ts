@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
+import { getUserFromCookies } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { PromotionValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -33,7 +34,7 @@ export const getFeaturedPromotion = async () => {
       where: {
         isFeatured: true,
       },
-      take: 3
+      take: 3,
     });
 
     if (!data) {
@@ -50,6 +51,12 @@ export const getFeaturedPromotion = async () => {
 export const createPromotion = async (
   values: z.infer<typeof PromotionValidation>
 ) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   const validatedField = PromotionValidation.safeParse(values);
 
   if (!validatedField.success) {
@@ -67,6 +74,15 @@ export const createPromotion = async (
       },
     });
 
+    await db.logs.create({
+      data: {
+        action: `${user.name} added ${
+          data.id
+        } as promotion at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    });
+
     return { success: "Promotion created successfully", data };
   } catch (error: any) {
     return {
@@ -81,6 +97,12 @@ export const updatePromotion = async (
   values: z.infer<typeof PromotionValidation>,
   promotionId: string
 ) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   if (!promotionId) {
     return { error: "Promotion ID is required." };
   }
@@ -105,6 +127,15 @@ export const updatePromotion = async (
       },
     });
 
+    await db.logs.create({
+      data: {
+        action: `${user.name} updated ${
+          data.id
+        } as promotion at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    });
+
     return { success: "Promotion updated successfully", data };
   } catch (error: any) {
     return {
@@ -116,6 +147,12 @@ export const updatePromotion = async (
 };
 
 export const deletePromotion = async (promotionId: string) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   if (!promotionId) {
     return { error: "Promotion ID is required." };
   }
@@ -124,6 +161,15 @@ export const deletePromotion = async (promotionId: string) => {
     const data = await db.promotions.delete({
       where: {
         id: promotionId,
+      },
+    });
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} deleted ${
+          data.id
+        } as promotion at ${new Date().toLocaleString()}`,
+        adminId: user.id,
       },
     });
 

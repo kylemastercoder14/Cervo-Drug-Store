@@ -22,6 +22,7 @@ import React from "react";
 import { Admin } from "@prisma/client";
 import { toast } from "sonner";
 import AlertModal from "./ui/alert-modal";
+import { logout } from "@/actions/manage-staff";
 
 export function NavUser({ admin }: { admin: Admin | null }) {
   const [open, setOpen] = React.useState(false);
@@ -29,9 +30,9 @@ export function NavUser({ admin }: { admin: Admin | null }) {
   const { isMobile } = useSidebar();
   const handleLogout = async () => {
     setLoading(true);
-    // await logout();
+    await logout();
     toast.success("Logging out...");
-    window.location.assign("/");
+    window.location.assign("/admin/auth/sign-in");
   };
   return (
     <>
@@ -55,7 +56,7 @@ export function NavUser({ admin }: { admin: Admin | null }) {
                   <AvatarFallback className="rounded-lg">A</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Administrator</span>
+                  <span className="truncate font-semibold">{admin?.name}</span>
                   <span className="truncate text-xs">{admin?.email}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
@@ -75,7 +76,7 @@ export function NavUser({ admin }: { admin: Admin | null }) {
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      Administrator
+                      {admin?.name}
                     </span>
                     <span className="truncate text-xs">{admin?.email}</span>
                   </div>
@@ -85,7 +86,7 @@ export function NavUser({ admin }: { admin: Admin | null }) {
               <DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setOpen(true)}>
-                  <LogOut />
+                  <LogOut className="w-4 h-4 mr-2" />
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuGroup>

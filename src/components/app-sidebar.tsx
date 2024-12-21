@@ -19,13 +19,14 @@ import {
   IconLogs,
   IconMedicineSyrup,
   IconPhoto,
-  IconSettings,
   IconUser,
   IconUsersGroup,
   IconWallet,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { Admin } from "@prisma/client";
+import { getUserFromCookies } from "@/hooks/use-user";
+import { redirect } from "next/navigation";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   admin: Admin | null;
@@ -84,11 +85,6 @@ const data = {
       icon: IconUsersGroup,
     },
     {
-      title: "Settings",
-      url: "/admin/settings",
-      icon: IconSettings,
-    },
-    {
       title: "Logs",
       url: "/admin/logs",
       icon: IconLogs,
@@ -96,7 +92,9 @@ const data = {
   ],
 };
 
-export function AppSidebar({ admin, ...props }: AppSidebarProps) {
+export async function AppSidebar({ admin, ...props }: AppSidebarProps) {
+  const { user } = await getUserFromCookies();
+  if(!user) redirect("/admin/auth/sign-in");
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>

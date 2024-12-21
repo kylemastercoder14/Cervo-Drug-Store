@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
+import { getUserFromCookies } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { ProductValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -119,6 +120,12 @@ export const getProductsByCategory = async (categoryTag: string) => {
 export const createProduct = async (
   values: z.infer<typeof ProductValidation>
 ) => {
+  const { user } = await getUserFromCookies();
+  
+    if (!user) {
+      return { error: "User not found." };
+    }
+
   const validatedField = ProductValidation.safeParse(values);
 
   if (!validatedField.success) {
@@ -158,6 +165,15 @@ export const createProduct = async (
       },
     });
 
+    await db.logs.create({
+      data: {
+        action: `${user.name} added ${
+          data.name
+        } at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    });
+
     return { success: "Product created successfully", data };
   } catch (error: any) {
     return {
@@ -172,6 +188,12 @@ export const updateProduct = async (
   values: z.infer<typeof ProductValidation>,
   productId: string
 ) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   if (!productId) {
     return { error: "Product ID is required." };
   }
@@ -218,6 +240,15 @@ export const updateProduct = async (
       },
     });
 
+    await db.logs.create({
+      data: {
+        action: `${user.name} updated ${
+          data.name
+        } at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    });
+
     return { success: "Product updated successfully", data };
   } catch (error: any) {
     return {
@@ -229,6 +260,12 @@ export const updateProduct = async (
 };
 
 export const deleteProduct = async (productId: string) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   if (!productId) {
     return { error: "Product ID is required." };
   }
@@ -237,6 +274,15 @@ export const deleteProduct = async (productId: string) => {
     const data = await db.products.delete({
       where: {
         id: productId,
+      },
+    });
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} deleted ${
+          data.name
+        } at ${new Date().toLocaleString()}`,
+        adminId: user.id,
       },
     });
 

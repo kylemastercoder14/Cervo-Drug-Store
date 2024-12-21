@@ -33,10 +33,14 @@ model User {
 
 model Admin {
   id        String   @id @default(cuid())
+  name      String
   email     String
   password  String
+  role      String   @default("Staff")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  logs Logs[]
 }
 
 model Banner {
@@ -126,4 +130,23 @@ model Inventory {
 
   productId String
   product   Products @relation(fields: [productId], references: [id])
+}
+
+model News {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  image     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Logs {
+  id        String   @id @default(cuid())
+  action    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  adminId String
+  admin   Admin  @relation(fields: [adminId], references: [id])
 }

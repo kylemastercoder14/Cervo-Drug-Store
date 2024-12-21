@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
+import { getUserFromCookies } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { CategoryValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -47,6 +48,12 @@ export const getCategoriesNavbar = async () => {
 export const createCategory = async (
   values: z.infer<typeof CategoryValidation>
 ) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   const validatedField = CategoryValidation.safeParse(values);
 
   if (!validatedField.success) {
@@ -71,6 +78,13 @@ export const createCategory = async (
       },
     });
 
+    await db.logs.create({
+      data: {
+        action: `${user.name} created a category ${data.name} at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    })
+
     return { success: "Category created successfully", data };
   } catch (error: any) {
     return {
@@ -85,6 +99,12 @@ export const updateCategory = async (
   values: z.infer<typeof CategoryValidation>,
   categoryId: string
 ) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   if (!categoryId) {
     return { error: "Category ID is required." };
   }
@@ -116,6 +136,13 @@ export const updateCategory = async (
       },
     });
 
+    await db.logs.create({
+      data: {
+        action: `${user.name} updated a category ${data.name} at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    })
+
     return { success: "Category updated successfully", data };
   } catch (error: any) {
     return {
@@ -127,6 +154,12 @@ export const updateCategory = async (
 };
 
 export const deleteCategory = async (categoryId: string) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   if (!categoryId) {
     return { error: "Category ID is required." };
   }
@@ -137,6 +170,13 @@ export const deleteCategory = async (categoryId: string) => {
         id: categoryId,
       },
     });
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} deleted a category ${data.name} at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    })
 
     return { success: "Category deleted successfully", data };
   } catch (error: any) {

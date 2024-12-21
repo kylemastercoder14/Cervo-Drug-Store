@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
+import { getUserFromCookies } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { InventoryValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -30,6 +31,12 @@ export const getAllInventory = async () => {
 export const createInventory = async (
   values: z.infer<typeof InventoryValidation>
 ) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   const validatedField = InventoryValidation.safeParse(values);
 
   if (!validatedField.success) {
@@ -58,6 +65,18 @@ export const createInventory = async (
         productId: productId,
         quantity: stock,
       },
+      include: {
+        product: true,
+      },
+    });
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} added a stock of ${data.quantity} for ${
+          data.product.name
+        } at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
     });
 
     return { success: "Inventory created successfully", data };
@@ -74,6 +93,12 @@ export const updateInventory = async (
   values: z.infer<typeof InventoryValidation>,
   inventoryId: string
 ) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   if (!inventoryId) {
     return { error: "Inventory ID is required." };
   }
@@ -96,6 +121,18 @@ export const updateInventory = async (
         productId: productId,
         quantity: stock,
       },
+      include: {
+        product: true,
+      },
+    });
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} updated a stock of ${data.quantity} for ${
+          data.product.name
+        } at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
     });
 
     return { success: "Inventory updated successfully", data };
@@ -109,6 +146,12 @@ export const updateInventory = async (
 };
 
 export const deleteInventory = async (inventoryId: string) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   if (!inventoryId) {
     return { error: "Inventory ID is required." };
   }
@@ -117,6 +160,18 @@ export const deleteInventory = async (inventoryId: string) => {
     const data = await db.inventory.delete({
       where: {
         id: inventoryId,
+      },
+      include: {
+        product: true,
+      },
+    });
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} deleted inventory for ${
+          data.product.name
+        } at ${new Date().toLocaleString()}`,
+        adminId: user.id,
       },
     });
 
