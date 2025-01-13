@@ -137,7 +137,7 @@ const CartSheet = () => {
                       type="text"
                       value={item.quantity}
                       readOnly
-                      className="border-none outline-none text-center w-5"
+                      className="border-none outline-none bg-white text-center w-5"
                     />
                     <PlusIcon
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}

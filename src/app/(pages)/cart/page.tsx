@@ -126,7 +126,7 @@ const Cart = () => {
                       <input
                         type="text"
                         value={item.quantity}
-                        className="border-none outline-none text-center w-10"
+                        className="border-none bg-white outline-none text-center w-10"
                       />
                       <PlusIcon
                         onClick={() =>
@@ -148,10 +148,7 @@ const Cart = () => {
             <TableFooter className="border border-zinc-400">
               <TableRow>
                 <TableCell colSpan={5}>
-                  <div className="flex items-center gap-2">
-                    <Input placeholder="Coupon Code" className="w-[200px]" />
-                    <Button variant="primary">Apply Coupon</Button>
-                  </div>
+
                 </TableCell>
                 <TableCell className="flex items-center gap-2">
                   <Button

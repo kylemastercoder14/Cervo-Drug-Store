@@ -54,13 +54,6 @@ const Checkout = () => {
             </p>
           </div>
         )}
-        <p className="mt-4 mb-2 text-sm">
-          If you have a coupon code, please apply it below.
-        </p>
-        <div className="flex items-center gap-2">
-          <Input placeholder="Coupon Code" className="w-[200px]" />
-          <Button variant="primary">Apply Coupon</Button>
-        </div>
         <CheckoutForm user={user} />
       </div>
       <Footer />

@@ -40,7 +40,7 @@ export const getFeaturedProducts = async () => {
       include: {
         category: true,
       },
-      take: 10
+      take: 10,
     });
 
     if (!data) {
@@ -121,10 +121,10 @@ export const createProduct = async (
   values: z.infer<typeof ProductValidation>
 ) => {
   const { user } = await getUserFromCookies();
-  
-    if (!user) {
-      return { error: "User not found." };
-    }
+
+  if (!user) {
+    return { error: "User not found." };
+  }
 
   const validatedField = ProductValidation.safeParse(values);
 
@@ -293,5 +293,42 @@ export const deleteProduct = async (productId: string) => {
         error.message || ""
       }`,
     };
+  }
+};
+
+export const searchProducts = async (query: string) => {
+  try {
+    const data = await db.products.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            description: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            tags: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    return { data };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong while searching products." };
   }
 };

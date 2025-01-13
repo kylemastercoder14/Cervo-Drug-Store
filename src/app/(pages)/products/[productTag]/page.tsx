@@ -135,7 +135,7 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
                   type="text"
                   value={quantity}
                   readOnly
-                  className="border-none outline-none text-center w-10"
+                  className="border-none bg-white outline-none text-center w-10"
                 />
                 <PlusIcon
                   onClick={() => setQuantity(quantity + 1)}
@@ -171,7 +171,7 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
             </Accordion>
             <p className="mt-4">
               Visit our{" "}
-              <Link href="/faq" className="font-semibold underline">
+              <Link href="/faqs" className="font-semibold underline">
                 FAQs
               </Link>{" "}
               page for further details

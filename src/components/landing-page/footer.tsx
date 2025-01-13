@@ -7,7 +7,7 @@ import Image from "next/image";
 const Footer = () => {
   return (
     <>
-      <footer className="bg-black px-4 xl:px-60 gap-20 text-white py-8 grid xl:grid-cols-5 md:grid-cols-2 grid-cols-1">
+      <footer className="bg-black px-4 xl:px-60 gap-20 text-white py-8 grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1">
         <div className="flex flex-col col-span-2">
           <p className="font-semibold text-xl mb-2">About</p>
           <p className="text-md text-muted-foreground">
@@ -31,13 +31,13 @@ const Footer = () => {
             href="/collections/all"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
-            Products
+            Privacy Policy
           </Link>
           <Link
             href="/terms-and-conditions"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
-            Conditions
+            Terms & Conditions
           </Link>
           <Link
             href="/faqs"
@@ -66,33 +66,6 @@ const Footer = () => {
             <span className="text-lg">•</span> 152-A 12th Avenue, J.P Rizal
             Ext., East Rembo, Taguig City
           </p>
-        </div>
-        <div className="flex flex-col">
-          <p className="font-semibold text-xl mb-2">Customer Care</p>
-          <Link
-            href="/privacy-policy"
-            className="text-muted-foreground hover:text-white font-semibold text-md"
-          >
-            Privacy Policy
-          </Link>
-          <Link
-            href="/terms-and-conditions"
-            className="text-muted-foreground hover:text-white font-semibold text-md"
-          >
-            Terms & Conditions
-          </Link>
-          <Link
-            href="/shipping-and-delivery"
-            className="text-muted-foreground hover:text-white font-semibold text-md"
-          >
-            Shipping & Delivery
-          </Link>
-          <Link
-            href="/store-locator"
-            className="text-muted-foreground hover:text-white font-semibold text-md"
-          >
-            Store Locator
-          </Link>
         </div>
       </footer>
       <div className="bg-white px-4 xl:px-60 py-5 grid xl:grid-cols-3 grid-cols-1 xl:gap-20 gap-10">
