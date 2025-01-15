@@ -1,19 +1,28 @@
+"use client";
+
 import Link from "next/link";
 import React from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { toast } from 'sonner';
 
 const Footer = () => {
+  const handleClick = () => {
+    toast.success("Subscribed to newsletter!");
+  }
   return (
     <>
       <footer className="bg-black px-4 xl:px-60 gap-20 text-white py-8 grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1">
         <div className="flex flex-col col-span-2">
           <p className="font-semibold text-xl mb-2">About</p>
           <p className="text-md text-muted-foreground">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Asperiores
-            dolore incidunt repudiandae nisi possimus commodi ad. Eveniet ex
-            maxime cumque?
+            Your trusted partner for health and wellness, now just a click away!
+            At Cervo, we offer a seamless online platform where you can
+            conveniently purchase medicines and health essentials from the
+            comfort of your home. With a commitment to quality and care, our
+            licensed pharmacy ensures safe and reliable delivery straight to
+            your door.
           </p>
           <p className="font-semibold text-xl mt-3">Newsletter</p>
           <p className="text-md text-muted-foreground mb-3">
@@ -22,13 +31,13 @@ const Footer = () => {
           <p></p>
           <div className="flex items-center gap-2">
             <Input placeholder="Type your email address" />
-            <Button variant="primary">Subscribe</Button>
+            <Button onClick={handleClick} variant="primary">Subscribe</Button>
           </div>
         </div>
         <div className="flex flex-col">
           <p className="font-semibold text-xl mb-2">Quick Links</p>
           <Link
-            href="/collections/all"
+            href="/privacy-policy"
             className="text-muted-foreground hover:text-white font-semibold text-md"
           >
             Privacy Policy

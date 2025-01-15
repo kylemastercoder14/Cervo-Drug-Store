@@ -48,9 +48,10 @@ interface ProductWithCategory extends Products {
 const Collection = () => {
   const pathname = usePathname();
   const categoryTag = pathname?.split("/").pop();
-  const [columns, setColumns] = useState(3);
   const [products, setProducts] = useState<ProductWithCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortOption, setSortOption] = useState<string>("Featured");
+
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -64,16 +65,46 @@ const Collection = () => {
     };
     fetchProducts();
   }, [categoryTag]);
-  const handleColumnChange = (col: number) => {
-    setColumns(col);
+
+  const handleSort = (option: string) => {
+    setSortOption(option);
+
+    const sortedProducts = [...products];
+    switch (option) {
+      case "Alphabetically, A-Z":
+        sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "Alphabetically, Z-A":
+        sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "Price, Low to High":
+        sortedProducts.sort((a, b) => a.price - b.price);
+        break;
+      case "Price, High to Low":
+        sortedProducts.sort((a, b) => b.price - a.price);
+        break;
+      case "Date, Old to New":
+        sortedProducts.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        break;
+      case "Date, New to Old":
+        sortedProducts.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      default:
+        break;
+    }
+
+    setProducts(sortedProducts);
   };
 
-  if(loading) return (
-    <Loading />
-  );
+  if (loading) return <Loading />;
   return (
     <div className="flex relative min-h-screen w-full flex-col">
-      <Chatbot />
       <Navbar />
       <div className="px-4 xl:px-60 py-10">
         <Breadcrumb>
@@ -91,96 +122,17 @@ const Collection = () => {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="grid md:grid-cols-4 grid-cols-1 gap-10 mt-5">
-          <div className="col-span-1">
-            <div className="flex justify-between items-center">
-              <p className="text-2xl font-semibold">Filter:</p>
-              <p className="text-sm font-semibold underline">Reset</p>
-            </div>
-            <Accordion type="multiple">
-              <AccordionItem value="item-1">
-                <AccordionTrigger className="text-md">
-                  AVAILABILITY
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="terms" />
-                      <label
-                        htmlFor="terms"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        In stock (3)
-                      </label>
-                    </div>
-                    <label
-                      htmlFor="terms"
-                      className="text-sm font-medium text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Out of stock (0)
-                    </label>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger className="text-md">PRICE</AccordionTrigger>
-                <AccordionContent>
-                  <p className="mb-3">The highest price is ₱180.00</p>
-                  <div className="flex items-center gap-3 px-1">
-                    <div>
-                      <Label>From:</Label>
-                      <Input type="number" placeholder="0" />
-                    </div>
-                    <div>
-                      <Label>To:</Label>
-                      <Input type="number" placeholder="180.00" />
-                    </div>
-                  </div>
-                  <Slider
-                    className="mt-5"
-                    defaultValue={[33]}
-                    max={100}
-                    step={1}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-          <div className="col-span-3">
+        <div className="mt-5">
+          <div>
             <div className="bg-[#EEEEEE] flex justify-between items-center rounded-lg py-2 px-5 shadow-md border">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={columns === 3 ? "primary" : "ghost"}
-                  size="sm"
-                  onClick={() => handleColumnChange(3)}
-                >
-                  <IconColumns3 />
-                </Button>
-                <Button
-                  variant={columns === 2 ? "primary" : "ghost"}
-                  size="sm"
-                  onClick={() => handleColumnChange(2)}
-                >
-                  <IconColumns2 />
-                </Button>
-                <Button
-                  variant={columns === 1 ? "primary" : "ghost"}
-                  size="sm"
-                  onClick={() => handleColumnChange(1)}
-                >
-                  <IconLayoutBottombar />
-                </Button>
-              </div>
               <div className="flex items-center gap-5">
                 <div className="flex items-center gap-3">
                   <Label>Sort by:</Label>
-                  <Select>
+                  <Select onValueChange={handleSort} defaultValue={sortOption}>
                     <SelectTrigger className="bg-white w-[180px]">
                       <SelectValue placeholder="Featured" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Featured">Featured</SelectItem>
-                      <SelectItem value="Best Selling">Best Selling</SelectItem>
                       <SelectItem value="Alphabetically, A-Z">
                         Alphabetically, A-Z
                       </SelectItem>
@@ -208,11 +160,7 @@ const Collection = () => {
               </div>
             </div>
             {products.length !== 0 ? (
-              <ProductsContent
-                loading={loading}
-                items={products}
-                columns={columns}
-              />
+              <ProductsContent loading={loading} items={products} columns={4} />
             ) : (
               <div className="flex justify-center items-center h-[400px]">
                 <p className="text-lg font-semibold text-muted-foreground">

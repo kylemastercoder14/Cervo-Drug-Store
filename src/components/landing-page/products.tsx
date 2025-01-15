@@ -42,7 +42,7 @@ const ProductsContent = ({
   return (
     <div
       className={`grid gap-5 ${
-        columns === 1 ? "grid-cols-1" : `grid-cols-${columns}`
+        columns === 1 ? "grid-cols-4" : `grid-cols-${columns}`
       }`}
     >
       {items.map((item, index) => {

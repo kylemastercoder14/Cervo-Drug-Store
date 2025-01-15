@@ -9,7 +9,9 @@ export const createOrder = async (
   values: z.infer<typeof CheckoutValidation>,
   userId: string,
   items: any[],
-  paymentMethod: string
+  paymentMethod: string,
+  selectedAddress: string,
+  totalPrice: any
 ) => {
   const validatedField = CheckoutValidation.safeParse(values);
 
@@ -18,21 +20,8 @@ export const createOrder = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const {
-    firstName,
-    lastName,
-    email,
-    phoneNumber,
-    region,
-    province,
-    municipality,
-    barangay,
-    houseNo,
-    zipCode,
-    prescription,
-  } = validatedField.data;
+  const { prescription, email } = validatedField.data;
 
-  const address = `${houseNo}, ${barangay}, ${municipality}, ${province}, ${region}, ${zipCode}`;
   const orderId = `${String.fromCharCode(
     65 + Math.floor(Math.random() * 26)
   )}${Math.floor(Math.random() * 1000000)}`;
@@ -43,15 +32,9 @@ export const createOrder = async (
         data: {
           orderNumber: orderId,
           userId,
-          firstName,
-          lastName,
           email,
-          address,
-          contactNumber: phoneNumber,
-          totalAmount: items.reduce(
-            (acc, item) => acc + item.discountedPrice * item.quantity,
-            0
-          ),
+          addressId: selectedAddress,
+          totalAmount: totalPrice,
           paymentMethod,
           prescription,
         },

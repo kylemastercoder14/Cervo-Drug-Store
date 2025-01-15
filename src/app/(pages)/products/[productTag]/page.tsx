@@ -67,7 +67,6 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
   };
   return (
     <div className="flex relative min-h-screen w-full flex-col">
-      <Chatbot />
       <Navbar />
       <div className="px-4 xl:px-60 py-10">
         <Breadcrumb>
@@ -98,13 +97,6 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
             <div className="border-b pb-5 border-zinc-300">
               <div className="flex items-center justify-between">
                 <p className="text-3xl font-semibold">{product?.name}</p>
-                <Button
-                  variant="outline"
-                  className="border-[#437634] hover:text-[#437634] text-[#437634]"
-                >
-                  <IconHeart className="mr-2" color="#437634" />
-                  Add To Wishlist
-                </Button>
               </div>
               <div className="flex items-center gap-2 mt-2">
                 {product?.discountedPrice === 0 && (
@@ -121,7 +113,7 @@ const ViewProduct = ({ params }: { params: { productTag: string } }) => {
                 )}
               </div>
               <p className="text-muted-foreground mt-2 text-sm">
-                Shipping calculated at checkout.
+                Shipping calculated after checkout.
               </p>
             </div>
             <div className="flex items-center gap-3 mt-10">

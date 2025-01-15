@@ -9,20 +9,15 @@ import ImageSlider from "@/components/landing-page/image-slider";
 import Navbar from "@/components/landing-page/navbar";
 import PromotionContent from "@/components/landing-page/promotion-content";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import React from "react";
 
 const Home = () => {
   return (
     <div className="flex relative min-h-screen w-full flex-col">
-      <Chatbot />
       <Navbar />
       <div className="w-full xl:px-60 px-4 py-5 h-full mx-auto">
         <ImageSlider />
-        <p className="mt-5 xl:block hidden text-center font-semibold px-80">
-          Discount Alert: Use code CERVONUS2024 to get P50 off with a minimum
-          P500 purchase. Valid until September 30, 2024.{" "}
-          <span className="italic underline">Terms & Conditions apply.</span>
-        </p>
       </div>
       <section className="xl:px-60 px-4 py-5">
         <div className="bg-[#EEEEEE] rounded-lg py-2 px-3 shadow-md border">
@@ -82,8 +77,18 @@ const Home = () => {
             ></iframe>
           </div>
           <div className="flex flex-col z-10">
-            <p className="text-4xl font-extrabold text-white">Visit Our  <br />Official Facebook Page</p>
-            <Button className="rounded-xl bg-transparent border mt-5 py-6 text-lg border-white hover:bg-white hover:text-black">Click Here</Button>
+            <p className="text-4xl font-extrabold text-white">
+              Visit Our <br />
+              Official Facebook Page
+            </p>
+            <Link
+              href="https://www.facebook.com/profile.php?id=100063781221493"
+              target="_blank"
+            >
+              <Button className="rounded-xl bg-transparent border mt-5 py-6 text-lg border-white hover:bg-white hover:text-black">
+                Click Here
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

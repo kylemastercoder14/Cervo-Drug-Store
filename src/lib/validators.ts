@@ -71,22 +71,13 @@ export const SeniorPwdRegistration = z.object({
 });
 
 export const CheckoutValidation = z.object({
-  firstName: z.string().min(1, { message: "First name is required" }),
-  lastName: z.string().min(1, { message: "Last name is required" }),
-  phoneNumber: z.string().min(1, { message: "Mobile number is required" }),
   email: z
     .string()
     .email({ message: "Enter a valid email address" })
     .min(1, { message: "Email address is required" }),
-  region: z.string().min(1, { message: "Region is required" }),
-  province: z.string().min(1, { message: "Province is required" }),
-  municipality: z.string().min(1, { message: "Municipality is required" }),
-  barangay: z.string().min(1, { message: "Barangay is required" }),
-  houseNo: z.string().min(1, { message: "Complete address is required" }),
   acceptPolicy: z.boolean().refine((value) => value === true, {
     message: "You must accept the terms and conditions",
   }),
-  zipCode: z.string().min(1, { message: "Postal / ZIP code is required" }),
   prescription: z.string().optional(),
 });
 

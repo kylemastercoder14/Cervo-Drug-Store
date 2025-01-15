@@ -17,7 +17,6 @@ import Link from "next/link";
 const ContactUs = () => {
   return (
     <div className="flex relative min-h-screen w-full flex-col">
-      <Chatbot />
       <Navbar />
       <div className="px-4 xl:px-60 py-5 mt-5">
         <Breadcrumb>
@@ -43,7 +42,7 @@ const ContactUs = () => {
               Get assistance with FAQ's, refunds, product availability,
               complaints and general inquiries.
             </p>
-            <Link href="mailto:cervodrugstore@gmail.com">
+            <Link href="mailto:cervowebsite@gmail.com">
               <Button>Inquire Now</Button>
             </Link>
           </div>
@@ -52,7 +51,7 @@ const ContactUs = () => {
             <p className="text-muted-foreground my-3">
               For online payment status, processing and payments inquiries.
             </p>
-            <Link href="mailto:cervodrugstore@gmail.com">
+            <Link href="mailto:cervowebsite@gmail.com">
               <Button>Inquire Now</Button>
             </Link>
           </div>
@@ -67,17 +66,16 @@ const ContactUs = () => {
           <p>Monday - Saturday (except holidays)</p>
           <p className="mb-10">You may reach us at </p>
           <p className="font-semibold my-2">
-            Globe: <span className="text-primary">(+63) 912 345 6789</span>
+            Contact Number:{" "}
+            <span className="text-primary">(+63) 9328567585 / 8696-7088</span>
           </p>
           <p className="font-semibold my-2">
-            Smart: <span className="text-primary">(+63) 912 345 6789</span>
-          </p>
-          <p className="font-semibold my-2">
-            PLDT: <span className="text-primary">(+63) 912 345 6789</span>
+            Contact Number:{" "}
+            <span className="text-primary">(+63) 93248626245 / 8893-4835</span>
           </p>
           <p className="font-semibold my-2">
             Or via Email:{" "}
-            <span className="text-primary">cervodrugstore@gmail.com</span>
+            <span className="text-primary">cervowebsite@gmail.com</span>
           </p>
         </div>
       </div>

@@ -43,7 +43,7 @@ const SearchComponent = ({
         <IconSearch color="white" />
       </Button>
       {showDropdown && filteredProducts.length > 0 && (
-        <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded shadow-lg z-10">
+        <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded shadow-lg z-50">
           {filteredProducts.map((product) => (
             <div
               key={product.id}

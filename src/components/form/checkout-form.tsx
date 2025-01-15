@@ -20,9 +20,18 @@ import useCart from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
 import { createOrder } from "@/actions/order";
 import { toast } from "sonner";
+import { Address, User } from "@prisma/client";
+import CustomOption, { RadioGroup } from "../globals/custom-option";
 
-const CheckoutForm = ({ user }: { user: any }) => {
+interface CheckoutFormProps extends User {
+  address: Address[];
+}
+
+const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: string; }) => {
+  const defaultAddressId =
+    user?.address.find((address) => address.isDefault)?.id || "";
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(defaultAddressId);
   const { items, removeAll } = useCart();
   const totalPrice = items.reduce(
     (total, item) =>
@@ -46,16 +55,7 @@ const CheckoutForm = ({ user }: { user: any }) => {
   const form = useForm<z.infer<typeof CheckoutValidation>>({
     resolver: zodResolver(CheckoutValidation),
     defaultValues: {
-      firstName: user.firstName ?? "",
-      lastName: user.lastName ?? "",
-      phoneNumber: "",
-      zipCode: "",
-      email: user.emailAddresses[0].emailAddress ?? "",
-      region: "",
-      province: "",
-      municipality: "",
-      barangay: "",
-      houseNo: "",
+      email: email || "",
       acceptPolicy: false,
       prescription: "",
     },
@@ -68,7 +68,7 @@ const CheckoutForm = ({ user }: { user: any }) => {
       setIsLoading(false);
       return;
     }
-    createOrder(values, user.id, items, selectedPaymentMethod)
+    createOrder(values, user?.id as string, items, selectedPaymentMethod, selectedAddress, totalPrice)
       .then((data) => {
         if (data.success) {
           removeAll();
@@ -82,21 +82,6 @@ const CheckoutForm = ({ user }: { user: any }) => {
         setIsLoading(false);
       });
   };
-
-  const selectedRegionName = form.watch("region");
-  const selectedProvinceName = form.watch("province");
-  const selectedMunicipalityName = form.watch("municipality");
-
-  const {
-    regionOptions,
-    provinceOptions,
-    municipalityOptions,
-    barangayOptions,
-  } = useAddressData(
-    selectedRegionName,
-    selectedProvinceName,
-    selectedMunicipalityName
-  );
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -106,122 +91,20 @@ const CheckoutForm = ({ user }: { user: any }) => {
               Billing Details
             </p>
             <div className="grid gap-3">
-              <div className="grid xl:grid-cols-2 grid-cols-1 gap-3">
-                <CustomFormField
-                  control={form.control}
-                  fieldType={FormFieldType.INPUT}
-                  label="First Name"
-                  name="firstName"
-                  placeholder="Juan"
-                  type="text"
-                  isRequired={true}
-                  disabled={isLoading}
-                />
-                <CustomFormField
-                  control={form.control}
-                  fieldType={FormFieldType.INPUT}
-                  label="Last Name"
-                  name="lastName"
-                  placeholder="Dela Cruz"
-                  type="text"
-                  isRequired={true}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="grid xl:grid-cols-3 grid-cols-1 gap-3">
-                <div className="col-span-2">
-                  <CustomFormField
-                    control={form.control}
-                    fieldType={FormFieldType.INPUT}
-                    label="Complete Address (House Number, Building and Street Name) "
-                    type="text"
-                    name="houseNo"
-                    placeholder="Blk 123 L1 Ph2 Emerald St."
-                    isRequired={true}
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="col-span-1">
-                  <CustomFormField
-                    control={form.control}
-                    fieldType={FormFieldType.INPUT}
-                    label="Postal / ZIP Code"
-                    type="text"
-                    name="zipCode"
-                    placeholder="4114"
-                    isRequired={true}
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
+              <p>Ship to:</p>
+              <RadioGroup value={selectedAddress} onChangeAction={setSelectedAddress}>
+                {user?.address.map((address) => (
+                  <CustomOption key={address.id} value={address.id}>
+                    <div>
+                      <p className="font-semibold">{`${address.firstName} ${address.lastName}`}</p>
+                      <p className="text-muted-foreground">
+                        {`${address.homeAddress}, ${address.barangay}, ${address.city}, ${address.province}`}
+                      </p>
+                    </div>
+                  </CustomOption>
+                ))}
+              </RadioGroup>
               <div className="grid gap-3">
-                <CustomFormField
-                  control={form.control}
-                  fieldType={FormFieldType.SELECT}
-                  label="Region / State"
-                  dynamicOptions={regionOptions.map((region) => ({
-                    label: region,
-                    value: region,
-                  }))}
-                  name="region"
-                  placeholder="Select Region / State"
-                  isRequired={true}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="grid gap-3">
-                <CustomFormField
-                  control={form.control}
-                  fieldType={FormFieldType.SELECT}
-                  label="Province"
-                  dynamicOptions={provinceOptions.map((province) => ({
-                    label: province,
-                    value: province,
-                  }))}
-                  name="province"
-                  placeholder="Select Province"
-                  isRequired={true}
-                  disabled={isLoading || !selectedRegionName}
-                />
-              </div>
-              <div className="grid gap-3">
-                <CustomFormField
-                  control={form.control}
-                  fieldType={FormFieldType.SELECT}
-                  label="Municipality / City"
-                  dynamicOptions={municipalityOptions.map((city) => ({
-                    label: city,
-                    value: city,
-                  }))}
-                  name="municipality"
-                  placeholder="Select Municipality / City"
-                  isRequired={true}
-                  disabled={
-                    isLoading || !selectedRegionName || !selectedProvinceName
-                  }
-                />
-              </div>
-              <div className="grid gap-3">
-                <CustomFormField
-                  control={form.control}
-                  fieldType={FormFieldType.SELECT}
-                  label="Barangay"
-                  dynamicOptions={barangayOptions.map((barangay) => ({
-                    label: barangay,
-                    value: barangay,
-                  }))}
-                  name="barangay"
-                  placeholder="Select Barangay"
-                  isRequired={true}
-                  disabled={
-                    isLoading ||
-                    !selectedRegionName ||
-                    !selectedProvinceName ||
-                    !selectedMunicipalityName
-                  }
-                />
-              </div>
-              <div className="grid xl:grid-cols-2 grid-cols-1 gap-3">
                 <CustomFormField
                   control={form.control}
                   fieldType={FormFieldType.INPUT}
@@ -229,16 +112,6 @@ const CheckoutForm = ({ user }: { user: any }) => {
                   name="email"
                   placeholder="jdelacruz@gmail.com"
                   type="email"
-                  isRequired={true}
-                  disabled={isLoading}
-                />
-                <CustomFormField
-                  control={form.control}
-                  fieldType={FormFieldType.PHONE_INPUT}
-                  label="Phone Number"
-                  name="phoneNumber"
-                  placeholder="09123456789"
-                  type="phone"
                   isRequired={true}
                   disabled={isLoading}
                 />
