@@ -60,3 +60,50 @@ export const createOrder = async (
     };
   }
 };
+
+export const getAllOrders = async () => {
+  try {
+    const data = await db.orders.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        address: true,
+        user: true,
+        OrderItems: true,
+      },
+    });
+
+    if (!data) {
+      return { error: "No orders found." };
+    }
+
+    return { data };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong." };
+  }
+};
+
+export const completeOrder = async (orderId: string) => {
+  try {
+    const order = await db.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status: "Order Completed",
+      },
+      include: {
+        OrderItems: {
+          include: { product: true },
+        },
+      },
+    });
+
+    return { success: "Order completed successfully", order };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to complete order" };
+  }
+};

@@ -73,7 +73,7 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
         if (data.success) {
           removeAll();
           toast.success(data.success);
-          router.push("/");
+          router.push("/my-profile");
         } else {
           toast.error(data.error);
         }

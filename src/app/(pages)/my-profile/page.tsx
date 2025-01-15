@@ -59,7 +59,7 @@ const MyProfile = async () => {
                 >
                   <div className="flex items-center justify-between">
                     <p>Order Number: {order.orderNumber}</p>
-                    <p className={`font-semibold `}>{order.status === "Pending" ? "Order Placed" : "Order Completed"}</p>
+                    <p className={`font-semibold ${order.status === "Pending" ? "text-black" : "text-emerald-600"}`}>{order.status === "Pending" ? "Order Placed" : "Order Completed"}</p>
                   </div>
                   <div className="flex flex-col space-y-3 mt-3">
                     {order.OrderItems.map((orderItem) => (
