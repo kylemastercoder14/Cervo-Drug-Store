@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 // Since this is running in a server component, we should treat it as a utility, not a hook
 export const getUserFromCookies = async () => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const authToken = cookieStore.get("Authorization");
 
   if (!authToken) {

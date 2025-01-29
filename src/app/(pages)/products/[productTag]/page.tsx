@@ -2,7 +2,7 @@
 
 import Chatbot from "@/components/landing-page/chatbot";
 import Navbar from "@/components/landing-page/navbar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,7 +34,8 @@ interface ProductWithCategory extends Products {
   category: Categories | null;
 }
 
-const ViewProduct = ({ params }: { params: { productTag: string } }) => {
+const ViewProduct = (props: { params: Promise<{ productTag: string }> }) => {
+  const params = use(props.params);
   const [product, setProduct] = useState<ProductWithCategory | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const addToCart = useCart((state) => state.addItem);

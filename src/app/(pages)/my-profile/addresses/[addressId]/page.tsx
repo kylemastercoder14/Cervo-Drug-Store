@@ -14,7 +14,8 @@ import db from "@/lib/db";
 import Link from "next/link";
 import UpdateAddressForm from "@/components/form/update-address-form";
 
-const AddressId = async ({ params }: { params: { addressId: string } }) => {
+const AddressId = async (props: { params: Promise<{ addressId: string }> }) => {
+  const params = await props.params;
   const data = await db.address.findUnique({
     where: {
       id: params.addressId,

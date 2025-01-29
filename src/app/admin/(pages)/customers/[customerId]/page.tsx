@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import Image from "next/image";
 
-const CustomerId = async ({
-  params,
-}: {
-  params: {
-    customerId: string;
-  };
-}) => {
+const CustomerId = async (
+  props: {
+    params: Promise<{
+      customerId: string;
+    }>;
+  }
+) => {
+  const params = await props.params;
   const data = await db.user.findUnique({
     where: {
       id: params.customerId,
