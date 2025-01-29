@@ -1,7 +1,7 @@
 import React from "react";
 import db from "@/lib/db";
 import Link from "next/link";
-import { Button } from "../../../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import Image from "next/image";
 
