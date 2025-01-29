@@ -87,8 +87,6 @@ const data = {
 };
 
 export async function AppSidebar({ admin, ...props }: AppSidebarProps) {
-  const { user } = await getUserFromCookies();
-  if(!user) redirect("/admin/auth/sign-in");
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
