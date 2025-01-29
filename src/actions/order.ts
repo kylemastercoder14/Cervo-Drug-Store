@@ -9,7 +9,7 @@ export const createOrder = async (
   values: z.infer<typeof CheckoutValidation>,
   userId: string,
   items: any[],
-  paymentMethod: string,
+  orderOption: string,
   selectedAddress: string,
   totalPrice: any
 ) => {
@@ -35,7 +35,7 @@ export const createOrder = async (
           email,
           addressId: selectedAddress,
           totalAmount: totalPrice,
-          paymentMethod,
+          method: orderOption,
           prescription,
         },
       });

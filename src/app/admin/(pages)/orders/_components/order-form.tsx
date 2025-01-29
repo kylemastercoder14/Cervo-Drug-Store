@@ -83,13 +83,12 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
 
       <div className="mt-3">
         <p className="font-bold text-xl">Order ID: {data.orderNumber}</p>
-        <p>Payment Method: {data.paymentMethod}</p>
+        <p>Order Option: {data.method}</p>
         {data.prescription ? (
           <p
-            className="cursor-pointer"
-            onClick={() => setPrescriptionModal(true)}
+
           >
-            Prescription: {data.prescription}
+            Prescription: <span onClick={() => setPrescriptionModal(true)} className="cursor-pointer underline text-green-400">{data.prescription}</span>
           </p>
         ) : (
           <p>Prescription: No Prescription</p>

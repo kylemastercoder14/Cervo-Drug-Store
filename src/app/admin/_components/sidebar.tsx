@@ -1,6 +1,5 @@
 import {
   IconCategory,
-  IconDashboard,
   IconFolders,
   IconHelp,
   IconMedicineSyrup,
@@ -20,11 +19,6 @@ const menuItems = [
   {
     title: "Main",
     list: [
-      {
-        title: "Dashboard",
-        path: "/admin/dashboard",
-        icon: <IconDashboard />,
-      },
       {
         title: "Banners",
         path: "/admin/banners",

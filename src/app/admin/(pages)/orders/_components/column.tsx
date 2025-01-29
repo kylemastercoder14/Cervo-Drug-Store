@@ -15,7 +15,7 @@ export type OrdersColumn = {
   orderNumber: string;
   totalAmount: string;
   status: string;
-  paymentMethod: string;
+  orderOption: string;
   createdAt: string;
 };
 
@@ -51,7 +51,7 @@ export const columns: ColumnDef<OrdersColumn>[] = [
     },
   },
   {
-    accessorKey: "paymentMethod",
+    accessorKey: "orderOption",
     header: ({ column }) => {
       return (
         <Button
@@ -59,7 +59,7 @@ export const columns: ColumnDef<OrdersColumn>[] = [
           size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          <p>Payment Method</p>
+          <p>Order Option</p>
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       );

@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/sidebar";
 import {
   IconBlockquote,
-  IconBrandTabler,
   IconCategory,
   IconDiscount,
   IconFolders,
@@ -34,11 +33,6 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 const data = {
   navMain: [
-    {
-      title: "Dashboard",
-      url: "/admin/dashboard",
-      icon: IconBrandTabler,
-    },
     {
       title: "Banner",
       url: "/admin/banners",

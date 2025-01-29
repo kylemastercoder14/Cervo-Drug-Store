@@ -46,10 +46,10 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
   );
 
   const router = useRouter();
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("Gcash");
+  const [selectedOrderOption, setSelectedOrderOption] = useState("Pick-Up");
 
-  const handleSelectPaymentMethod = (name: string) => {
-    setSelectedPaymentMethod(name);
+  const handleSelectOrderOption = (name: string) => {
+    setSelectedOrderOption(name);
   };
 
   const form = useForm<z.infer<typeof CheckoutValidation>>({
@@ -68,7 +68,7 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
       setIsLoading(false);
       return;
     }
-    createOrder(values, user?.id as string, items, selectedPaymentMethod, selectedAddress, totalPrice)
+    createOrder(values, user?.id as string, items, selectedOrderOption, selectedAddress, totalPrice)
       .then((data) => {
         if (data.success) {
           removeAll();
@@ -145,12 +145,12 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
           </div>
           <div>
             <p className="border-b pb-3 border-zinc-300 mb-5">
-              Payment Details
+              Order Option
             </p>
             <div className="flex flex-col space-y-3">
               <label
                 className={`${
-                  selectedPaymentMethod === "Gcash"
+                  selectedOrderOption === "Pick-Up"
                     ? "cursor-pointer"
                     : "cursor-default"
                 } w-full`}
@@ -159,13 +159,13 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                   type="radio"
                   className="peer sr-only"
                   name="payment_method"
-                  onChange={() => handleSelectPaymentMethod("Gcash")}
-                  checked={selectedPaymentMethod === "Gcash"}
+                  onChange={() => handleSelectOrderOption("Pick-Up")}
+                  checked={selectedOrderOption === "Pick-Up"}
                   disabled={isLoading}
                 />
                 <div
                   className={`w-full rounded-md bg-zinc-100 p-2 transition-all shadow-md border ${
-                    selectedPaymentMethod === "Gcash"
+                    selectedOrderOption === "Pick-Up"
                       ? "border-green-800"
                       : "border-zinc-300"
                   }`}
@@ -173,28 +173,20 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-x-3">
-                        {selectedPaymentMethod === "Gcash" ? (
+                        {selectedOrderOption === "Pick-Up" ? (
                           <IconCircleCheckFilled className="text-green-800" />
                         ) : (
                           <Circle />
                         )}
                         <div className="flex flex-col">
                           <div className="flex items-center gap-x-2">
-                            <p className="font-semibold text-sm">Gcash</p>
+                            <p className="font-semibold text-sm">Pick-Up</p>
                             <Badge variant="default">Recommended</Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            Simple and easy payments via GCash.
-                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-x-2">
-                        <Image
-                          src="/brands/gcash.png"
-                          alt="Gcash"
-                          width={50}
-                          height={50}
-                        />
+                        <div className='bg-green-600 w-14 h-14 scale-75 text-white flex items-center justify-center text-xs rounded-lg'>Pick-up</div>
                       </div>
                     </div>
                   </div>
@@ -202,7 +194,7 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
               </label>
               <label
                 className={`${
-                  selectedPaymentMethod === "Maya"
+                  selectedOrderOption === "Delivery"
                     ? "cursor-pointer"
                     : "cursor-default"
                 } w-full`}
@@ -211,13 +203,13 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                   type="radio"
                   className="peer sr-only"
                   name="payment_method"
-                  onChange={() => handleSelectPaymentMethod("Maya")}
-                  checked={selectedPaymentMethod === "Maya"}
+                  onChange={() => handleSelectOrderOption("Delivery")}
+                  checked={selectedOrderOption === "Delivery"}
                   disabled={isLoading}
                 />
                 <div
                   className={`w-full rounded-md bg-zinc-100 p-2 transition-all shadow-md border ${
-                    selectedPaymentMethod === "Maya"
+                    selectedOrderOption === "Delivery"
                       ? "border-green-800"
                       : "border-zinc-300"
                   }`}
@@ -225,55 +217,7 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-x-3">
-                        {selectedPaymentMethod === "Maya" ? (
-                          <IconCircleCheckFilled className="text-green-800" />
-                        ) : (
-                          <Circle />
-                        )}
-                        <div className="flex flex-col">
-                          <p className="font-semibold text-sm">Maya</p>
-                          <p className="text-xs text-muted-foreground">
-                            Payments via Maya wallet.
-                          </p>
-                        </div>
-                      </div>
-                      <Image
-                        src="/brands/maya.png"
-                        alt="Maya"
-                        width={50}
-                        height={50}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </label>
-
-              <label
-                className={`${
-                  selectedPaymentMethod === "COD"
-                    ? "cursor-pointer"
-                    : "cursor-default"
-                } w-full`}
-              >
-                <input
-                  type="radio"
-                  className="peer sr-only"
-                  name="payment_method"
-                  onChange={() => handleSelectPaymentMethod("COD")}
-                  checked={selectedPaymentMethod === "COD"}
-                  disabled={isLoading}
-                />
-                <div
-                  className={`w-full rounded-md bg-zinc-100 p-2 transition-all shadow-md border ${
-                    selectedPaymentMethod === "COD"
-                      ? "border-green-800"
-                      : "border-zinc-300"
-                  }`}
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-x-3">
-                        {selectedPaymentMethod === "COD" ? (
+                        {selectedOrderOption === "Delivery" ? (
                           <IconCircleCheckFilled className="text-green-800" />
                         ) : (
                           <Circle />
@@ -281,21 +225,13 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                         <div className="flex flex-col">
                           <div className="flex items-center gap-x-2">
                             <p className="font-semibold text-sm">
-                              Cash on Delivery
+                              Delivery
                             </p>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            Get it after 3 hours or as soon as possible.
-                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-x-2">
-                        <Image
-                          src="/brands/cod.png"
-                          alt="COD"
-                          width={50}
-                          height={50}
-                        />
+                      <div className='bg-red-600 w-14 h-14 scale-75 text-white flex items-center justify-center text-xs rounded-lg'>Delivery</div>
                       </div>
                     </div>
                   </div>

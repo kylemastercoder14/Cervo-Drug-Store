@@ -28,7 +28,7 @@ const OrdersClient = () => {
       orderNumber: item.orderNumber,
       totalAmount: formatPrice(item.totalAmount),
       status: item.status,
-      paymentMethod: item.paymentMethod,
+      orderOption: item.method,
       createdAt: format(item.createdAt, "MMMM do, yyyy"),
     })) || [];
 

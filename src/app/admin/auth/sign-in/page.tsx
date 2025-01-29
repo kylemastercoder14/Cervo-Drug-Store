@@ -26,7 +26,7 @@ const AdminSignIn = () => {
           toast.error(response.error);
         } else {
           toast.success("Redirecting to dashboard...");
-          router.push("/admin/dashboard");
+          router.push("/admin/products");
         }
       })
       .finally(() => {

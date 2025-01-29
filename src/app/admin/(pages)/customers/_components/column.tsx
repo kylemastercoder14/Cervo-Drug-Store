@@ -6,7 +6,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Eye } from "lucide-react";
+import Link from "next/link";
 
 export type CustomerColumn = {
   id: string;
@@ -99,6 +100,17 @@ export const columns: ColumnDef<CustomerColumn>[] = [
           <p>Date Created</p>
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
+      );
+    },
+  },
+  {
+    accessorKey: "action",
+    header: "Action",
+    cell: ({ row }) => {
+      return (
+        <Link href={`/admin/customers/${row.original.id}`}>
+          <Button variant={"default"} size="sm"><Eye className='w-4 h-4 mr-2' />View</Button>
+        </Link>
       );
     },
   },
