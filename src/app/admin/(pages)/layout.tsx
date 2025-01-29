@@ -9,8 +9,6 @@ import { getUserFromCookies } from "@/hooks/use-user";
 import { redirect } from "next/navigation";
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
-  const { user } = await getUserFromCookies();
-  if (!user) redirect("/admin/auth/sign-in");
   return (
     <SidebarProvider>
       <AppSidebar admin={user} />
