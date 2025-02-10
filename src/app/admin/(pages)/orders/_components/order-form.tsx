@@ -83,6 +83,7 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
 
       <div className="mt-3">
         <p className="font-bold text-xl">Order ID: {data.orderNumber}</p>
+        <p>Branch: {data.branch || "N/A"}</p>
         <p>Order Option: {data.method}</p>
         {data.prescription ? (
           <p

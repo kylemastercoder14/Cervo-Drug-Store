@@ -20,7 +20,7 @@ export const createOrder = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { prescription, email } = validatedField.data;
+  const { prescription, email, branch } = validatedField.data;
 
   const orderId = `${String.fromCharCode(
     65 + Math.floor(Math.random() * 26)
@@ -37,6 +37,7 @@ export const createOrder = async (
           totalAmount: totalPrice,
           method: orderOption,
           prescription,
+          branch: branch || "",
         },
       });
 

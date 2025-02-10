@@ -119,6 +119,7 @@ model Orders {
   totalAmount  Float
   method       String
   prescription String?
+  branch       String?
   status       String   @default("Pending")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

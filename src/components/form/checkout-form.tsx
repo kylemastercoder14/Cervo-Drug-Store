@@ -11,7 +11,7 @@ import { Form } from "../ui/form";
 import CustomFormField from "../globals/custom-formfield";
 import { FormFieldType } from "@/lib/constants";
 import { Button } from "../ui/button";
-import { Circle, Loader2 } from "lucide-react";
+import { Circle, Loader2, PlusCircle } from "lucide-react";
 import { useAddressData } from "@/lib/address-selection";
 import Image from "next/image";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
@@ -27,7 +27,13 @@ interface CheckoutFormProps extends User {
   address: Address[];
 }
 
-const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: string; }) => {
+const CheckoutForm = ({
+  user,
+  email,
+}: {
+  user: CheckoutFormProps | null;
+  email: string;
+}) => {
   const defaultAddressId =
     user?.address.find((address) => address.isDefault)?.id || "";
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +46,11 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
         : total + item.discountedPrice * item.quantity,
     0
   );
+
+  // Calculate discount and grand total conditionally
+  const isEligibleForDiscount = user?.seniorPwdId && user.seniorPwdIdImage;
+  const discount = isEligibleForDiscount ? totalPrice * 0.2 : 0;
+  const grandTotal = totalPrice - discount;
 
   const isPrescriptionRequired = items.some(
     (item) => item.isPrescriptionRequired
@@ -58,6 +69,7 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
       email: email || "",
       acceptPolicy: false,
       prescription: "",
+      branch: "",
     },
   });
 
@@ -68,7 +80,14 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
       setIsLoading(false);
       return;
     }
-    createOrder(values, user?.id as string, items, selectedOrderOption, selectedAddress, totalPrice)
+    createOrder(
+      values,
+      user?.id as string,
+      items,
+      selectedOrderOption,
+      selectedAddress,
+      grandTotal
+    )
       .then((data) => {
         if (data.success) {
           removeAll();
@@ -82,6 +101,7 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
         setIsLoading(false);
       });
   };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -92,18 +112,32 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
             </p>
             <div className="grid gap-3">
               <p>Ship to:</p>
-              <RadioGroup value={selectedAddress} onChangeAction={setSelectedAddress}>
-                {user?.address.map((address) => (
-                  <CustomOption key={address.id} value={address.id}>
-                    <div>
-                      <p className="font-semibold">{`${address.firstName} ${address.lastName}`}</p>
-                      <p className="text-muted-foreground">
-                        {`${address.homeAddress}, ${address.barangay}, ${address.city}, ${address.province}`}
-                      </p>
-                    </div>
-                  </CustomOption>
-                ))}
-              </RadioGroup>
+              {user?.address && user?.address.length > 0 ? (
+                <RadioGroup
+                  value={selectedAddress}
+                  onChangeAction={setSelectedAddress}
+                >
+                  {user?.address.map((address) => (
+                    <CustomOption key={address.id} value={address.id}>
+                      <div>
+                        <p className="font-semibold">{`${address.firstName} ${address.lastName}`}</p>
+                        <p className="text-muted-foreground">
+                          {`${address.homeAddress}, ${address.barangay}, ${address.city}, ${address.province}`}
+                        </p>
+                      </div>
+                    </CustomOption>
+                  ))}
+                </RadioGroup>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={() => router.push("/my-profile/addresses")}
+                  variant="secondary"
+                >
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  Add your address
+                </Button>
+              )}
               <div className="grid gap-3">
                 <CustomFormField
                   control={form.control}
@@ -112,6 +146,31 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                   name="email"
                   placeholder="jdelacruz@gmail.com"
                   type="email"
+                  isRequired={true}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="grid gap-3">
+                <CustomFormField
+                  control={form.control}
+                  fieldType={FormFieldType.SELECT}
+                  label="Branch"
+                  name="branch"
+                  placeholder="Select Branch"
+                  dynamicOptions={[
+                    {
+                      label:
+                        "No. 472-A Elisco Rd., Brgy. San Joaquin, Pasig City",
+                      value:
+                        "No. 472-A Elisco Rd., Brgy. San Joaquin, Pasig City",
+                    },
+                    {
+                      label:
+                        "152-A 12th Avenue, J.P Rizal Ext., East Rembo, Taguig City",
+                      value:
+                        "152-A 12th Avenue, J.P Rizal Ext., East Rembo, Taguig City",
+                    },
+                  ]}
                   isRequired={true}
                   disabled={isLoading}
                 />
@@ -144,9 +203,7 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
             </div>
           </div>
           <div>
-            <p className="border-b pb-3 border-zinc-300 mb-5">
-              Order Option
-            </p>
+            <p className="border-b pb-3 border-zinc-300 mb-5">Order Option</p>
             <div className="flex flex-col space-y-3">
               <label
                 className={`${
@@ -186,7 +243,9 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                         </div>
                       </div>
                       <div className="flex items-center gap-x-2">
-                        <div className='bg-green-600 w-14 h-14 scale-75 text-white flex items-center justify-center text-xs rounded-lg'>Pick-up</div>
+                        <div className="bg-green-600 w-14 h-14 scale-75 text-white flex items-center justify-center text-xs rounded-lg">
+                          Pick-up
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -224,14 +283,14 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                         )}
                         <div className="flex flex-col">
                           <div className="flex items-center gap-x-2">
-                            <p className="font-semibold text-sm">
-                              Delivery
-                            </p>
+                            <p className="font-semibold text-sm">Delivery</p>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-x-2">
-                      <div className='bg-red-600 w-14 h-14 scale-75 text-white flex items-center justify-center text-xs rounded-lg'>Delivery</div>
+                        <div className="bg-red-600 w-14 h-14 scale-75 text-white flex items-center justify-center text-xs rounded-lg">
+                          Delivery
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -252,15 +311,28 @@ const CheckoutForm = ({ user, email }: { user: CheckoutFormProps | null; email: 
                   className="flex items-center justify-between mt-1"
                 >
                   <p className="text-sm">{item.name}</p>
+                  <p className="text-sm">
+                    {formatPrice(
+                      item.discountedPrice === 0
+                        ? item.price * item.quantity
+                        : item.discountedPrice * item.quantity
+                    )}
+                  </p>
                 </div>
               ))}
               <div className="flex items-center justify-between mt-1">
                 <p className="font-semibold">Subtotal</p>
                 <p className="font-semibold">{formatPrice(totalPrice)}</p>
               </div>
+              {isEligibleForDiscount && (
+                <div className="flex items-center justify-between mt-1">
+                  <p className="font-semibold">Senior Citizen/PWD Discount:</p>
+                  <p className="font-semibold">{formatPrice(discount)}</p>
+                </div>
+              )}
               <div className="flex items-center justify-between mt-1">
                 <p className="font-semibold">Total</p>
-                <p className="font-semibold">{formatPrice(totalPrice)}</p>
+                <p className="font-semibold">{formatPrice(grandTotal)}</p>
               </div>
             </div>
             <div className="flex items-end justify-end mt-5 gap-5">
