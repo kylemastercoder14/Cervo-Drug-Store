@@ -99,6 +99,7 @@ model Products {
   tags                   String
   isFeatured             Boolean  @default(false)
   isPrescriptionRequired Boolean  @default(false)
+  isVatItem              Boolean  @default(false)
   image                  String
   status                 String   @default("Available")
   createdAt              DateTime @default(now())

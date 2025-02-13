@@ -59,6 +59,7 @@ const ProductsContent = ({
             price: item?.price ?? 0,
             discountedPrice: item?.discountedPrice ?? 0,
             quantity: 1,
+            isVatable: item?.isVatItem as boolean,
             category: item?.category?.name as string,
             image: item?.image as string,
             description: item?.description as string,

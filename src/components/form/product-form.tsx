@@ -55,8 +55,10 @@ const ProductForm = ({
           description: initialData.description ?? "",
           category: initialData?.categoryId ?? "",
           isFeatured: initialData.isFeatured ?? false,
+          isVatItem: initialData?.isVatItem ?? false,
           isPrescriptionRequired: initialData.isPrescription ?? false,
-          discountedPrice: parseFloat(initialData.discountedPrice.replace("₱", "")) || 0,
+          discountedPrice:
+            parseFloat(initialData.discountedPrice.replace("₱", "")) || 0,
         }
       : {
           image: "",
@@ -67,6 +69,7 @@ const ProductForm = ({
           isFeatured: true,
           isPrescriptionRequired: false,
           discountedPrice: 0,
+          isVatItem: false,
         },
   });
 
@@ -172,6 +175,15 @@ const ProductForm = ({
                   description="Toggle this option if the product requires a valid prescription from a healthcare provider before purchase."
                   isRequired={true}
                   name="isPrescriptionRequired"
+                  disabled={isSaving}
+                />
+                <CustomFormField
+                  control={form.control}
+                  fieldType={FormFieldType.SWITCH}
+                  label="Value added tax exemption (1.12)"
+                  description="Toggle this option if the product has a VAT exemption. This will be exempted from the value added tax."
+                  isRequired={true}
+                  name="isVatItem"
                   disabled={isSaving}
                 />
                 <Button type="submit" disabled={isSaving} size="sm">

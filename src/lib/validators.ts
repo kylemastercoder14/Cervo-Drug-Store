@@ -104,6 +104,7 @@ export const ProductValidation = z.object({
   price: z.coerce.number().min(1, { message: "Price is required" }),
   discountedPrice: z.coerce.number().optional(),
   isFeatured: z.boolean().optional(),
+  isVatItem: z.boolean().optional(),
   isPrescriptionRequired: z.boolean().optional(),
 });
 

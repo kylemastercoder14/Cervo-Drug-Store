@@ -51,6 +51,7 @@ const FeaturedProducts = () => {
       price: item.price,
       isPrescriptionRequired: item.isPrescriptionRequired,
       discountedPrice: item.discountedPrice ?? item.price,
+      isVatable: item.isVatItem,
       quantity: 1,
       category: item?.category?.name as string,
       image: item.image,

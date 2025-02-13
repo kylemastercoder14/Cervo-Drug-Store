@@ -61,6 +61,7 @@ const ViewProduct = (props: { params: Promise<{ productTag: string }> }) => {
       isPrescriptionRequired: product?.isPrescriptionRequired as boolean,
       discountedPrice: product?.discountedPrice ?? 0,
       quantity,
+      isVatable: product?.isVatItem as boolean,
       category: product?.category?.name as string,
       image: product?.image as string,
       description: product?.description as string,
