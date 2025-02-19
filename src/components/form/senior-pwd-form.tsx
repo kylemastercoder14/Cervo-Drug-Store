@@ -61,7 +61,7 @@ const PWDSeniorForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form autoComplete='off' onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-3">
             <CustomFormField

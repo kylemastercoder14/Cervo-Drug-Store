@@ -297,6 +297,21 @@ const CheckoutForm = ({
                 </div>
               </label>
             </div>
+            {selectedOrderOption === "Delivery" && (
+              <>
+                <p className="border-b pb-3 border-zinc-300 mb-5 mt-10">
+                  Scan to pay
+                </p>
+                <div className="relative my-3 w-[200px] h-[200px]">
+                  <Image
+                    src="/images/SAN JOAQUIN QR CODE.jpeg"
+                    alt="Qr Code"
+                    fill
+                    className="w-full h-full"
+                  />
+                </div>
+              </>
+            )}
             <p className="border-b pb-3 border-zinc-300 mb-5 mt-10">
               Product Summary
             </p>
