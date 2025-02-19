@@ -78,6 +78,7 @@ export const CheckoutValidation = z.object({
   acceptPolicy: z.boolean().refine((value) => value === true, {
     message: "You must accept the terms and conditions",
   }),
+  branch: z.string().min(1, { message: "Branch is required" }),
   prescription: z.string().optional(),
 });
 
@@ -103,6 +104,7 @@ export const ProductValidation = z.object({
   price: z.coerce.number().min(1, { message: "Price is required" }),
   discountedPrice: z.coerce.number().optional(),
   isFeatured: z.boolean().optional(),
+  isVatItem: z.boolean().optional(),
   isPrescriptionRequired: z.boolean().optional(),
 });
 

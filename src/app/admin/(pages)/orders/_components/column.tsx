@@ -7,7 +7,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
 export type OrdersColumn = {

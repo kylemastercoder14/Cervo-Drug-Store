@@ -9,6 +9,7 @@ interface CartItem {
   price: number;
   discountedPrice: number;
   isPrescriptionRequired: boolean;
+  isVatable: boolean;
   category: string;
   quantity: number;
   description: string;

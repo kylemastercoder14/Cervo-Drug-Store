@@ -23,6 +23,7 @@ export type ProductColumn = {
   price: any;
   isFeatured: boolean;
   isPrescription: boolean;
+  isVatItem: boolean;
   prescription: string;
   createdAt: string;
 };

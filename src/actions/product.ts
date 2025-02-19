@@ -141,6 +141,7 @@ export const createProduct = async (
     category,
     isFeatured,
     isPrescriptionRequired,
+    isVatItem,
     discountedPrice,
   } = validatedField.data;
 
@@ -150,6 +151,11 @@ export const createProduct = async (
     .replace(/\s+/g, "-")
     .replace(/&/g, "and");
 
+  // Ensure price is a number and handle VAT exemption
+  const exemptedVatPrice = isVatItem
+    ? parseFloat((price / 1.12).toFixed(2))
+    : price;
+
   try {
     const data = await db.products.create({
       data: {
@@ -158,9 +164,10 @@ export const createProduct = async (
         tags,
         description,
         categoryTag: category,
-        price,
+        price: exemptedVatPrice,
         isFeatured,
         discountedPrice,
+        isVatItem,
         isPrescriptionRequired,
       },
     });
@@ -176,6 +183,7 @@ export const createProduct = async (
 
     return { success: "Product created successfully", data };
   } catch (error: any) {
+    console.error("Failed to create product:", error); // Log the error for debugging
     return {
       error: `Failed to create product. Please try again. ${
         error.message || ""
@@ -214,6 +222,7 @@ export const updateProduct = async (
     isFeatured,
     isPrescriptionRequired,
     discountedPrice,
+    isVatItem,
   } = validatedField.data;
 
   const tags = name
@@ -236,6 +245,7 @@ export const updateProduct = async (
         price,
         isFeatured,
         isPrescriptionRequired,
+        isVatItem,
         discountedPrice,
       },
     });

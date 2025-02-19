@@ -33,6 +33,7 @@ const ProductClient = () => {
       price: formatPrice(item.price),
       isFeatured: item.isFeatured,
       isPrescription: item.isPrescriptionRequired,
+      isVatItem: item.isVatItem,
       prescription: item.isPrescriptionRequired === true ? "Need Prescription" : "Over The Counter",
       category: item.category.name,
       discountedPrice: formatPrice(item?.discountedPrice ?? 0),
