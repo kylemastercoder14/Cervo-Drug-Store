@@ -64,7 +64,7 @@ export const loginUser = async (email: string, password: string) => {
       .sign(secret);
 
     // Set the cookie with the JWT
-    cookies().set("Authorization", jwt, {
+    (await cookies()).set("Authorization", jwt, {
       httpOnly: true, // Set to true for security
       secure: process.env.NODE_ENV === "production", // Use secure cookies in production
       maxAge: 60 * 60 * 24 * 3, // Cookie expiration (3 days in seconds)
@@ -81,7 +81,7 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 export const logout = async () => {
-  cookies().set("Authorization", "", { maxAge: 0, path: "/" });
+  (await cookies()).set("Authorization", "", { maxAge: 0, path: "/" });
 };
 
 export const createStaff = async (values: z.infer<typeof StaffValidation>) => {

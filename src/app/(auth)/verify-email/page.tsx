@@ -5,7 +5,7 @@ import Chatbot from "@/components/landing-page/chatbot";
 import Navbar from "@/components/landing-page/navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import React, { useState } from "react";
+import React, { useState, use } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,12 +21,13 @@ import { createUser } from "@/actions/user";
 import { Loader2 } from "lucide-react";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     [key: string]: string | string[] | undefined;
-  };
+  }>;
 }
 
-const VerifyEmail = ({ searchParams }: PageProps) => {
+const VerifyEmail = (props: PageProps) => {
+  const searchParams = use(props.searchParams);
   const { setActive, isLoaded, signUp } = useSignUp();
   const router = useRouter();
   const email = Array.isArray(searchParams.email)
