@@ -303,12 +303,24 @@ const CheckoutForm = ({
                   Scan to pay
                 </p>
                 <div className="relative my-3 w-[200px] h-[200px]">
-                  <Image
-                    src="/images/SAN JOAQUIN QR CODE.jpeg"
-                    alt="Qr Code"
-                    fill
-                    className="w-full h-full"
-                  />
+                  {form.watch("branch") ===
+                    "No. 472-A Elisco Rd., Brgy. San Joaquin, Pasig City" && (
+                    <Image
+                      src="/images/SAN JOAQUIN QR CODE.jpeg"
+                      alt="Qr Code"
+                      fill
+                      className="w-full h-full"
+                    />
+                  )}
+                  {form.watch("branch") ===
+                    "152-A 12th Avenue, J.P Rizal Ext., East Rembo, Taguig City" && (
+                    <Image
+                      src="/images/EAST REMBO QR CODE.jpeg"
+                      alt="Qr Code"
+                      fill
+                      className="w-full h-full"
+                    />
+                  )}
                 </div>
               </>
             )}
