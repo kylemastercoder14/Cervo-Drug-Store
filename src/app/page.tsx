@@ -1,8 +1,6 @@
 import BlogsCarousel from "@/components/landing-page/blogs-carousel";
 import { BrandMarquee } from "@/components/landing-page/brand-marquee";
 import CategoriesCarousel from "@/components/landing-page/categories-carousel";
-import Chatbot from "@/components/landing-page/chatbot";
-import CountdownTimer from "@/components/landing-page/countdown-timer";
 import FeaturedProducts from "@/components/landing-page/featured-products";
 import Footer from "@/components/landing-page/footer";
 import ImageSlider from "@/components/landing-page/image-slider";
@@ -38,7 +36,6 @@ const Home = () => {
           <p className="text-lg font-semibold text-black">Featured Products</p>
         </div>
         <FeaturedProducts />
-        <CountdownTimer />
       </section>
       <section className="bg-white">
         <div className="xl:px-60 px-4 py-5">
