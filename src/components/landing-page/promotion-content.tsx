@@ -24,12 +24,12 @@ const PromotionContent = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-6">
       {promotions.map((item) => (
-        <div key={item.id} className="relative w-full h-[400px]">
+        <div key={item.id} className="relative w-full h-[600px]">
           <Image
             src={item.image}
             alt={item.image}
             fill
-            className="w-full h-full rounded-xl object-cover"
+            className="w-full h-full rounded-xl object-cover shadow-md"
           />
         </div>
       ))}
