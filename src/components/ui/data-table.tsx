@@ -81,7 +81,7 @@ export function DataTable<TData, TValue>({
     },
     initialState: {
       pagination: {
-        pageSize: 5,
+        pageSize: 10,
       },
     },
     onSortingChange: setSorting,
@@ -233,7 +233,7 @@ export function DataTable<TData, TValue>({
                 />
               </SelectTrigger>
               <SelectContent>
-                {[5, 10, 20, 30].map((pageSize) => (
+                {[10, 20, 30, 50, 100].map((pageSize) => (
                   <SelectItem key={pageSize} value={String(pageSize)}>
                     {pageSize}
                   </SelectItem>

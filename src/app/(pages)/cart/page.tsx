@@ -29,16 +29,15 @@ import { Input } from "@/components/ui/input";
 import useCart from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useUser } from '@clerk/nextjs';
 
 const Cart = () => {
+  const {user} = useUser();
   const router = useRouter();
   const { items, updateQuantity, removeItem, removeAll } = useCart();
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   const totalPrice = items.reduce(
-    (total, item) =>
-      item.discountedPrice === 0
-        ? total + item.price * item.quantity
-        : total + item.discountedPrice * item.quantity,
+    (total, item) => total + item.price * item.quantity,
     0
   );
   return (
@@ -68,7 +67,6 @@ const Cart = () => {
             <TableHeader>
               <TableRow className="border border-zinc-400">
                 <TableHead className="xl:w-[100px] border-r border-zinc-400"></TableHead>
-                <TableHead className="xl:w-[100px] border-r border-zinc-400"></TableHead>
                 <TableHead className="border-r border-zinc-400">
                   Product
                 </TableHead>
@@ -93,23 +91,15 @@ const Cart = () => {
                       color="red"
                     />
                   </TableCell>
-                  <TableCell>
-                    <Image
-                      src={item.image}
-                      alt="Product"
-                      width={50}
-                      height={50}
-                    />
-                  </TableCell>
                   <TableCell className="flex flex-col">
                     <p className="font-semibold">{item.name}</p>
                     <p className="font-semibold text-sm text-muted-foreground">
-                      {item.category}
+                      {item.tags}
                     </p>
                   </TableCell>
-                  <TableCell>{item.discountedPrice === 0
-                      ? formatPrice(item.price)
-                      : formatPrice(item.discountedPrice)}</TableCell>
+                  <TableCell>
+                    {formatPrice(item?.price * item?.quantity)}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center border w-40 bg-white py-2.5 px-5 gap-5">
                       <MinusIcon
@@ -137,18 +127,14 @@ const Cart = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {item.discountedPrice === 0
-                      ? formatPrice(item.price * item.quantity)
-                      : formatPrice(item.discountedPrice * item.quantity)}
+                    {formatPrice(item?.price * item?.quantity)}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
             <TableFooter className="border border-zinc-400">
               <TableRow>
-                <TableCell colSpan={5}>
-
-                </TableCell>
+                <TableCell colSpan={5}></TableCell>
                 <TableCell className="flex items-center gap-2">
                   <Button
                     onClick={removeAll}
@@ -188,7 +174,13 @@ const Cart = () => {
           </Table>
         </div>
         <Button
-          onClick={() => router.push("/checkout")}
+          onClick={() => {
+            if (user) {
+              router.push("/checkout");
+            } else {
+              router.push("/my-account");
+            }
+          }}
           variant="primary"
           disabled={items.length === 0}
         >

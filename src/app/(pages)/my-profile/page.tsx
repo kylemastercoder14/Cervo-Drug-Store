@@ -16,7 +16,7 @@ import db from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { formatPrice } from '../../../lib/utils';
+import { formatPrice } from '@/lib/utils';
 
 const MyProfile = async () => {
   const { userId } = auth();
@@ -64,12 +64,12 @@ const MyProfile = async () => {
                   <div className="flex flex-col space-y-3 mt-3">
                     {order.OrderItems.map((orderItem) => (
                       <div key={orderItem.id} className="flex bg-white shadow border rounded-md p-2 gap-3 items-start">
-                        <Image
+                        {/* <Image
                           width={70}
                           height={70}
                           src={orderItem.product.image}
                           alt={orderItem.product.name}
-                        />
+                        /> */}
                         <div>
                           <p className='font-semibold'>{orderItem.product.name}</p>
                           <p className='text-muted-foreground'>{orderItem.product.categoryTag}</p>

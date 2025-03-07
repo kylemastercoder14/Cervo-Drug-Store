@@ -26,17 +26,16 @@ const ProductClient = () => {
     productData?.data?.map((item) => ({
       id: item.id,
       name: item.name,
-      image: item.image,
-      tags: item.tags,
-      categoryId: item.categoryTag,
-      description: item.description,
+      image: item.image || "",
+      tags: item.tags || "",
+      categoryId: item.categoryTag || "",
+      description: item.description || "",
       price: formatPrice(item.price),
       isFeatured: item.isFeatured,
       isPrescription: item.isPrescriptionRequired,
       isVatItem: item.isVatItem,
       prescription: item.isPrescriptionRequired === true ? "Need Prescription" : "Over The Counter",
-      category: item.category.name,
-      discountedPrice: formatPrice(item?.discountedPrice ?? 0),
+      category: "Category",
       createdAt: format(item.createdAt, "MMMM do, yyyy"),
     })) || [];
 

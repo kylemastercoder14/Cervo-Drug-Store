@@ -60,8 +60,8 @@ const ContactUs = () => {
         <div className="flex flex-col items-center justify-center text-center mt-10">
           <h3>We're here to help!</h3>
           <p>
-            Cervo Drug Store Customer Support is available daily from 8:00 AM to
-            7:00 PM.
+            Cervo Drug Store Customer Support is available daily from 7:00 AM to
+            8:30 PM.
           </p>
           <p>Monday - Saturday (except holidays)</p>
           <p className="mb-10">You may reach us at </p>

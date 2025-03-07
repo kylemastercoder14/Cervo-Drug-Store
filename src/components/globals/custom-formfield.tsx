@@ -45,6 +45,7 @@ import ImageUpload from "./image-uploader";
 import { DynamicArraySelect } from "./dynamic-array-select";
 import { Switch } from "../ui/switch";
 import RichTextEditor from "./rich-text-editor";
+import ComboBox from "@/components/ui/combo-box";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
@@ -431,6 +432,20 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
             value={""}
             // onChange={field.onChange}
             className="hidden"
+          />
+        </FormControl>
+      );
+
+    case FormFieldType.COMBO_BOX:
+      return (
+        <FormControl>
+          <ComboBox
+            className="w-full"
+            disabled={disabled}
+            value={field.value}
+            onChange={field.onChange}
+            placeholder={placeholder}
+            data={dynamicOptions || []}
           />
         </FormControl>
       );

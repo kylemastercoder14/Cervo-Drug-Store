@@ -17,12 +17,12 @@ const Home = () => {
       <div className="w-full xl:px-60 px-4 py-5 h-full mx-auto">
         <ImageSlider />
       </div>
-      <section className="xl:px-60 px-4 py-5">
+      {/* <section className="xl:px-60 px-4 py-5">
         <div className="bg-[#EEEEEE] rounded-lg py-2 px-3 shadow-md border">
           <p className="text-lg font-semibold text-black">Categories</p>
         </div>
         <CategoriesCarousel />
-      </section>
+      </section> */}
       <section className="xl:px-60 px-4 py-5">
         <div className="bg-[#EEEEEE] rounded-lg py-2 px-3 shadow-md border">
           <p className="text-lg font-semibold text-black">

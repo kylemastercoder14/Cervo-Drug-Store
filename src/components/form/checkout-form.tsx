@@ -17,7 +17,7 @@ import Image from "next/image";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import { Badge } from "../ui/badge";
 import useCart from "@/hooks/use-cart";
-import { formatPrice } from "@/lib/utils";
+import { calculateVatAdjustedPrice, formatPrice } from "@/lib/utils";
 import { createOrder } from "@/actions/order";
 import { toast } from "sonner";
 import { Address, User } from "@prisma/client";
@@ -40,10 +40,7 @@ const CheckoutForm = ({
   const [selectedAddress, setSelectedAddress] = useState(defaultAddressId);
   const { items, removeAll } = useCart();
   const totalPrice = items.reduce(
-    (total, item) =>
-      item.discountedPrice === 0
-        ? total + item.price * item.quantity
-        : total + item.discountedPrice * item.quantity,
+    (total, item) => total + calculateVatAdjustedPrice(item) * item.quantity,
     0
   );
 
@@ -169,6 +166,10 @@ const CheckoutForm = ({
                         "152-A 12th Avenue, J.P Rizal Ext., East Rembo, Taguig City",
                       value:
                         "152-A 12th Avenue, J.P Rizal Ext., East Rembo, Taguig City",
+                    },
+                    {
+                      label: "7F. Manalo St. Ligid-Tipas, Taguig City",
+                      value: "7F. Manalo St. Ligid-Tipas, Taguig City",
                     },
                   ]}
                   isRequired={true}
@@ -321,6 +322,15 @@ const CheckoutForm = ({
                       className="w-full h-full"
                     />
                   )}
+                  {form.watch("branch") ===
+                    "7F. Manalo St. Ligid-Tipas, Taguig City" && (
+                    <Image
+                      src="/images/BST QR CODE.jpeg"
+                      alt="Qr Code"
+                      fill
+                      className="w-full h-full"
+                    />
+                  )}
                 </div>
               </>
             )}
@@ -339,11 +349,7 @@ const CheckoutForm = ({
                 >
                   <p className="text-sm">{item.name}</p>
                   <p className="text-sm">
-                    {formatPrice(
-                      item.discountedPrice === 0
-                        ? item.price * item.quantity
-                        : item.discountedPrice * item.quantity
-                    )}
+                    {formatPrice(item?.price * item?.quantity)}
                   </p>
                 </div>
               ))}

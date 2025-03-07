@@ -47,9 +47,8 @@ const Faqs = () => {
               <span className="font-semibold">Can I pay using cash?</span>
               <p>
                 Yes, Cash on Delivery is available for orders within Metro
-                Manila, Rizal and select areas of Pampanga namely Mabalacat,
-                Angeles and San Fernando only. We highly encourage you to
-                prepare the exact amount of payment.
+                Manila ONLY. We highly encourage you to prepare the exact amount
+                of payment.
               </p>
               <span className="font-semibold mt-3">
                 Can I pay using my debit or credit card?
@@ -71,9 +70,8 @@ const Faqs = () => {
               </p>
               <span className="font-semibold">Can I pay via GCash?</span>
               <p>
-                Yes. GCash via Paymongo is available on our site. Please note
-                that any adjustments on Senior Citizen / PWD discounts will be
-                processed via GCash refund in 3 to 5 banking days.
+                Yes. GCash is available on our site, and you just need to scan
+                the QR code upon payment.
               </p>
             </AccordionContent>
           </AccordionItem>
@@ -105,12 +103,8 @@ const Faqs = () => {
               </span>
               <p>
                 Senior Citizen and PWD discounts are now being offered to
-                qualified customers. Documents such as Senior Citizen/PWD ID,
-                booklet and valid prescriptions are required to avail the
-                discount. Please note that the discount will not be
-                automatically applied upon checkout. Final discounted amount
-                will be sent via email once we have validated your submitted
-                requirements.
+                qualified customers. Documents such as Senior Citizen/PWD ID and
+                valid prescriptions are required to avail the discount.
               </p>
             </AccordionContent>
           </AccordionItem>
@@ -126,7 +120,10 @@ const Faqs = () => {
                 At the moment, we do not offer standard shipping options.
                 However, we provide a self-delivery service where our admin can
                 book a delivery rider from services such as Lalamove, Toktok, or
-                other reliable delivery companies.
+                other reliable delivery companies. Customers will be responsible
+                for covering the shipping fee directly to the rider upon
+                delivery. Once your order is confirmed, you will receive details
+                about the delivery arrangement and estimated costs.
               </p>
               <p>
                 Customers will be responsible for covering the shipping fee

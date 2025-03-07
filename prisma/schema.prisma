@@ -93,20 +93,19 @@ model Categories {
 model Products {
   id                     String   @id @default(cuid())
   name                   String
-  description            String
+  description            String?
   price                  Float
-  discountedPrice        Float?
-  tags                   String
+  tags                   String?
   isFeatured             Boolean  @default(false)
   isPrescriptionRequired Boolean  @default(false)
   isVatItem              Boolean  @default(false)
-  image                  String
+  image                  String?
   status                 String   @default("Available")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  categoryTag String
-  category    Categories @relation(fields: [categoryTag], references: [tags], onDelete: Cascade)
+  categoryTag String?
+  category    Categories? @relation(fields: [categoryTag], references: [tags], onDelete: Cascade)
 
   orderItems OrderItems[]
   inventory  Inventory[]

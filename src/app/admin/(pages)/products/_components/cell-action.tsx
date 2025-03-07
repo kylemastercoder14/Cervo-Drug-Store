@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { ProductColumn } from "./column";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,40 +23,23 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [initialData, setInitialData] = useState<ProductColumn | null>(null);
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
 
   const onDelete = async () => {
     deleteProduct(data.id, {
-      onSuccess: () => {
-        setOpen(false);
-      },
+      onSuccess: () => setOpen(false),
     });
   };
 
-  const onUpdate = () => {
-    setInitialData(data);
-    setFormOpen(true);
-  };
+  const onUpdate = () => setFormOpen(true);
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        loading={isDeleting}
-        onConfirm={onDelete}
-      />
-      {formOpen && (
-        <ProductForm
-          initialData={initialData}
-          onClose={() => setFormOpen(false)}
-        />
-      )}
+      <AlertModal isOpen={open} onClose={() => setOpen(false)} loading={isDeleting} onConfirm={onDelete} />
+      {formOpen && <ProductForm productId={data.id} onClose={() => setFormOpen(false)} />}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
             <MoreHorizontal className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>

@@ -10,10 +10,10 @@ export const getAllProducts = async () => {
   try {
     const data = await db.products.findMany({
       orderBy: {
-        createdAt: "desc",
+        name: "asc",
       },
       include: {
-        category: true,
+        orderItems: true,
       },
     });
 
@@ -22,6 +22,39 @@ export const getAllProducts = async () => {
     }
 
     return { data };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong." };
+  }
+};
+
+export const getProductById = async (productId: string) => {
+  try {
+    const data = await db.products.findUnique({
+      where: {
+        id: productId,
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    if (!data) {
+      return { error: "No product found." };
+    }
+
+    return { data };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong." };
+  }
+};
+
+export const getProductsCount = async () => {
+  try {
+    const count = await db.products.count();
+
+    return { data: { count } };
   } catch (error) {
     console.error(error);
     return { error: "Something went wrong." };
@@ -38,7 +71,7 @@ export const getFeaturedProducts = async () => {
         isFeatured: true,
       },
       include: {
-        category: true,
+        orderItems: true,
       },
       take: 10,
     });
@@ -135,14 +168,12 @@ export const createProduct = async (
 
   const {
     name,
-    image,
-    description,
     price,
-    category,
-    isFeatured,
     isPrescriptionRequired,
     isVatItem,
-    discountedPrice,
+    description,
+    image,
+    isFeatured,
   } = validatedField.data;
 
   const tags = name
@@ -151,33 +182,17 @@ export const createProduct = async (
     .replace(/\s+/g, "-")
     .replace(/&/g, "and");
 
-  // Ensure price is a number and handle VAT exemption
-  const exemptedVatPrice = isVatItem
-    ? parseFloat((price / 1.12).toFixed(2))
-    : price;
-
   try {
     const data = await db.products.create({
       data: {
         name,
-        image,
-        tags,
         description,
-        categoryTag: category,
-        price: exemptedVatPrice,
+        image,
         isFeatured,
-        discountedPrice,
+        tags,
+        price,
         isVatItem,
         isPrescriptionRequired,
-      },
-    });
-
-    await db.logs.create({
-      data: {
-        action: `${user.name} added ${
-          data.name
-        } at ${new Date().toLocaleString()}`,
-        adminId: user.id,
       },
     });
 
@@ -189,6 +204,60 @@ export const createProduct = async (
         error.message || ""
       }`,
     };
+  }
+};
+
+export const createProductFromExcel = async (values: {
+  name: string;
+  price: number;
+  isPrescriptionRequired: boolean;
+  isVatItem: boolean;
+}) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
+  const tags = values.name
+    .toLowerCase()
+    .replace(/,/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/&/g, "and");
+
+  try {
+    const data = await db.products.create({
+      data: {
+        name: values.name,
+        tags,
+        price: values.price,
+        isVatItem: values.isVatItem,
+        isPrescriptionRequired: values.isPrescriptionRequired,
+      },
+    });
+
+    return { success: "Product created successfully", data };
+  } catch (error: any) {
+    console.error("Failed to create product:", error); // Log the error for debugging
+    return {
+      error: `Failed to create product. Please try again. ${
+        error.message || ""
+      }`,
+    };
+  }
+};
+
+export const createBulkProducts = async (data: any[]) => {
+  try {
+    for (const product of data) {
+      const result = await createProductFromExcel(product);
+      if (result.error) {
+        console.error("Error creating product:", result.error);
+      }
+    }
+  } catch (error) {
+    console.error("Error in createBulkProducts:", error);
+    throw new Error(error instanceof Error ? error.message : String(error));
   }
 };
 
@@ -218,10 +287,8 @@ export const updateProduct = async (
     image,
     description,
     price,
-    category,
     isFeatured,
     isPrescriptionRequired,
-    discountedPrice,
     isVatItem,
   } = validatedField.data;
 
@@ -241,12 +308,10 @@ export const updateProduct = async (
         image,
         tags,
         description,
-        categoryTag: category,
         price,
         isFeatured,
         isPrescriptionRequired,
         isVatItem,
-        discountedPrice,
       },
     });
 

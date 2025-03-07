@@ -28,7 +28,7 @@ const CartSheet = () => {
   const { items, updateQuantity, removeItem } = useCart();
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   const totalPrice = items.reduce(
-    (total, item) => item.discountedPrice === 0 ? total + item.price * item.quantity : total + item.discountedPrice * item.quantity,
+    (total, item) => total + item.price * item.quantity,
     0
   );
 
@@ -54,7 +54,9 @@ const CartSheet = () => {
         <div className="flex items-center gap-3">
           <IconShoppingBag size={30} color="black" />
           <div className="flex flex-col items-start justify-start">
-            <p className="font-semibold lg:block hidden">Cart Items ({totalItems})</p>
+            <p className="font-semibold lg:block hidden">
+              Cart Items ({totalItems})
+            </p>
             <p className="text-sm text-muted-foreground lg:block hidden">
               {formatPrice(totalPrice)}
             </p>
@@ -97,19 +99,17 @@ const CartSheet = () => {
                 className="flex items-start px-6 py-2 mt-10 justify-between gap-10 w-full"
               >
                 <div className="flex items-start gap-2">
-                  <Image
+                  {/* <Image
                     src={item.image}
                     alt={item.name}
                     width={100}
                     height={100}
                     className="rounded-lg"
-                  />
+                  /> */}
                   <div className="flex flex-col">
                     <p className="font-semibold">{item?.name}</p>
                     <p className="font-semibold text-muted-foreground">
-                      {item.discountedPrice === 0
-                        ? formatPrice(item?.price * item?.quantity)
-                        : formatPrice(item?.discountedPrice * item?.quantity)}
+                      {formatPrice(item?.price * item?.quantity)}
                     </p>
                   </div>
                 </div>

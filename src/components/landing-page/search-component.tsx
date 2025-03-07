@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Input } from "../ui/input";
 import { IconSearch } from "@tabler/icons-react";
 import { Button } from "../ui/button";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 const SearchComponent = ({
   onSearch,
@@ -13,7 +13,7 @@ const SearchComponent = ({
   onSearch: (query: string) => void;
   filteredProducts: any[];
 }) => {
-	const router = useRouter();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -44,20 +44,24 @@ const SearchComponent = ({
       </Button>
       {showDropdown && filteredProducts.length > 0 && (
         <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded shadow-lg z-50">
-          {filteredProducts.map((product) => (
-            <div
+          {filteredProducts.map((product) => {
+            const encodedSlug = encodeURIComponent(product.tags);
+            const productUrl = `/products/${encodedSlug}`;
+            return (
+              <div
               key={product.id}
               className="p-2 hover:bg-gray-100 cursor-pointer"
               onClick={() => {
                 setSearchTerm(product.name);
                 setShowDropdown(false);
-				router.push(`/products/${product.tags}`);
+                router.push(productUrl);
               }}
             >
               <p className="font-medium">{product.name}</p>
               <p className="text-sm text-gray-500">{product.category?.name}</p>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

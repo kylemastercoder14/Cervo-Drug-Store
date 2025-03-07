@@ -44,11 +44,6 @@ const data = {
       icon: IconDiscount,
     },
     {
-      title: "Categories",
-      url: "/admin/categories",
-      icon: IconCategory,
-    },
-    {
       title: "Products",
       url: "/admin/products",
       icon: IconMedicineSyrup,

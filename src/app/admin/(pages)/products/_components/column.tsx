@@ -18,7 +18,6 @@ export type ProductColumn = {
   category: string;
   categoryId: string;
   description: string;
-  discountedPrice: any;
   tags: string;
   price: any;
   isFeatured: boolean;
@@ -29,19 +28,19 @@ export type ProductColumn = {
 };
 
 export const columns: ColumnDef<ProductColumn>[] = [
-  {
-    accessorKey: "image",
-    header: "",
-    cell: ({ row }) => (
-      <Image
-        alt="Product image"
-        className="aspect-square rounded-md object-cover"
-        height="70"
-        src={row.original.image}
-        width="70"
-      />
-    ),
-  },
+  // {
+  //   accessorKey: "image",
+  //   header: "",
+  //   cell: ({ row }) => (
+  //     <Image
+  //       alt="Product image"
+  //       className="aspect-square rounded-md object-cover"
+  //       height="70"
+  //       src={row.original.image}
+  //       width="70"
+  //     />
+  //   ),
+  // },
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -56,22 +55,28 @@ export const columns: ColumnDef<ProductColumn>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => (
+      <div>
+        <p>{row.original.name}</p>
+        <p className='text-sm text-muted-foreground'>SKU: {row.original.tags}</p>
+      </div>
+    ),
   },
-  {
-    accessorKey: "tags",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant={"ghost"}
-          size={"tableButton"}
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          <p>SKU</p>
-          <ChevronsUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
+  // {
+  //   accessorKey: "tags",
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant={"ghost"}
+  //         size={"tableButton"}
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //       >
+  //         <p>SKU</p>
+  //         <ChevronsUpDown className="ml-2 h-4 w-4" />
+  //       </Button>
+  //     );
+  //   },
+  // },
   {
     accessorKey: "price",
     header: ({ column }) => {
@@ -87,36 +92,21 @@ export const columns: ColumnDef<ProductColumn>[] = [
       );
     },
   },
-  {
-    accessorKey: "discountedPrice",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant={"ghost"}
-          size={"tableButton"}
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          <p>Discounted Price</p>
-          <ChevronsUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
-  {
-    accessorKey: "category",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant={"ghost"}
-          size={"tableButton"}
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          <p>Category</p>
-          <ChevronsUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
+  // {
+  //   accessorKey: "category",
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant={"ghost"}
+  //         size={"tableButton"}
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //       >
+  //         <p>Category</p>
+  //         <ChevronsUpDown className="ml-2 h-4 w-4" />
+  //       </Button>
+  //     );
+  //   },
+  // },
   {
     accessorKey: "prescription",
     header: ({ column }) => {

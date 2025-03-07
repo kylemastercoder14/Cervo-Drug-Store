@@ -2,20 +2,19 @@
 
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { IconHeart } from "@tabler/icons-react";
-import { Categories, Products } from "@prisma/client";
+import { OrderItems, Products } from "@prisma/client";
 import { getFeaturedProducts } from "@/actions/product";
-import { formatPrice } from "@/lib/utils";
+import { extractWeight, formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import useCart from "@/hooks/use-cart";
-
-interface ProductWithCategory extends Products {
-  category: Categories | null;
+interface ProductClientProps extends Products {
+  orderItems: OrderItems[];
 }
 
 const FeaturedProducts = () => {
-  const [items, setItems] = useState<ProductWithCategory[]>([]);
+  const [items, setItems] = useState<ProductClientProps[]>([]);
   const addToCart = useCart((state) => state.addItem);
   const router = useRouter();
 
@@ -33,87 +32,71 @@ const FeaturedProducts = () => {
     fetchProducts();
   }, []);
 
-  // Function to calculate discount percentage
-  const calculateDiscountPercentage = (
-    price: number,
-    discountedPrice: number | null
-  ) => {
-    if (discountedPrice === null || price === 0) return null;
-    const discount = ((price - discountedPrice) / price) * 100;
-    return Math.round(discount); // Round the discount percentage
-  };
-
   // Corrected handleAddToCart function to add specific item to the cart
-  const handleAddToCart = (item: ProductWithCategory) => {
+  const handleAddToCart = (item: ProductClientProps) => {
     addToCart({
       id: item.id,
       name: item.name,
       price: item.price,
       isPrescriptionRequired: item.isPrescriptionRequired,
-      discountedPrice: item.discountedPrice ?? item.price,
       isVatable: item.isVatItem,
       quantity: 1,
-      category: item?.category?.name as string,
-      image: item.image,
-      description: item.description,
+      tags: item.tags as string,
+      image: item.image as string,
+      description: item.description as string,
     });
   };
 
   return (
     <div className="grid xl:grid-cols-5 md:grid-cols-3 grid-cols-1 gap-5">
       {items.map((item) => {
-        const discountPercentage = calculateDiscountPercentage(
-          item.price,
-          item.discountedPrice
-        );
         return (
-          <div className="pt-5" key={item.id}>
+          <div key={item.id}>
             <div
               onClick={() => router.push(`/products/${item.tags}`)}
-              className="bg-white cursor-pointer shadow-lg relative w-full h-[300px]"
+              className="cursor-pointer"
             >
-              <Image
-                src={item.image}
-                alt="Featured"
-                fill
-                className="w-full h-full"
-              />
-              {discountPercentage !== null &&
-                item?.discountedPrice !== null &&
-                item.discountedPrice > 0 && (
-                  <div className="absolute top-3 flex items-start gap-1 left-2 px-2.5 py-4 rounded-full bg-[#437634]">
-                    <p className="text-white font-black text-xl">
-                      {discountPercentage}
-                    </p>
-                    <div className="flex gap-0 mt-1 flex-col">
-                      <p className="m-0 text-[9px] text-white">%</p>
-                      <p className="m-0 text-[9px] font-semibold text-white">
-                        OFF
-                      </p>
-                    </div>
-                  </div>
-                )}
-            </div>
-            <p className="mt-3 font-semibold">{item.name}</p>
-            <div className="flex items-center gap-1 mt-2 text-sm">
-              <p className="font-semibold">{formatPrice(item.price)}</p>
-              {item.discountedPrice !== null && item.discountedPrice !== 0 && (
-                <p className="text-muted-foreground line-through">
-                  {formatPrice(item.discountedPrice)}
+              <div className="relative flex items-center flex-col justify-center bg-secondary w-full h-[30vh]">
+                <Image
+                  src="/images/logo.png"
+                  alt="Logo"
+                  width={80}
+                  height={80}
+                  className="absolute top-5 right-5"
+                />
+                <div className="border-4 w-[80%] overflow-hidden text-black text-center font-semibold truncate border-black p-3">
+                  {item.name}
+                </div>
+                <p className="text-black text-center font-semibold mt-3">
+                  {extractWeight(item.name) || ""}
                 </p>
-              )}
+                {item.isPrescriptionRequired && (
+                  <Image
+                    src="/images/rx.png"
+                    alt="Rx"
+                    width={80}
+                    height={80}
+                    className="absolute bottom-5 right-5"
+                  />
+                )}
+              </div>
             </div>
-            <div className="flex items-center mt-2">
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={() => handleAddToCart(item)}
-              >
-                Add To Cart
-              </Button>
-              <Button variant="ghost" size="icon" className="w-14 p-0">
-                <IconHeart color="#437634" />
-              </Button>
+            <div className="p-3">
+              <h1 className="font-semibold line-clamp-1 text-lg">
+                {item.isPrescriptionRequired ? "Rx:" : ""} {item.name}
+              </h1>
+              <p className="text-base font-semibold">
+                ₱{item.price.toFixed(2)}
+              </p>
+              <div className="flex items-center mt-2">
+                <Button
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => handleAddToCart(item)}
+                >
+                  Add To Cart
+                </Button>
+              </div>
             </div>
           </div>
         );

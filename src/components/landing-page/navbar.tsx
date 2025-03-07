@@ -38,18 +38,18 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 inset-x-0 w-full bg-white">
-      <div className="flex items-center border-b border-zinc-300 px-4 gap-10 py-6 xl:px-60 xl:justify-between justify-center">
-        <div className="flex items-center gap-10">
-          <Sheet>
+      <div className="flex items-center border-b border-zinc-300 px-4 gap-10 py-6 lg:px-60 lg:justify-between justify-center">
+        <div className="flex items-center gap-5">
+          {/* <Sheet>
             <SheetTrigger asChild>
-              <Button className="xl:hidden block" size="sm" variant="ghost">
+              <Button className="lg:hidden block" size="sm" variant="ghost">
                 <Menu />
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
               <NavLinks />
             </SheetContent>
-          </Sheet>
+          </Sheet> */}
 
           <Link href="/">
             <Image src="/images/logo.png" alt="Logo" width={180} height={180} />
@@ -59,13 +59,13 @@ const Navbar = () => {
             filteredProducts={filteredProducts}
           />
         </div>
-        <div className="flex xl:gap-0 gap-2 items-center">
+        <div className="flex lg:gap-0 gap-2 items-center">
+          <Link href="/products" className="mr-5">
+            <Button variant="secondary">Browse Products &rarr;</Button>
+          </Link>
           <UserDropdown />
           <CartSheet />
         </div>
-      </div>
-      <div className="py-5 w-full justify-center xl:flex hidden px-4 bg-[#f5f5f5] shadow-md">
-        <NavLinks />
       </div>
     </header>
   );

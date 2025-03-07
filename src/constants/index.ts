@@ -16,6 +16,7 @@ export enum FormFieldType {
   SKELETON = "skeleton",
   HIDDEN = "hidden",
   HONEY_POT = "honeyPot",
+  COMBO_BOX = "comboBox",
 }
 
 export const OPT_LENGTH = 6;

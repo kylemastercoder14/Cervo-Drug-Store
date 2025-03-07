@@ -21,7 +21,6 @@ const AddProduct = () => {
 
       {openProductModal && (
         <ProductForm
-          initialData={null}
           onClose={() => setOpenProductModal(false)}
         />
       )}

@@ -71,7 +71,7 @@ const InventoryForm = ({
   return (
     <>
       <Modal
-        className="max-w-lg"
+        className="max-w-2xl"
         isOpen={true}
         onClose={onClose}
         title={title}
@@ -83,7 +83,7 @@ const InventoryForm = ({
               <div className="grid gap-4">
                 <CustomFormField
                   control={form.control}
-                  fieldType={FormFieldType.SELECT}
+                  fieldType={FormFieldType.COMBO_BOX}
                   label="Product"
                   isRequired={true}
                   placeholder="Select product"
