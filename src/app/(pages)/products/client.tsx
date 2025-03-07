@@ -246,7 +246,7 @@ const ProductClient = ({ products }: { products: ProductClientProps[] }) => {
           </div>
           <div className="grid lg:grid-cols-4 grid-cols-1 gap-5 mt-5">
             {filteredProducts.slice(0, visibleProducts).map((product) => {
-              const encodedSlug = encodeURIComponent(product.tags);
+              const encodedSlug = encodeURIComponent(product.tags || '');
               const productUrl = `/products/${encodedSlug}`;
               return (
                 <div key={product.id}>
