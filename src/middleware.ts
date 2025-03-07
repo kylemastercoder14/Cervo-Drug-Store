@@ -4,6 +4,7 @@ export default clerkMiddleware();
 
 const isPublicRoute = createRouteMatcher([
   "/my-account",
+  "/my-profile",
   "/senior-and-pwd-account-registration",
   "/verify-email",
   "/admin/(.*)",
