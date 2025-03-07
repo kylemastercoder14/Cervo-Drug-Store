@@ -114,12 +114,12 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
         {data.OrderItems.map((item) => (
           <div key={item.id} className="flex items-start gap-3">
             <div className="relative w-24 h-24 border p-0">
-              <Image
+              {/* <Image
                 src={item.product.image}
                 alt={item.product.name}
                 className="w-full h-full object-cover"
                 fill
-              />
+              /> */}
             </div>
             <div>
               <h4>{item.product.name}</h4>
