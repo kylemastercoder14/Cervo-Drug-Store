@@ -16,23 +16,15 @@ import { Button } from "@/components/ui/button";
 import { maskEmail } from "@/lib/utils";
 import { useSignUp } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createUser } from "@/actions/user";
 import { Loader2 } from "lucide-react";
 
-interface PageProps {
-  searchParams: Promise<{
-    [key: string]: string | string[] | undefined;
-  }>;
-}
-
-const VerifyEmail = (props: PageProps) => {
-  const searchParams = use(props.searchParams);
+const VerifyEmail = () => {
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
   const { setActive, isLoaded, signUp } = useSignUp();
   const router = useRouter();
-  const email = Array.isArray(searchParams.email)
-    ? searchParams.email[0]
-    : searchParams.email || "";
   const [isPending, setIsPending] = useState(false);
   const form = useForm<z.infer<typeof OTPValidation>>({
     resolver: zodResolver(OTPValidation),
