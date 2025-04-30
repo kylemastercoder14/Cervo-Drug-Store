@@ -11,7 +11,9 @@ export const createOrder = async (
   items: any[],
   orderOption: string,
   selectedAddress: string,
-  totalPrice: any
+  totalPrice: any,
+  lalamoveOrderId: string,
+  deliveryFee: number
 ) => {
   const validatedField = CheckoutValidation.safeParse(values);
 
@@ -31,6 +33,8 @@ export const createOrder = async (
       const order = await prisma.orders.create({
         data: {
           orderNumber: orderId,
+          lalamoveOrderId,
+          deliveryFee,
           userId,
           email,
           addressId: selectedAddress,

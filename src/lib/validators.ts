@@ -80,6 +80,7 @@ export const CheckoutValidation = z.object({
   }),
   branch: z.string().min(1, { message: "Branch is required" }),
   prescription: z.string().optional(),
+  recipientRemarks: z.string().optional(),
 });
 
 export const BannerValidation = z.object({

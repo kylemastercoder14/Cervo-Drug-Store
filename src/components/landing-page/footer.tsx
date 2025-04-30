@@ -98,7 +98,6 @@ const Footer = () => {
               width={80}
               height={80}
             />
-            <Image src="/brands/lbc.png" alt="lbc" width={50} height={50} />
           </div>
         </div>
         <div className="flex flex-col">

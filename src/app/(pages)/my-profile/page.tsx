@@ -16,7 +16,7 @@ import db from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { formatPrice } from '@/lib/utils';
+import { formatPrice } from "@/lib/utils";
 
 const MyProfile = async () => {
   const { userId } = auth();
@@ -59,11 +59,24 @@ const MyProfile = async () => {
                 >
                   <div className="flex items-center justify-between">
                     <p>Order Number: {order.orderNumber}</p>
-                    <p className={`font-semibold ${order.status === "Pending" ? "text-black" : "text-emerald-600"}`}>{order.status === "Pending" ? "Order Placed" : "Order Completed"}</p>
+                    <p
+                      className={`font-semibold ${
+                        order.status === "ASSIGNING"
+                          ? "text-black"
+                          : "text-emerald-600"
+                      }`}
+                    >
+                      {order.status === "ASSIGNING"
+                        ? "Order Placed"
+                        : "Order Completed"}
+                    </p>
                   </div>
                   <div className="flex flex-col space-y-3 mt-3">
                     {order.OrderItems.map((orderItem) => (
-                      <div key={orderItem.id} className="flex bg-white shadow border rounded-md p-2 gap-3 items-start">
+                      <div
+                        key={orderItem.id}
+                        className="flex bg-white shadow border rounded-md p-2 gap-3 items-start"
+                      >
                         {/* <Image
                           width={70}
                           height={70}
@@ -71,13 +84,31 @@ const MyProfile = async () => {
                           alt={orderItem.product.name}
                         /> */}
                         <div>
-                          <p className='font-semibold'>{orderItem.product.name}</p>
-                          <p className='text-muted-foreground'>{orderItem.product.categoryTag}</p>
-                          <p className='text-sm'>{orderItem.quantity} {orderItem.quantity > 2 ? "items" : "item"}</p>
+                          <p className="font-semibold">
+                            {orderItem.product.name}
+                          </p>
+                          <p className="text-muted-foreground">
+                            {orderItem.product.categoryTag}
+                          </p>
+                          <p className="text-sm">
+                            {orderItem.quantity}{" "}
+                            {orderItem.quantity > 2 ? "items" : "item"}
+                          </p>
                         </div>
                       </div>
                     ))}
-                    <p>{order.OrderItems.length} {order.OrderItems.length > 2 ? "items" : "item"}: <span className='font-semibold'>{formatPrice(order.totalAmount)}</span></p>
+                    <div className="flex items-center justify-between">
+                      <p>
+                        {order.OrderItems.length}{" "}
+                        {order.OrderItems.length > 2 ? "items" : "item"}:{" "}
+                        <span className="font-semibold">
+                          {formatPrice(order.totalAmount)}
+                        </span>
+                      </p>
+                      <Link href={`/track-order/${order.id}`}>
+                        <Button variant="secondary" size="sm">Track Order &rarr;</Button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))
