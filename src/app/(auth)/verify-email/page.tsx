@@ -97,7 +97,7 @@ const VerifyEmail = () => {
                     isRequired
                     disabled={isPending}
                   />
-                  <Button disabled={isPending} variant="primary" className="mt-5">
+                  <Button disabled={isPending}  className="mt-5">
                     {isPending && (
                       <Loader2 className="animate-spin w-4 h-4 mr-2" />
                     )}

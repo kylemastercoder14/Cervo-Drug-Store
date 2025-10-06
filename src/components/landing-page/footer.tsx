@@ -31,7 +31,7 @@ const Footer = () => {
           <p></p>
           <div className="flex items-center gap-2">
             <Input placeholder="Type your email address" />
-            <Button onClick={handleClick} variant="primary">
+            <Button onClick={handleClick} >
               Subscribe
             </Button>
           </div>

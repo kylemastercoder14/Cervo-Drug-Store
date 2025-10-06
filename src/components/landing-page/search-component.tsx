@@ -39,7 +39,7 @@ const SearchComponent = ({
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         className="w-[200px] xl:w-[500px]"
       />
-      <Button onClick={handleSearch} variant="primary" size="sm">
+      <Button onClick={handleSearch}  size="sm">
         <IconSearch color="white" />
       </Button>
       {showDropdown && filteredProducts.length > 0 && (
