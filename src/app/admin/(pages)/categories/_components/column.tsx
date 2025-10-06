@@ -23,7 +23,7 @@ export const columns: ColumnDef<CategoryColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Category</p>
@@ -38,7 +38,7 @@ export const columns: ColumnDef<CategoryColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Image</p>
@@ -61,7 +61,7 @@ export const columns: ColumnDef<CategoryColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>

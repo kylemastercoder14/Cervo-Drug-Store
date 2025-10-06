@@ -22,7 +22,7 @@ export const columns: ColumnDef<BannerColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Banner</p>
@@ -45,7 +45,7 @@ export const columns: ColumnDef<BannerColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>

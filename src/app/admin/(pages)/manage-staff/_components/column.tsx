@@ -24,7 +24,7 @@ export const columns: ColumnDef<StaffColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Name</p>
@@ -39,7 +39,7 @@ export const columns: ColumnDef<StaffColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Email Address</p>
@@ -54,7 +54,7 @@ export const columns: ColumnDef<StaffColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Role</p>
@@ -69,7 +69,7 @@ export const columns: ColumnDef<StaffColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>

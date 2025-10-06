@@ -38,7 +38,7 @@ export const columns: ColumnDef<NewsEventColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Title</p>
@@ -53,7 +53,7 @@ export const columns: ColumnDef<NewsEventColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p className="line-clamp-2">Content</p>
@@ -68,7 +68,7 @@ export const columns: ColumnDef<NewsEventColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>

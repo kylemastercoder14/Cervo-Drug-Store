@@ -47,7 +47,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Name</p>
@@ -68,7 +68,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
   //     return (
   //       <Button
   //         variant={"ghost"}
-  //         size={"tableButton"}
+  //
   //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
   //       >
   //         <p>SKU</p>
@@ -83,7 +83,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Original Price</p>
@@ -98,7 +98,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
   //     return (
   //       <Button
   //         variant={"ghost"}
-  //         size={"tableButton"}
+  //
   //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
   //       >
   //         <p>Category</p>
@@ -113,7 +113,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Prescription</p>
@@ -139,7 +139,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>

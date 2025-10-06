@@ -25,7 +25,7 @@ export const columns: ColumnDef<PromotionColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Promotion</p>
@@ -48,7 +48,7 @@ export const columns: ColumnDef<PromotionColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Featured</p>
@@ -70,7 +70,7 @@ export const columns: ColumnDef<PromotionColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
+
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>
