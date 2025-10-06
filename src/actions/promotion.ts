@@ -60,7 +60,7 @@ export const createPromotion = async (
   const validatedField = PromotionValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
@@ -110,7 +110,7 @@ export const updatePromotion = async (
   const validatedField = PromotionValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 

@@ -57,7 +57,7 @@ export const createCategory = async (
   const validatedField = CategoryValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
@@ -80,10 +80,12 @@ export const createCategory = async (
 
     await db.logs.create({
       data: {
-        action: `${user.name} created a category ${data.name} at ${new Date().toLocaleString()}`,
+        action: `${user.name} created a category ${
+          data.name
+        } at ${new Date().toLocaleString()}`,
         adminId: user.id,
       },
-    })
+    });
 
     return { success: "Category created successfully", data };
   } catch (error: any) {
@@ -112,7 +114,7 @@ export const updateCategory = async (
   const validatedField = CategoryValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
@@ -138,10 +140,12 @@ export const updateCategory = async (
 
     await db.logs.create({
       data: {
-        action: `${user.name} updated a category ${data.name} at ${new Date().toLocaleString()}`,
+        action: `${user.name} updated a category ${
+          data.name
+        } at ${new Date().toLocaleString()}`,
         adminId: user.id,
       },
-    })
+    });
 
     return { success: "Category updated successfully", data };
   } catch (error: any) {
@@ -173,10 +177,12 @@ export const deleteCategory = async (categoryId: string) => {
 
     await db.logs.create({
       data: {
-        action: `${user.name} deleted a category ${data.name} at ${new Date().toLocaleString()}`,
+        action: `${user.name} deleted a category ${
+          data.name
+        } at ${new Date().toLocaleString()}`,
         adminId: user.id,
       },
-    })
+    });
 
     return { success: "Category deleted successfully", data };
   } catch (error: any) {

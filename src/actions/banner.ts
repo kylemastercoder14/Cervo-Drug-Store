@@ -28,16 +28,16 @@ export const getAllBanner = async () => {
 export const createBanner = async (
   values: z.infer<typeof BannerValidation>
 ) => {
-  const {user} = await getUserFromCookies();
+  const { user } = await getUserFromCookies();
 
-  if(!user) {
-    return {error: "User not found."}
+  if (!user) {
+    return { error: "User not found." };
   }
 
   const validatedField = BannerValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
@@ -52,10 +52,12 @@ export const createBanner = async (
 
     await db.logs.create({
       data: {
-        action: `${user.name} created a banner at ${new Date().toLocaleString()}`,
+        action: `${
+          user.name
+        } created a banner at ${new Date().toLocaleString()}`,
         adminId: user.id,
       },
-    })
+    });
 
     return { success: "Banner created successfully", data };
   } catch (error: any) {
@@ -71,10 +73,10 @@ export const updateBanner = async (
   values: z.infer<typeof BannerValidation>,
   bannerId: string
 ) => {
-  const {user} = await getUserFromCookies();
+  const { user } = await getUserFromCookies();
 
-  if(!user) {
-    return {error: "User not found."}
+  if (!user) {
+    return { error: "User not found." };
   }
 
   if (!bannerId) {
@@ -84,7 +86,7 @@ export const updateBanner = async (
   const validatedField = BannerValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
@@ -102,10 +104,12 @@ export const updateBanner = async (
 
     await db.logs.create({
       data: {
-        action: `${user.name} updated a banner ${bannerId} at ${new Date().toLocaleString()}`,
+        action: `${
+          user.name
+        } updated a banner ${bannerId} at ${new Date().toLocaleString()}`,
         adminId: user.id,
       },
-    })
+    });
 
     return { success: "Banner updated successfully", data };
   } catch (error: any) {
@@ -118,10 +122,10 @@ export const updateBanner = async (
 };
 
 export const deleteBanner = async (bannerId: string) => {
-  const {user} = await getUserFromCookies();
+  const { user } = await getUserFromCookies();
 
-  if(!user) {
-    return {error: "User not found."}
+  if (!user) {
+    return { error: "User not found." };
   }
 
   if (!bannerId) {
@@ -137,15 +141,19 @@ export const deleteBanner = async (bannerId: string) => {
 
     await db.logs.create({
       data: {
-        action: `${user.name} deleted a banner ${bannerId} at ${new Date().toLocaleString()}`,
+        action: `${
+          user.name
+        } deleted a banner ${bannerId} at ${new Date().toLocaleString()}`,
         adminId: user.id,
       },
-    })
+    });
 
     return { success: "Banner deleted successfully", data };
   } catch (error: any) {
     return {
-      error: `Failed to delete banner. Please try again. ${error.message || ""}`,
+      error: `Failed to delete banner. Please try again. ${
+        error.message || ""
+      }`,
     };
   }
 };
