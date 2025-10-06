@@ -25,15 +25,31 @@ export const columns: ColumnDef<InventoryColumn>[] = [
   {
     accessorKey: "image",
     header: "",
-    cell: ({ row }) => (
-      <Image
-        alt="Product image"
-        className="aspect-square rounded-md object-cover"
-        height="70"
-        src={row.original.image}
-        width="70"
-      />
-    ),
+    cell: ({ row }) => {
+      return row.original.image ? (
+        <div className="relative w-20 h-20 border p-0">
+          <Image
+            src={row.original.image || ""}
+            alt={row.original.name}
+            fill
+            className="object-cover rounded"
+          />
+        </div>
+      ) : (
+        <div className="relative w-20 flex items-center justify-center m-auto h-20 bg-primary/60 p-0">
+          <Image
+            src="/images/logo.png"
+            alt="Logo"
+            width={40}
+            height={40}
+            className="absolute top-1 right-1"
+          />
+          <div className="border-2 text-xs w-[80%] overflow-hidden line-clamp-2 text-black text-center font-semibold border-black p-1">
+            {row.original.name}
+          </div>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "name",
@@ -41,7 +57,6 @@ export const columns: ColumnDef<InventoryColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Name</p>
@@ -56,7 +71,6 @@ export const columns: ColumnDef<InventoryColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>SKU</p>
@@ -71,7 +85,6 @@ export const columns: ColumnDef<InventoryColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Stock</p>
@@ -86,7 +99,6 @@ export const columns: ColumnDef<InventoryColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Status</p>
@@ -95,10 +107,12 @@ export const columns: ColumnDef<InventoryColumn>[] = [
       );
     },
     cell: ({ row }) => (
-      <Badge variant={row.original.status === "In Stock" ? "default" : "destructive"}>
+      <Badge
+        variant={row.original.status === "In Stock" ? "default" : "destructive"}
+      >
         {row.original.status}
       </Badge>
-    )
+    ),
   },
   {
     accessorKey: "createdAt",
@@ -106,7 +120,6 @@ export const columns: ColumnDef<InventoryColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>

@@ -56,7 +56,7 @@ const FeaturedProducts = () => {
               onClick={() => router.push(`/products/${item.tags}`)}
               className="cursor-pointer"
             >
-              <div className="relative flex items-center flex-col justify-center bg-secondary w-full h-[30vh]">
+              <div className="relative flex items-center flex-col justify-center bg-primary/40 w-full h-[30vh]">
                 <Image
                   src="/images/logo.png"
                   alt="Logo"
@@ -90,7 +90,6 @@ const FeaturedProducts = () => {
               </p>
               <div className="flex items-center mt-2">
                 <Button
-                  variant="primary"
                   className="w-full"
                   onClick={() => handleAddToCart(item)}
                 >

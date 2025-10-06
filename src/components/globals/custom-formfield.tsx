@@ -85,6 +85,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
     autoFocus,
     renderedValue,
     onCreate,
+    className
   } = props;
 
   const [showPassword, setShowPassword] = useState(false);
@@ -239,7 +240,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
             <SelectTrigger
               disabled={disabled}
               className={cn(
-                "bg-zinc-100",
+                "bg-zinc-100 w-full",
                 !field.value && "text-muted-foreground"
               )}
             >
@@ -311,7 +312,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           <PopoverContent align="start" className=" w-auto p-0">
             <Calendar
               mode="single"
-              captionLayout="dropdown-buttons"
+              captionLayout="dropdown"
               selected={field.value ? new Date(field.value) : undefined}
               onSelect={(date) =>
                 date && field.onChange(format(date, DATE_DEFAULT_FORMAT))
@@ -390,6 +391,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
             description={field.value}
             onChange={field.onChange}
             disabled={disabled}
+            value={field.value}
           />
         </FormControl>
       );
@@ -440,7 +442,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
       return (
         <FormControl>
           <ComboBox
-            className="w-full"
+            className={`w-full ${className}`}
             disabled={disabled}
             value={field.value}
             onChange={field.onChange}

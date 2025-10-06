@@ -33,6 +33,7 @@ const config = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          muted: "hsl(var(--primary-muted))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -93,6 +94,13 @@ const config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
       },
       boxShadow: {
         input:
@@ -116,8 +124,18 @@ const config = {
         shimmer: "shimmer 2s linear infinite",
         pulse: "pulse var(--duration) ease-out infinite",
         shimmer2: "shimmer 8s infinite",
+        marquee: "marquee linear infinite var(--duration)",
+        "marquee-vertical": "marquee-vertical linear infinite var(--duration)",
       },
       keyframes: {
+        marquee: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
+        "marquee-vertical": {
+          "0%": { transform: "translateY(0%)" },
+          "100%": { transform: "translateY(-100%)" },
+        },
         "accordion-down": {
           from: {
             height: "0",

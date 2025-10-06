@@ -147,11 +147,11 @@ const SignUpForm = () => {
             <Button
               type="submit"
               className="w-full"
-              variant="primary"
+              variant="secondary"
               disabled={isLoading}
               size="sm"
             >
-              {isLoading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+              {isLoading && <Loader2 className="animate-spin w-4 h-4" />}
               CREATE AN ACCOUNT
             </Button>
             <Button

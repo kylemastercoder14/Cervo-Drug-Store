@@ -8,8 +8,10 @@ const RichTextEditor = ({
   description,
   onChange,
   disabled,
+  value
 }: {
   description: string;
+  value: string;
   onChange: (richText: string) => void;
   disabled?: boolean;
 }) => {
@@ -37,7 +39,7 @@ const RichTextEditor = ({
   return (
     <div className="flex flex-col justify-stretch">
       <Toolbar editor={editor} />
-      <EditorContent disabled={disabled} editor={editor} />
+      <EditorContent value={value} disabled={disabled} editor={editor} />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 import { IconProps as TablerIconProps } from "@tabler/icons-react";
 
@@ -19,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { usePathname } from 'next/navigation';
 
 // Update the type of `icon` to accept both Tabler and Lucide Icons
 export function NavMain({
@@ -32,6 +34,7 @@ export function NavMain({
     items?: { title: string; url: string }[];
   }[];
 }) {
+  const pathname = usePathname();
   return (
     <SidebarGroup>
       <SidebarGroupLabel>General</SidebarGroupLabel>
@@ -42,7 +45,7 @@ export function NavMain({
             <DropdownMenu key={item.title}>
               <SidebarMenuItem>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton asChild tooltip={item.title}>
+                  <SidebarMenuButton isActive={pathname === item.url} asChild tooltip={item.title}>
                     <a href="#">
                       <item.icon size={20} />
                       <span>{item.title}</span>
@@ -66,7 +69,7 @@ export function NavMain({
             // Render Collapsible if there are no sub-items
             <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={item.title}>
+                <SidebarMenuButton isActive={pathname === item.url} asChild tooltip={item.title}>
                   <a href={item.url}>
                     <item.icon size={20} />
                     <span>{item.title}</span>

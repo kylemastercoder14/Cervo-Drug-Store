@@ -26,7 +26,7 @@ const AdminPromotion = async () => {
       <div className="flex items-center justify-between">
         <Heading
           title="Manage Promotions"
-          description="View, add, and manage the promotions displayed across your platform. Easily update existing promotions or create new ones to keep your site fresh and engaging."
+          description="Manage the promotions and discounts displayed across your platform."
         />
         <AddPromotion />
       </div>

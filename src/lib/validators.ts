@@ -101,7 +101,7 @@ export const ProductValidation = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   image: z.string().optional(),
   description: z.string().optional(),
-  price: z.coerce.number().min(1, { message: "Price is required" }),
+  price: z.number().min(1, { message: "Price is required" }),
   isFeatured: z.boolean().optional(),
   isVatItem: z.boolean().optional(),
   isPrescriptionRequired: z.boolean().optional(),
@@ -109,7 +109,7 @@ export const ProductValidation = z.object({
 
 export const InventoryValidation = z.object({
   productId: z.string().min(1, { message: "Product is required" }),
-  stock: z.coerce.number().min(1, { message: "Stock is required" }),
+  stock: z.number().min(1, { message: "Stock is required" }),
 });
 
 export const NewsEventValidation = z.object({

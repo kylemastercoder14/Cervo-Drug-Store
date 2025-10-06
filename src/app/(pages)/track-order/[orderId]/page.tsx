@@ -10,7 +10,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import db from "@/lib/db";
-import StepIndicator from "./step-indicator";
+import Image from "next/image";
+import { formatDate } from "@/lib/utils";
 
 interface OrderPageProps {
   params: {
@@ -52,6 +53,66 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
     );
   }
 
+  const orderStepsDelivery = [
+    {
+      id: "pending",
+      label: "Pending",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/pending.svg",
+      date: order.createdAt,
+    },
+    {
+      id: "processing",
+      label: "Processing",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/processing.svg",
+      date: order.processingAt || undefined,
+    },
+    {
+      id: "shipped",
+      label: "Shipped",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/out-for-delivery.svg",
+      date: order.shippedAt || undefined,
+    },
+    {
+      id: "completed",
+      label: "Completed",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/delivered.svg",
+      date: order.completedAt || undefined,
+    },
+  ];
+
+  const orderStepsInstallation = [
+    {
+      id: "pending",
+      label: "Pending",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/pending.svg",
+      date: order.createdAt,
+    },
+    {
+      id: "processing",
+      label: "Processing",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/processing.svg",
+      date: order.processingAt || undefined,
+    },
+    {
+      id: "completed",
+      label: "Completed",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/delivered.svg",
+      date: order.completedAt || undefined,
+    },
+  ];
+
+  const orderSteps =
+    order.orderOption === "Delivery"
+      ? orderStepsDelivery
+      : orderStepsInstallation;
+
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Navbar />
@@ -86,29 +147,53 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
         </div>
 
         <div className="py-5">
-          <StepIndicator
-            orderId={
-              order.lalamoveOrderId ?? undefined
-            }
-            currentStatus={order.status}
-            steps={[
-              { title: "Order Placed", completed: true },
-              {
-                title: "On the Way",
-                completed:
-                  order.status === "ON_GOING" ||
-                  order.status === "PICKED_UP" ||
-                  order.status === "COMPLETED",
-              },
-              {
-                title: "Picked Up",
-                completed:
-                  order.status === "PICKED_UP" || order.status === "COMPLETED",
-              },
-              { title: "Delivered", completed: order.status === "COMPLETED" },
-              { title: "Completed", completed: order.status === "COMPLETED" },
-            ]}
-          />
+          <div
+            className={`grid ${
+              order.orderOption === "Delivery"
+                ? "lg:grid-cols-4"
+                : "lg:grid-cols-3"
+            } grid-cols-1 gap-10`}
+          >
+            {orderSteps.map((step) => {
+              const isActive =
+                step.id.toLowerCase() === order.status.toLowerCase();
+
+              return (
+                <React.Fragment key={step.id}>
+                  <div
+                    className={`flex w-full relative tracking-panel gap-4 items-center ${
+                      isActive ? "bg-[#e2f7e2] active" : "bg-zinc-100"
+                    }`}
+                  >
+                    <div className="relative size-10">
+                      <Image
+                        src={step.image}
+                        alt={step.label}
+                        fill
+                        className={`size-full ${
+                          isActive ? "text-primary" : "text-gray-400"
+                        }`}
+                      />
+                    </div>
+                    <div>
+                      <p
+                        className={`text-base font-semibold ${
+                          isActive ? "text-primary" : "text-gray-600"
+                        }`}
+                      >
+                        {step.label}
+                      </p>
+                      {step.date && (
+                        <p className="text-sm text-gray-500">
+                          {formatDate(step.date)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </React.Fragment>
+              );
+            })}
+          </div>
         </div>
 
         <div className="mt-8 bg-white rounded-lg shadow overflow-hidden">
@@ -121,21 +206,31 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
               {order.OrderItems.map((item: any) => (
                 <div
                   key={item.id}
-                  className="flex items-start py-2 border-b border-gray-100"
+                  className="flex items-start gap-3 py-2 border-b border-gray-100"
                 >
-                  <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center mr-4">
-                    {item.product.image ? (
-                      <img
-                        src={item.product.image}
+                  {item.product.image ? (
+                    <div className="relative w-20 h-20 border p-0">
+                      <Image
+                        src={item.product.image || ""}
                         alt={item.product.name}
-                        className="object-cover w-full h-full"
+                        fill
+                        className="object-cover rounded"
                       />
-                    ) : (
-                      <div className="text-gray-400 text-xs text-center">
-                        No image
+                    </div>
+                  ) : (
+                    <div className="relative w-20 flex items-center justify-center m-auto h-20 bg-primary/60 p-0">
+                      <Image
+                        src="/images/logo.png"
+                        alt="Logo"
+                        width={40}
+                        height={40}
+                        className="absolute top-1 right-1"
+                      />
+                      <div className="border-2 text-xs w-[80%] overflow-hidden line-clamp-2 text-black text-center font-semibold border-black p-1">
+                        {item.product.name}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">
                       {item.product.name}
@@ -156,18 +251,21 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
             <div className="mt-6 border-t border-gray-200 pt-6">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
-                <span>
-                  ₱{" "}
-                  {formatCurrency(order.totalAmount - (order.deliveryFee || 0))}
-                </span>
+                <span>₱ {formatCurrency(order.totalAmount)}</span>
               </div>
               <div className="flex justify-between text-sm mt-2">
-                <span>Delivery Fee</span>
-                <span>₱ {formatCurrency(order.deliveryFee || 0)}</span>
+                <span>Discount</span>
+                <span>₱ {formatCurrency(order.discountPrice ?? 0)}</span>
               </div>
+              {order.orderOption === "Delivery" && (
+                <div className="flex justify-between text-sm">
+                  <span>Estimated Delivery Fee</span>
+                  <span>₱ {formatCurrency(order.deliveryFee ?? 0)}</span>
+                </div>
+              )}
               <div className="flex justify-between font-medium text-base mt-4 pt-4 border-t border-gray-200">
                 <span>Total</span>
-                <span>₱ {formatCurrency(order.totalAmount)}</span>
+                <span>₱ {formatCurrency((order.totalAmount - (order.discountPrice ?? 0)) + (order.deliveryFee ?? 0))}</span>
               </div>
             </div>
           </div>
@@ -213,8 +311,8 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
             <div className="px-6 py-4">
               <div className="text-gray-600">
                 <p>
-                  <span className="font-medium">Payment Method:</span>{" "}
-                  {order.method}
+                  <span className="font-medium">Order Option:</span>{" "}
+                  {order.orderOption}
                 </p>
                 <p>
                   <span className="font-medium">Branch:</span>{" "}

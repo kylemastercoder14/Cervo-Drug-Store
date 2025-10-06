@@ -37,7 +37,7 @@ const CategoriesCarousel = () => {
             key={item.id}
             className="flex flex-col items-center justify-center p-4 lg:basis-[15%]"
           >
-            <Link href={`/collections/${item.tags}`} className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
               <Image
                 src={item.image}
                 alt="Category"
@@ -46,7 +46,7 @@ const CategoriesCarousel = () => {
                 className="object-contain"
               />
               <p className="text-center font-semibold mt-2">{item.name}</p>
-            </Link>
+            </div>
           </CarouselItem>
         ))}
       </CarouselContent>

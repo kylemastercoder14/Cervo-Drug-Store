@@ -52,7 +52,7 @@ const SingleProductClient = ({
               className="w-full h-full object-contain"
             />
           ) : (
-            <div className="relative flex items-center flex-col justify-center bg-secondary w-full h-[700px]">
+            <div className="relative flex items-center flex-col justify-center bg-primary/60 w-full h-[700px]">
               <Image
                 src="/images/logo.png"
                 alt="Logo"
@@ -113,7 +113,6 @@ const SingleProductClient = ({
             </div>
             <Button
               onClick={handleAddToCart}
-              variant="primary"
               className="w-full py-6"
             >
               Add To Cart

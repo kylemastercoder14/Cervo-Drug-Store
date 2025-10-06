@@ -104,8 +104,8 @@ const InventoryForm = ({
                   name="stock"
                   disabled={isSaving}
                 />
-                <Button type="submit" disabled={isSaving} size="sm">
-                  {isSaving && <Loader className="animate-spin w-4 h-4 mr-2" />}
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving && <Loader className="animate-spin w-4 h-4" />}
                   {action}
                 </Button>
               </div>

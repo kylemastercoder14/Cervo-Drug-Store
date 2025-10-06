@@ -17,7 +17,7 @@ export function useGetProducts() {
   });
 }
 
-export function useSaveProduct(initialData?: any) {
+export function useSaveProduct(initialData?: any, onClose?: () => void) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -32,6 +32,7 @@ export function useSaveProduct(initialData?: any) {
       if (data.success) {
         toast.success(data.success);
         queryClient.invalidateQueries({ queryKey: ["products"] });
+        if (onClose) onClose();
       }
     },
     onError: (error: any) => {

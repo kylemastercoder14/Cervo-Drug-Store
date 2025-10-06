@@ -13,12 +13,13 @@ export const createOrder = async (
   selectedAddress: string,
   totalPrice: any,
   lalamoveOrderId: string,
-  deliveryFee: number
+  deliveryFee: number,
+  discount: number
 ) => {
   const validatedField = CheckoutValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
@@ -40,8 +41,10 @@ export const createOrder = async (
           addressId: selectedAddress,
           totalAmount: totalPrice,
           method: orderOption,
+          orderOption: orderOption,
           prescription,
           branch: branch || "",
+          discountPrice: discount,
         },
       });
 
@@ -112,3 +115,36 @@ export const completeOrder = async (orderId: string) => {
     return { error: "Failed to complete order" };
   }
 };
+
+export async function updateOrderStatus(orderId: string, status: string) {
+  const now = new Date();
+
+  let updateData: any = { status };
+
+  switch (status.toUpperCase()) {
+    case "PROCESSING":
+      updateData.processingAt = now;
+      break;
+    case "SHIPPED":
+      updateData.shippedAt = now;
+      break;
+    case "COMPLETED":
+      updateData.completedAt = now;
+      break;
+    case "PENDING":
+      updateData = {
+        status,
+        processingAt: null,
+        shippedAt: null,
+        completedAt: null,
+      };
+      break;
+  }
+
+  const order = await db.orders.update({
+    where: { id: orderId },
+    data: updateData,
+  });
+
+  return order;
+}

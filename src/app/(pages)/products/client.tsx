@@ -250,7 +250,7 @@ const ProductClient = ({ products }: { products: ProductClientProps[] }) => {
               const productUrl = `/products/${encodedSlug}`;
               return (
                 <div key={product.id}>
-                <div className="relative flex items-center flex-col justify-center bg-secondary w-full h-[30vh]">
+                <div className="relative flex items-center flex-col justify-center bg-primary/60 w-full h-[30vh]">
                   <Image
                     src="/images/logo.png"
                     alt="Logo"
@@ -284,7 +284,6 @@ const ProductClient = ({ products }: { products: ProductClientProps[] }) => {
                   <Button
                     onClick={() => router.push(productUrl)}
                     className="w-full mt-3"
-                    variant="primary"
                   >
                     View Details &rarr;
                   </Button>
@@ -308,7 +307,6 @@ const ProductClient = ({ products }: { products: ProductClientProps[] }) => {
         <Button
           onClick={scrollToTop}
           size="icon"
-          variant="primary"
           className="fixed rounded-full bottom-10 right-10"
         >
           <ChevronUp className="size-5" />

@@ -26,7 +26,9 @@ const OrdersClient = () => {
     ordersData?.data?.map((item) => ({
       id: item.id,
       orderNumber: item.orderNumber,
-      totalAmount: formatPrice(item.totalAmount),
+      totalAmount: item.totalAmount,
+      discountPrice: item.discountPrice ?? 0,
+      deliveryFee: item.deliveryFee ?? 0,
       status: item.status,
       orderOption: item.method,
       createdAt: format(item.createdAt, "MMMM do, yyyy"),

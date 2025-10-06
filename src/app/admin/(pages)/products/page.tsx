@@ -25,7 +25,7 @@ const AdminProducts = async () => {
       <div className="flex items-center justify-between">
         <Heading
           title="Manage Products"
-          description="Easily manage and organize your pharmacy's products. Add new products, view existing listings, and keep your stock updated to ensure customers have access to the medications and health products they need."
+          description="Easily manage and organize your pharmacy's products."
         />
         <AddProduct />
       </div>

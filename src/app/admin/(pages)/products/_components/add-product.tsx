@@ -10,10 +10,8 @@ const AddProduct = () => {
     <>
       <Button
         onClick={() => setOpenProductModal(true)}
-        size="sm"
-        className="h-7 gap-1"
       >
-        <IconCirclePlus className="h-3.5 w-3.5" />
+        <IconCirclePlus className="size-4" />
         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
           Add Product
         </span>

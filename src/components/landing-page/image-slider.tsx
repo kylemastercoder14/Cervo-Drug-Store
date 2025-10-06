@@ -57,15 +57,15 @@ const ImageSlider = () => {
         {imageData.map((url, idx) => (
           <div
             key={idx}
-            className="w-full h-full flex-shrink-0 relative rounded-xl"
+            className="w-full h-full flex-shrink-0 relative"
           >
             <Image
               src={url.image}
               alt={`Slider ${idx + 1}`}
               fill
-              className="w-full h-full object-cover rounded-xl"
+              className="w-full h-full object-cover"
             />
-            <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/80 to-transparent rounded-b-xl" />
+            <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/80 to-transparent" />
           </div>
         ))}
       </div>

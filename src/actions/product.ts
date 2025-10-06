@@ -10,7 +10,7 @@ export const getAllProducts = async () => {
   try {
     const data = await db.products.findMany({
       orderBy: {
-        name: "asc",
+        createdAt: "desc",
       },
       include: {
         orderItems: true,
@@ -162,7 +162,7 @@ export const createProduct = async (
   const validatedField = ProductValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
@@ -278,7 +278,7 @@ export const updateProduct = async (
   const validatedField = ProductValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 

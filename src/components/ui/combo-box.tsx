@@ -55,7 +55,7 @@ const ComboBox = ({
           <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align='start' className={`w-full ${className} p-0`}>
+      <PopoverContent align='start' className={`lg:w-[400px] w-full ${className} p-0`}>
         <Command>
           <CommandInput placeholder="Search..." />
           <CommandList>

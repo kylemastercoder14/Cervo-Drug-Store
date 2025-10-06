@@ -24,7 +24,7 @@ const AdminOrders = async () => {
       <div className="flex items-center justify-between">
         <Heading
           title="Orders Record"
-          description="Seamlessly track and manage all your orders in one place. This section allows you to view detailed order information, update statuses, and ensure a smooth workflow for processing customer purchases. Keep your order management efficient and accurate in real time."
+          description="Seamlessly track and manage all your orders in one place."
         />
       </div>
       <HydrationBoundary state={dehydratedState}>

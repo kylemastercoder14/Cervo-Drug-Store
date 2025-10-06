@@ -17,6 +17,7 @@ import { useAddressData } from "@/lib/address-selection";
 import { toast } from "sonner";
 import { updateAddress } from "@/actions/user";
 import { useRouter } from "next/navigation";
+import { Save, X } from "lucide-react";
 
 const UpdateAddressForm = ({ data }: { data: Address | null }) => {
   const router = useRouter();
@@ -68,7 +69,7 @@ const UpdateAddressForm = ({ data }: { data: Address | null }) => {
         province: selectedProvinceName,
         municipality: selectedMunicipalityName,
         barangay: selectedBarangayName,
-		userId: data?.userId as string,
+        userId: data?.userId as string,
       });
 
       if (res.success) {
@@ -80,50 +81,68 @@ const UpdateAddressForm = ({ data }: { data: Address | null }) => {
     } catch (error) {
       console.error(error);
       toast.error("An error occurred. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
-    <>
-      <div className="my-5">
-        <p className="font-semibold">Update address</p>
-        <form
-          autoComplete="off"
-          onSubmit={handleSubmit}
-          className="mt-4 space-y-4"
-        >
-          <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
+    <div className="w-full">
+      <form autoComplete="off" onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              First Name
+            </label>
             <Input
               disabled={loading}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="First Name"
-              type="text"
-              required
-            />
-            <Input
-              disabled={loading}
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Last Name"
+              placeholder="Enter first name"
               type="text"
               required
             />
           </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Last Name
+            </label>
+            <Input
+              disabled={loading}
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Enter last name"
+              type="text"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-700 mb-1 block">
+            Complete Address
+          </label>
           <Textarea
             disabled={loading}
-            placeholder="Complete address"
+            placeholder="House number, street name, building, etc."
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="border border-zinc-200"
+            rows={3}
             required
           />
-          <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
+        </div>
+
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Region
+            </label>
             <Select
               disabled={loading}
               onValueChange={(value) => setSelectedRegionName(value)}
-              defaultValue={selectedRegionName}
+              value={selectedRegionName}
             >
-              <SelectTrigger className="border border-zinc-200">
+              <SelectTrigger className='w-full'>
                 <SelectValue placeholder="Select region" />
               </SelectTrigger>
               <SelectContent>
@@ -134,13 +153,18 @@ const UpdateAddressForm = ({ data }: { data: Address | null }) => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
 
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Province
+            </label>
             <Select
               disabled={loading}
               onValueChange={(value) => setSelectedProvinceName(value)}
-              defaultValue={selectedProvinceName}
+              value={selectedProvinceName}
             >
-              <SelectTrigger className="border border-zinc-200">
+              <SelectTrigger className='w-full'>
                 <SelectValue placeholder="Select province" />
               </SelectTrigger>
               <SelectContent>
@@ -152,14 +176,20 @@ const UpdateAddressForm = ({ data }: { data: Address | null }) => {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
+        </div>
+
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              City/Municipality
+            </label>
             <Select
               disabled={loading}
               onValueChange={(value) => setSelectedMunicipalityName(value)}
-              defaultValue={selectedMunicipalityName}
+              value={selectedMunicipalityName}
             >
-              <SelectTrigger className="border border-zinc-200">
-                <SelectValue placeholder="Select municipality" />
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder="Select city/municipality" />
               </SelectTrigger>
               <SelectContent>
                 {municipalityOptions.map((municipality) => (
@@ -169,13 +199,18 @@ const UpdateAddressForm = ({ data }: { data: Address | null }) => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
 
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Barangay
+            </label>
             <Select
               disabled={loading}
               onValueChange={(value) => setSelectedBarangayName(value)}
-              defaultValue={selectedBarangayName}
+              value={selectedBarangayName}
             >
-              <SelectTrigger className="border border-zinc-200">
+              <SelectTrigger className='w-full'>
                 <SelectValue placeholder="Select barangay" />
               </SelectTrigger>
               <SelectContent>
@@ -187,53 +222,70 @@ const UpdateAddressForm = ({ data }: { data: Address | null }) => {
               </SelectContent>
             </Select>
           </div>
-          <Input
-            disabled={loading}
-            value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value)}
-            type="text"
-            placeholder="Postal/Zip code"
-            required
-          />
-          <Input
-            disabled={loading}
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="Phone number"
-            type="tel"
-            required
-          />
-          <div className="flex items-center space-x-2 mt-3">
-            <Checkbox
-              disabled={loading}
-              defaultChecked={isDefaultAddress}
-              onCheckedChange={(value) => setIsDefaultAddress(value === true)}
-              id="defaultAddress"
-            />
-            <label
-              htmlFor="defaultAddress"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Set as default address
+        </div>
+
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Postal/Zip Code
             </label>
-          </div>
-          <div className="flex items-center gap-2 mt-3">
-            <Button
+            <Input
               disabled={loading}
-              className="w-full"
-              onClick={() => router.push("/my-profile/addresses")}
-              variant="secondary"
-              type="button"
-            >
-              Cancel
-            </Button>
-            <Button disabled={loading} className="w-full">
-              Update Address
-            </Button>
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              type="text"
+              placeholder="Enter postal code"
+              required
+            />
           </div>
-        </form>
-      </div>
-    </>
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Phone Number
+            </label>
+            <Input
+              disabled={loading}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Enter phone number"
+              type="tel"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 pt-2">
+          <Checkbox
+            disabled={loading}
+            checked={isDefaultAddress}
+            onCheckedChange={(value) => setIsDefaultAddress(value === true)}
+            id="defaultAddress"
+          />
+          <label
+            htmlFor="defaultAddress"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+          >
+            Set as default address
+          </label>
+        </div>
+
+        <div className="flex items-center gap-3 pt-6 border-t">
+          <Button
+            disabled={loading}
+            className="flex-1 gap-2"
+            onClick={() => router.push("/my-profile/addresses")}
+            variant="outline"
+            type="button"
+          >
+            <X className="w-4 h-4" />
+            Cancel
+          </Button>
+          <Button disabled={loading} className="flex-1 gap-2" type="submit">
+            <Save className="w-4 h-4" />
+            Update Address
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 

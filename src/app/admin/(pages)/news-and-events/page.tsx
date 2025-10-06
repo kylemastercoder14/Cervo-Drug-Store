@@ -25,7 +25,7 @@ const AdminNewsAndEvents = async () => {
       <div className="flex items-center justify-between">
         <Heading
           title="Manage News and Events"
-          description="Effortlessly manage your inventory items by viewing, adding, and updating them in real-time. Whether you're updating product details, adjusting quantities, or adding new items, this section ensures your platform’s inventory stays accurate and up-to-date."
+          description="Effortlessly manage your news and events by viewing, adding, and updating them in real-time."
         />
 
         <AddNewsEvents />

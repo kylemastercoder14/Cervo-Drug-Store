@@ -14,9 +14,6 @@ export const getAllStaff = async () => {
       orderBy: {
         createdAt: "desc",
       },
-      where: {
-        role: "Staff",
-      },
     });
 
     if (!data) {
@@ -94,7 +91,7 @@ export const createStaff = async (values: z.infer<typeof StaffValidation>) => {
   const validatedField = StaffValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
@@ -144,7 +141,7 @@ export const updateStaff = async (
   const validatedField = StaffValidation.safeParse(values);
 
   if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
+    const errors = validatedField.error.issues.map((err) => err.message);
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 

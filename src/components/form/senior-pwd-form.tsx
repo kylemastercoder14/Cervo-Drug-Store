@@ -177,11 +177,10 @@ const PWDSeniorForm = () => {
           <div className="flex items-center gap-5">
             <Button
               type="submit"
-              variant="primary"
               disabled={isLoading}
               size="sm"
             >
-              {isLoading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+              {isLoading && <Loader2 className="animate-spin w-4 h-4" />}
               CREATE AN ACCOUNT
             </Button>
           </div>

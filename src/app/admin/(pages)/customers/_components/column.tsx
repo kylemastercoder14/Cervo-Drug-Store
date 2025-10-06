@@ -25,7 +25,6 @@ export const columns: ColumnDef<CustomerColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Name</p>
@@ -40,7 +39,6 @@ export const columns: ColumnDef<CustomerColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Contact Number</p>
@@ -55,7 +53,6 @@ export const columns: ColumnDef<CustomerColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Address</p>
@@ -70,7 +67,6 @@ export const columns: ColumnDef<CustomerColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>User Type</p>
@@ -94,7 +90,6 @@ export const columns: ColumnDef<CustomerColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>
@@ -109,7 +104,7 @@ export const columns: ColumnDef<CustomerColumn>[] = [
     cell: ({ row }) => {
       return (
         <Link href={`/admin/customers/${row.original.id}`}>
-          <Button variant={"default"} size="sm"><Eye className='w-4 h-4 mr-2' />View</Button>
+          <Button variant={"default"} size="sm"><Eye className='w-4 h-4' />View</Button>
         </Link>
       );
     },

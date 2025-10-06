@@ -15,7 +15,6 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import useCart from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
-import Image from "next/image";
 import { MinusIcon, PlusIcon, Trash } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { useRouter } from "next/navigation";
@@ -32,10 +31,8 @@ const CartSheet = () => {
     0
   );
 
-  // State to track if terms checkbox is checked
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
-  // Handle checkbox change
   const handleCheckboxChange = (checked: boolean) => {
     setIsTermsAccepted(checked);
   };
@@ -63,20 +60,20 @@ const CartSheet = () => {
           </div>
         </div>
       </SheetTrigger>
-      <SheetContent className="h-screen xl:pb-0 pb-10 overflow-auto">
+
+      <SheetContent className="h-screen flex flex-col pb-0">
         <SheetHeader>
           <SheetTitle className="text-white">
             Cart Items ({totalItems})
           </SheetTitle>
         </SheetHeader>
+
         {items.length === 0 ? (
-          <div className="flex flex-col p-6 mt-40 items-center justify-center">
+          <div className="flex flex-col p-6 mt-40 items-center justify-center flex-grow overflow-auto">
             <p className="text-3xl font-semibold text-center">
               Your cart is empty
             </p>
-            <Button variant="primary" className="mt-10">
-              Continue Shopping
-            </Button>
+            <Button className="mt-10">Continue Shopping</Button>
             {!user && (
               <div>
                 <p className="text-muted-foreground mt-5">
@@ -92,20 +89,13 @@ const CartSheet = () => {
             )}
           </div>
         ) : (
-          <div className="xl:h-[77vh] h-auto flex flex-col">
+          <div className="flex flex-col flex-grow overflow-auto px-6">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex items-start px-6 py-2 mt-10 justify-between gap-10 w-full"
+                className="flex items-start py-2 justify-between gap-10 w-full"
               >
                 <div className="flex items-start gap-2">
-                  {/* <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={100}
-                    height={100}
-                    className="rounded-lg"
-                  /> */}
                   <div className="flex flex-col">
                     <p className="font-semibold">{item?.name}</p>
                     <p className="font-semibold text-muted-foreground">
@@ -151,39 +141,37 @@ const CartSheet = () => {
             ))}
           </div>
         )}
-        <div className="px-6 flex mt-auto items-center justify-between">
-          <p className="font-semibold text-muted-foreground text-lg">
-            Subtotal ({totalItems})
-          </p>
-          <p className="text-lg font-semibold">{formatPrice(totalPrice)}</p>
+
+        {/* Footer */}
+        <div className="mt-auto">
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-semibold text-muted-foreground text-lg">
+              Subtotal ({totalItems})
+            </p>
+            <p className="text-lg font-semibold">{formatPrice(totalPrice)}</p>
+          </div>
+          <div className="flex items-center mb-5 space-x-2">
+            <Checkbox id="terms" onCheckedChange={handleCheckboxChange} />
+            <label
+              htmlFor="terms"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              I agree with the terms and conditions
+            </label>
+          </div>
+          <SheetFooter className="flex items-center gap-2 mb-10">
+            <Button
+              onClick={() => router.push("/cart")}
+              variant="outline"
+              className="w-full text-[#437634] border-[#437634] hover:border-[#437634]"
+            >
+              View Cart
+            </Button>
+            <Button onClick={handleCheckout} className="w-full">
+              Checkout
+            </Button>
+          </SheetFooter>
         </div>
-        <div className="flex items-center justify-end px-6 my-3 space-x-2">
-          <Checkbox id="terms" onCheckedChange={handleCheckboxChange} />
-          <label
-            htmlFor="terms"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            I agree with the terms and conditions
-          </label>
-        </div>
-        <SheetFooter className="flex items-center gap-2 px-6 mt-5">
-          <Button
-            onClick={() => router.push("/cart")}
-            variant="outline"
-            size="sm"
-            className="w-full py-6 text-[#437634] border-[#437634] hover:border-[#437634]"
-          >
-            View Cart
-          </Button>
-          <Button
-            onClick={handleCheckout}
-            variant="primary"
-            size="sm"
-            className="w-full py-6"
-          >
-            Checkout
-          </Button>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

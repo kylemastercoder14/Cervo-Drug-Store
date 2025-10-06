@@ -112,7 +112,7 @@ export function DataTable<TData, TValue>({
             placeholder="Search keyword here..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="max-w-sm pl-8 border border-zinc-200"
+            className="lg:w-[300px] pl-8 border border-zinc-200"
           />
         </div>
         {!isFiltering && filterValues && (
@@ -220,7 +220,9 @@ export function DataTable<TData, TValue>({
 
         <div className="flex items-center gap-x-5">
           <div className="flex items-center gap-x-2">
-            <span className="font-semibold text-sm md:block hidden">Items per page</span>
+            <span className="font-semibold text-sm md:block hidden">
+              Items per page
+            </span>
             <Select
               value={String(table.getState().pagination.pageSize)}
               onValueChange={(e) => {

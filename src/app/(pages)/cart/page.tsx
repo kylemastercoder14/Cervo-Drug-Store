@@ -29,10 +29,10 @@ import { Input } from "@/components/ui/input";
 import useCart from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useUser } from '@clerk/nextjs';
+import { useUser } from "@clerk/nextjs";
 
 const Cart = () => {
-  const {user} = useUser();
+  const { user } = useUser();
   const router = useRouter();
   const { items, updateQuantity, removeItem, removeAll } = useCart();
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
@@ -145,7 +145,6 @@ const Cart = () => {
                   </Button>
                   <Button
                     onClick={() => router.push("/collections/all")}
-                    variant="primary"
                     className="w-full"
                   >
                     Continue Shopping
@@ -181,7 +180,6 @@ const Cart = () => {
               router.push("/my-account");
             }
           }}
-          variant="primary"
           disabled={items.length === 0}
         >
           Proceed To Checkout

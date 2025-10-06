@@ -97,11 +97,10 @@ const SignInForm = () => {
           <Button
             type="submit"
             className="w-20"
-            variant="primary"
             disabled={isLoading}
             size="sm"
           >
-            {isLoading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+            {isLoading && <Loader2 className="animate-spin w-4 h-4" />}
             LOGIN
           </Button>
           <Link

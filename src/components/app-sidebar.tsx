@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -13,6 +15,7 @@ import {
 import {
   IconBlockquote,
   IconCategory,
+  IconDashboard,
   IconDiscount,
   IconFolders,
   IconLogs,
@@ -24,8 +27,6 @@ import {
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { Admin } from "@prisma/client";
-import { getUserFromCookies } from "@/hooks/use-user";
-import { redirect } from "next/navigation";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   admin: Admin | null;
@@ -33,6 +34,16 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 const data = {
   navMain: [
+    {
+      title: "Dashboard",
+      url: "/admin/dashboard",
+      icon: IconDashboard,
+    },
+    {
+      title: "Categories",
+      url: "/admin/categories",
+      icon: IconCategory,
+    },
     {
       title: "Banner",
       url: "/admin/banners",
@@ -81,14 +92,18 @@ const data = {
   ],
 };
 
-export async function AppSidebar({ admin, ...props }: AppSidebarProps) {
+export function AppSidebar({ admin, ...props }: AppSidebarProps) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a className="mt-5" href="/teacher/dashboard">
+            <SidebarMenuButton
+              className="hover:bg-transparent mx-auto flex items-center justify-center"
+              size="lg"
+              asChild
+            >
+              <a className="mt-5" href="/admin/dashboard">
                 <Image
                   src="/images/logo.png"
                   alt="Logo"

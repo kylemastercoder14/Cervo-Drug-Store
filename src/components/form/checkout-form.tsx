@@ -284,7 +284,7 @@ const CheckoutForm = ({
     selectedOrderOption === "Delivery" && quotation
       ? Number(quotation?.data?.priceBreakdown?.total) || 0
       : 0;
-  const grandTotal = totalPrice - discount + shippingFee;
+  const grandTotal = (totalPrice - discount) + shippingFee;
 
   const isPrescriptionRequired = items.some(
     (item) => item.isPrescriptionRequired
@@ -321,14 +321,12 @@ const CheckoutForm = ({
       }
 
       let lalamoveOrderId = "";
-      let deliveryFee = 0;
 
       // If delivery option is selected, call the Lalamove API first
       if (selectedOrderOption === "Delivery") {
         try {
           const deliveryOrder = await placeDeliveryOrder(values);
           lalamoveOrderId = deliveryOrder.orderId;
-          deliveryFee = Number(quotation?.data?.priceBreakdown?.total) || 0;
         } catch (err: any) {
           console.error("Delivery order error:", err);
           toast.warning(
@@ -344,9 +342,10 @@ const CheckoutForm = ({
         items,
         selectedOrderOption,
         selectedAddress,
-        grandTotal,
+        totalPrice,
         lalamoveOrderId, // Now this will have the actual Lalamove order ID
-        deliveryFee
+        shippingFee,
+        discount
       );
 
       if (!orderRes.success) {
@@ -665,7 +664,7 @@ const CheckoutForm = ({
                     <Loader2 className="animate-spin w-4 h-4" />
                   ) : quotation ? (
                     <p className="font-medium">
-                      {formatPrice(quotation.data.priceBreakdown.total)}
+                      {formatPrice(shippingFee)}
                     </p>
                   ) : (
                     <p className="font-medium">-</p>
@@ -685,15 +684,13 @@ const CheckoutForm = ({
             <div className="flex items-end justify-end mt-5 gap-5">
               <Button
                 type="submit"
-                variant="primary"
                 disabled={
                   isLoading ||
                   (selectedOrderOption === "Delivery" && !quotation)
                 }
-                size="lg"
                 className="w-full md:w-auto"
               >
-                {isLoading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+                {isLoading && <Loader2 className="animate-spin w-4 h-4" />}
                 PLACE ORDER
               </Button>
             </div>

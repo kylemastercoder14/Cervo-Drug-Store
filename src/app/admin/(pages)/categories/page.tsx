@@ -25,7 +25,7 @@ const AdminCategory = async () => {
       <div className="flex items-center justify-between">
         <Heading
           title="Manage Categories"
-          description="Organize and manage your pharmacy's product categories. Add, edit, or remove categories to keep your product offerings well-structured and easy to navigate."
+          description="Organize and manage your pharmacy's product categories."
         />
         <AddCategory />
       </div>

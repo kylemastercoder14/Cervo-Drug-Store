@@ -26,7 +26,7 @@ const AdminBanner = async () => {
       <div className="flex items-center justify-between">
         <Heading
           title="Manage Banners"
-          description="View, add, and manage the banners displayed across your platform. Easily update existing banners or create new ones to keep your site fresh and engaging."
+          description="Manage the banners displayed across your platform to keep it fresh and engaging."
         />
         <AddBanner />
       </div>

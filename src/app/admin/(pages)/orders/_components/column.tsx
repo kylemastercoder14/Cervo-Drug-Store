@@ -8,11 +8,14 @@ import { CellAction } from "./cell-action";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatPrice } from '@/lib/utils';
 
 export type OrdersColumn = {
   id: string;
   orderNumber: string;
-  totalAmount: string;
+  totalAmount: number;
+  discountPrice: number;
+  deliveryFee: number;
   status: string;
   orderOption: string;
   createdAt: string;
@@ -25,7 +28,6 @@ export const columns: ColumnDef<OrdersColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Order Number</p>
@@ -40,7 +42,6 @@ export const columns: ColumnDef<OrdersColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Total Amount</p>
@@ -48,6 +49,13 @@ export const columns: ColumnDef<OrdersColumn>[] = [
         </Button>
       );
     },
+    cell: ({row}) => {
+      const order = row.original;
+      const total = formatPrice((order.totalAmount - order.discountPrice) + order.deliveryFee);
+      return (
+        <span>{total}</span>
+      )
+    }
   },
   {
     accessorKey: "orderOption",
@@ -55,7 +63,6 @@ export const columns: ColumnDef<OrdersColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Order Option</p>
@@ -70,7 +77,6 @@ export const columns: ColumnDef<OrdersColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Status</p>
@@ -78,9 +84,24 @@ export const columns: ColumnDef<OrdersColumn>[] = [
         </Button>
       );
     },
-    cell: ({row}) => (
-      <Badge variant={row.original.status === "Order Completed" ? "default" : "secondary"}>{row.original.status}</Badge>
-    )
+    cell: ({ row }) => (
+      <Badge
+        variant="outline"
+        className={
+          row.original.status === "PENDING"
+            ? "bg-yellow-500/20 text-yellow-700 border-yellow-500"
+            : row.original.status === "PROCESSING"
+            ? "bg-blue-500/20 text-blue-700 border-blue-500"
+            : row.original.status === "COMPLETED"
+            ? "bg-green-500/20 text-green-700 border-green-500"
+            : row.original.status === "CANCELLED"
+            ? "bg-red-500/20 text-red-700 border-red-500"
+            : ""
+        }
+      >
+        {row.original.status}
+      </Badge>
+    ),
   },
   {
     accessorKey: "createdAt",
@@ -88,7 +109,6 @@ export const columns: ColumnDef<OrdersColumn>[] = [
       return (
         <Button
           variant={"ghost"}
-          size={"tableButton"}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Date Created</p>

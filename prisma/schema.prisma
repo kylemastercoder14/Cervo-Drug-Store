@@ -118,13 +118,22 @@ model Orders {
   userId          String
   email           String
   totalAmount     Float
+  discountPrice   Float?
+  orderOption     String   @default("Pick-up")
   deliveryFee     Float?
   method          String
   prescription    String?
   branch          String?
-  status          String   @default("ASSIGNING_DRIVER")
+  status          String   @default("PENDING")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  processingAt DateTime?
+  shippedAt    DateTime?
+  completedAt  DateTime?
+
+  reasonCancelled String?
+  cancelledAt     DateTime?
 
   addressId  String
   address    Address      @relation(fields: [addressId], references: [id], onDelete: Cascade)

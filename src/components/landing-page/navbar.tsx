@@ -61,7 +61,7 @@ const Navbar = () => {
         </div>
         <div className="flex lg:gap-0 gap-2 items-center">
           <Link href="/products" className="mr-5">
-            <Button variant="secondary">Browse Products &rarr;</Button>
+            <Button>Browse Products &rarr;</Button>
           </Link>
           <UserDropdown />
           <CartSheet />

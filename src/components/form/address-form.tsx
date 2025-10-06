@@ -17,6 +17,7 @@ import { useAddressData } from "@/lib/address-selection";
 import { toast } from "sonner";
 import { createAddress } from "@/actions/user";
 import { useRouter } from "next/navigation";
+import { Plus, MapPin, Star, Trash2, Edit, X } from "lucide-react";
 
 interface AddressFormProps extends User {
   address: Address[];
@@ -68,6 +69,18 @@ const AddressForm = ({ user }: { user: AddressFormProps | null }) => {
 
       if (res.success) {
         toast.success(res.success);
+        setShowAddressForm(false);
+        // Reset form
+        setFirstName("");
+        setLastName("");
+        setAddress("");
+        setPostalCode("");
+        setPhoneNumber("");
+        setIsDefaultAddress(false);
+        setSelectedRegionName("");
+        setSelectedProvinceName("");
+        setSelectedMunicipalityName("");
+        setSelectedBarangayName("");
         router.refresh();
       } else {
         toast.error(res.error);
@@ -75,206 +88,335 @@ const AddressForm = ({ user }: { user: AddressFormProps | null }) => {
     } catch (error) {
       console.error(error);
       toast.error("An error occurred. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
-    <>
-      <Button
-        disabled={loading}
-        onClick={() => setShowAddressForm(true)}
-        type="button"
-      >
-        Add a new address
-      </Button>
+    <div className="space-y-6">
+      {/* Add Address Button */}
+      {!showAddressForm && (
+        <Button
+          disabled={loading}
+          onClick={() => setShowAddressForm(true)}
+          type="button"
+          className="w-full sm:w-auto gap-2"
+          size="lg"
+        >
+          <Plus className="w-4 h-4" />
+          Add New Address
+        </Button>
+      )}
+
+      {/* Address Form */}
       {showAddressForm && (
-        <div className="my-5">
-          <p className="font-semibold">Add a new address</p>
+        <div className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              Add New Address
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAddressForm(false)}
+              disabled={loading}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
           <form
             autoComplete="off"
             onSubmit={handleSubmit}
-            className="mt-4 space-y-4"
+            className="space-y-4"
           >
-            <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
-              <Input
+            <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  First Name
+                </label>
+                <Input
+                  disabled={loading}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Enter first name"
+                  type="text"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Last Name
+                </label>
+                <Input
+                  disabled={loading}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Enter last name"
+                  type="text"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Complete Address
+              </label>
+              <Textarea
                 disabled={loading}
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="First Name"
-                type="text"
+                placeholder="House number, street name, building, etc."
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                rows={3}
                 required
               />
-              <Input
-                disabled={loading}
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Last Name"
-                type="text"
-                required
-              />
             </div>
-            <Textarea
-              disabled={loading}
-              placeholder="Complete address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="border border-zinc-200"
-              required
-            />
-            <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
-              <Select
-                disabled={loading}
-                onValueChange={(value) => setSelectedRegionName(value)}
-                defaultValue={selectedRegionName}
-              >
-                <SelectTrigger className="border border-zinc-200">
-                  <SelectValue placeholder="Select region" />
-                </SelectTrigger>
-                <SelectContent>
-                  {regionOptions.map((region) => (
-                    <SelectItem key={region} value={region}>
-                      {region}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
 
-              <Select
-                disabled={loading}
-                onValueChange={(value) => setSelectedProvinceName(value)}
-                defaultValue={selectedProvinceName}
-              >
-                <SelectTrigger className="border border-zinc-200">
-                  <SelectValue placeholder="Select province" />
-                </SelectTrigger>
-                <SelectContent>
-                  {provinceOptions.map((province) => (
-                    <SelectItem key={province} value={province}>
-                      {province}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
-              <Select
-                disabled={loading}
-                onValueChange={(value) => setSelectedMunicipalityName(value)}
-                defaultValue={selectedMunicipalityName}
-              >
-                <SelectTrigger className="border border-zinc-200">
-                  <SelectValue placeholder="Select municipality" />
-                </SelectTrigger>
-                <SelectContent>
-                  {municipalityOptions.map((municipality) => (
-                    <SelectItem key={municipality} value={municipality}>
-                      {municipality}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Region
+                </label>
+                <Select
+                  disabled={loading}
+                  onValueChange={(value) => setSelectedRegionName(value)}
+                  value={selectedRegionName}
+                >
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder="Select region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {regionOptions.map((region) => (
+                      <SelectItem key={region} value={region}>
+                        {region}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select
-                disabled={loading}
-                onValueChange={(value) => setSelectedBarangayName(value)}
-                defaultValue={selectedBarangayName}
-              >
-                <SelectTrigger className="border border-zinc-200">
-                  <SelectValue placeholder="Select barangay" />
-                </SelectTrigger>
-                <SelectContent>
-                  {barangayOptions.map((barangay) => (
-                    <SelectItem key={barangay} value={barangay}>
-                      {barangay}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Province
+                </label>
+                <Select
+                  disabled={loading}
+                  onValueChange={(value) => setSelectedProvinceName(value)}
+                  value={selectedProvinceName}
+                >
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder="Select province" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {provinceOptions.map((province) => (
+                      <SelectItem key={province} value={province}>
+                        {province}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <Input
-              disabled={loading}
-              value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
-              type="text"
-              placeholder="Postal/Zip code"
-              required
-            />
-            <Input
-              disabled={loading}
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Phone number"
-              type="tel"
-              required
-            />
-            <div className="flex items-center space-x-2 mt-3">
+
+            <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  City/Municipality
+                </label>
+                <Select
+                  disabled={loading}
+                  onValueChange={(value) => setSelectedMunicipalityName(value)}
+                  value={selectedMunicipalityName}
+                >
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder="Select city/municipality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {municipalityOptions.map((municipality) => (
+                      <SelectItem key={municipality} value={municipality}>
+                        {municipality}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Barangay
+                </label>
+                <Select
+                  disabled={loading}
+                  onValueChange={(value) => setSelectedBarangayName(value)}
+                  value={selectedBarangayName}
+                >
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder="Select barangay" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {barangayOptions.map((barangay) => (
+                      <SelectItem key={barangay} value={barangay}>
+                        {barangay}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Postal/Zip Code
+                </label>
+                <Input
+                  disabled={loading}
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  type="text"
+                  placeholder="Enter postal code"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Phone Number
+                </label>
+                <Input
+                  disabled={loading}
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="Enter phone number"
+                  type="tel"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 pt-2">
               <Checkbox
                 disabled={loading}
-                defaultChecked={isDefaultAddress}
+                checked={isDefaultAddress}
                 onCheckedChange={(value) => setIsDefaultAddress(value === true)}
                 id="defaultAddress"
               />
               <label
                 htmlFor="defaultAddress"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
                 Set as default address
               </label>
             </div>
-            <div className="flex items-center gap-2 mt-3">
+
+            <div className="flex items-center gap-3 pt-4 border-t">
               <Button
                 disabled={loading}
-                className="w-full"
+                className="flex-1"
                 onClick={() => setShowAddressForm(false)}
-                variant="secondary"
+                variant="outline"
                 type="button"
               >
                 Cancel
               </Button>
-              <Button disabled={loading} className="w-full">
-                Add Address
+              <Button disabled={loading} className="flex-1" type="submit">
+                Save Address
               </Button>
             </div>
           </form>
         </div>
       )}
-      {!showAddressForm && (
-        <div className="grid md:grid-cols-4 w-full grid-cols-1 gap-5 mt-10">
-          {user?.address.map((address) => (
-            <div
-              key={address.id}
-              className="flex flex-col text-center items-center justify-center w-full bg-white p-5 rounded-lg border shadow-md"
-            >
-              <h3>{address.isDefault ? "Default" : ""}</h3>
-              <p className="text-muted-foreground mt-3">
-                {address.firstName} {address.lastName}
-              </p>
-              <p className="text-muted-foreground mt-1">
-                {address.homeAddress}, {address.barangay}
-              </p>
-              <p className="text-muted-foreground mt-1">
-                {address.zipCode} {address.city}, {address.province}{" "}
-                {address.region}
-              </p>
-              <p className="text-muted-foreground mt-1">
-                {address.contactNumber}
-              </p>
-              <div className="flex items-center gap-2 mt-3">
-                <Button
-                  onClick={() =>
-                    router.push(`/my-profile/addresses/${address.id}`)
-                  }
-                  className="w-full"
-                  variant="secondary"
-                >
-                  Edit
-                </Button>
-                <Button className="w-full">Delete</Button>
+
+      {/* Address List */}
+      {!showAddressForm && user?.address && user.address.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Saved Addresses ({user.address.length})
+          </h3>
+          <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+            {user.address.map((address) => (
+              <div
+                key={address.id}
+                className={`relative bg-white rounded-lg border-2 p-5 hover:shadow-md transition-all ${
+                  address.isDefault
+                    ? "border-green-500 bg-green-50/50"
+                    : "border-gray-200"
+                }`}
+              >
+                {address.isDefault && (
+                  <div className="absolute top-3 right-3">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-500 text-white">
+                      <Star className="w-3 h-3 fill-white" />
+                      Default
+                    </span>
+                  </div>
+                )}
+
+                <div className="space-y-2 mb-4 mt-2">
+                  <p className="font-semibold text-gray-900 text-lg">
+                    {address.firstName} {address.lastName}
+                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {address.homeAddress}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {address.barangay}, {address.city}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {address.province}, {address.region}
+                  </p>
+                  <p className="text-sm text-gray-600">{address.zipCode}</p>
+                  <p className="text-sm font-medium text-gray-900 pt-1">
+                    {address.contactNumber}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-3 border-t">
+                  <Button
+                    onClick={() =>
+                      router.push(`/my-profile/addresses/${address.id}`)
+                    }
+                    className="flex-1 gap-2"
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                    Edit
+                  </Button>
+                  <Button
+                    className="flex-1 gap-2"
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
-    </>
+
+      {/* Empty State */}
+      {!showAddressForm && (!user?.address || user.address.length === 0) && (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <MapPin className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No Addresses Yet
+          </h3>
+          <p className="text-gray-600 mb-6">
+            Add your first delivery address to get started.
+          </p>
+          <Button onClick={() => setShowAddressForm(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Add Your First Address
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 
