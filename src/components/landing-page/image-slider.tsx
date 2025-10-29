@@ -51,21 +51,21 @@ const ImageSlider = () => {
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
       <div
-        className="w-full lg:h-[700px] h-screen flex transition-transform duration-500 ease-in-out"
+        className="w-full lg:h-[550px] rounded-lg h-screen flex transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(${-imageIndex * 100}%)` }}
       >
         {imageData.map((url, idx) => (
           <div
             key={idx}
-            className="w-full h-full flex-shrink-0 relative"
+            className="w-full rounded-lg h-full flex-shrink-0 relative"
           >
             <Image
               src={url.image}
               alt={`Slider ${idx + 1}`}
               fill
-              className="w-full h-full object-cover"
+              className="w-full h-full rounded-lg object-cover"
             />
-            <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/80 to-transparent" />
+            <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/80 rounded-lg to-transparent" />
           </div>
         ))}
       </div>
