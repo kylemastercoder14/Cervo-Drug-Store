@@ -23,7 +23,7 @@ const ViewProduct = async (props: {
   const decodedParams = decodeURIComponent(params.productTag);
   const product = await db.products.findFirst({
     where: {
-      tags: decodedParams,
+      id: decodedParams,
     },
     include: {
       orderItems: true,

@@ -53,7 +53,7 @@ const FeaturedProducts = () => {
         return (
           <div key={item.id}>
             <div
-              onClick={() => router.push(`/products/${item.tags}`)}
+              onClick={() => router.push(`/products/${item.id}`)}
               className="cursor-pointer"
             >
               <div className="relative flex items-center flex-col justify-center bg-primary/40 w-full h-[30vh]">
