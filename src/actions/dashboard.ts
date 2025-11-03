@@ -13,7 +13,15 @@ export async function getRevenueStats() {
   const { start: thisStart, end: thisEnd } = getPeriodRange(0);
   const { start: prevStart, end: prevEnd } = getPeriodRange(1);
 
-  const [thisMonth, lastMonth] = await Promise.all([
+  const [allTime, thisMonth, lastMonth] = await Promise.all([
+    // All-time revenue
+    db.orders.aggregate({
+      _sum: { totalAmount: true },
+      where: {
+        status: "COMPLETED",
+      },
+    }),
+    // Current month for trend comparison
     db.orders.aggregate({
       _sum: { totalAmount: true },
       where: {
@@ -21,6 +29,7 @@ export async function getRevenueStats() {
         createdAt: { gte: thisStart, lte: thisEnd },
       },
     }),
+    // Previous month for trend comparison
     db.orders.aggregate({
       _sum: { totalAmount: true },
       where: {
@@ -31,8 +40,11 @@ export async function getRevenueStats() {
   ]);
 
   return {
-    current: thisMonth._sum.totalAmount ?? 0,
+    current: allTime._sum.totalAmount ?? 0,
     previous: lastMonth._sum.totalAmount ?? 0,
+    // Keep monthly data for trend calculation
+    monthlyCurrent: thisMonth._sum.totalAmount ?? 0,
+    monthlyPrevious: lastMonth._sum.totalAmount ?? 0,
   };
 }
 
@@ -40,11 +52,17 @@ export async function getProductsStats() {
   const { start: thisStart, end: thisEnd } = getPeriodRange(0);
   const { start: prevStart, end: prevEnd } = getPeriodRange(1);
 
-  const [thisMonth, lastMonth] = await Promise.all([
+  const [allTime, thisMonth, lastMonth] = await Promise.all([
+    // All-time products sold
+    db.orderItems.aggregate({
+      _sum: { quantity: true },
+    }),
+    // Current month for trend comparison
     db.orderItems.aggregate({
       _sum: { quantity: true },
       where: { createdAt: { gte: thisStart, lte: thisEnd } },
     }),
+    // Previous month for trend comparison
     db.orderItems.aggregate({
       _sum: { quantity: true },
       where: { createdAt: { gte: prevStart, lte: prevEnd } },
@@ -52,8 +70,11 @@ export async function getProductsStats() {
   ]);
 
   return {
-    current: thisMonth._sum.quantity ?? 0,
+    current: allTime._sum.quantity ?? 0,
     previous: lastMonth._sum.quantity ?? 0,
+    // Keep monthly data for trend calculation
+    monthlyCurrent: thisMonth._sum.quantity ?? 0,
+    monthlyPrevious: lastMonth._sum.quantity ?? 0,
   };
 }
 
@@ -61,34 +82,55 @@ export async function getCustomerStats() {
   const { start: thisStart, end: thisEnd } = getPeriodRange(0);
   const { start: prevStart, end: prevEnd } = getPeriodRange(1);
 
-  const [thisMonth, lastMonth] = await Promise.all([
+  const [allTimeOrders, thisMonth, lastMonth] = await Promise.all([
+    // All-time orders to get all unique customers
+    db.orders.findMany({
+      select: { userId: true },
+    }),
+    // Current month for trend comparison
     db.orders.findMany({
       where: { createdAt: { gte: thisStart, lte: thisEnd } },
       select: { userId: true },
     }),
+    // Previous month for trend comparison
     db.orders.findMany({
       where: { createdAt: { gte: prevStart, lte: prevEnd } },
       select: { userId: true },
     }),
   ]);
 
+  const distinctAllTime = new Set(allTimeOrders.map((o) => o.userId)).size;
   const distinctThis = new Set(thisMonth.map((o) => o.userId)).size;
   const distinctPrev = new Set(lastMonth.map((o) => o.userId)).size;
 
-  return { current: distinctThis, previous: distinctPrev };
+  return {
+    current: distinctAllTime,
+    previous: distinctPrev,
+    // Keep monthly data for trend calculation
+    monthlyCurrent: distinctThis,
+    monthlyPrevious: distinctPrev,
+  };
 }
 
 export async function getGrowthStats() {
   const { start: thisStart, end: thisEnd } = getPeriodRange(0);
   const { start: prevStart, end: prevEnd } = getPeriodRange(1);
 
-  const [thisMonth, lastMonth] = await Promise.all([
+  const [allTime, thisMonth, lastMonth] = await Promise.all([
+    // All-time completed orders
+    db.orders.count({
+      where: {
+        status: "COMPLETED",
+      },
+    }),
+    // Current month for trend comparison
     db.orders.count({
       where: {
         status: "COMPLETED",
         createdAt: { gte: thisStart, lte: thisEnd },
       },
     }),
+    // Previous month for trend comparison
     db.orders.count({
       where: {
         status: "COMPLETED",
@@ -97,7 +139,13 @@ export async function getGrowthStats() {
     }),
   ]);
 
-  return { current: thisMonth, previous: lastMonth };
+  return {
+    current: allTime,
+    previous: lastMonth,
+    // Keep monthly data for trend calculation
+    monthlyCurrent: thisMonth,
+    monthlyPrevious: lastMonth,
+  };
 }
 
 export async function getSalesData() {

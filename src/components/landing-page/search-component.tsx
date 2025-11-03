@@ -45,8 +45,7 @@ const SearchComponent = ({
       {showDropdown && filteredProducts.length > 0 && (
         <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded shadow-lg z-50">
           {filteredProducts.map((product) => {
-            const encodedSlug = encodeURIComponent(product.tags);
-            const productUrl = `/products/${encodedSlug}`;
+            const productUrl = `/products/${product.id}`;
             return (
               <div
               key={product.id}

@@ -56,30 +56,58 @@ const FeaturedProducts = () => {
               onClick={() => router.push(`/products/${item.id}`)}
               className="cursor-pointer"
             >
-              <div className="relative flex items-center flex-col justify-center bg-primary/40 w-full h-[30vh]">
-                <Image
-                  src="/images/logo.png"
-                  alt="Logo"
-                  width={80}
-                  height={80}
-                  className="absolute top-5 right-5"
-                />
-                <div className="border-4 w-[80%] overflow-hidden text-black text-center font-semibold truncate border-black p-3">
-                  {item.name}
-                </div>
-                <p className="text-black text-center font-semibold mt-3">
-                  {extractWeight(item.name) || ""}
-                </p>
-                {item.isPrescriptionRequired && (
+              {item.image ? (
+                <div className="relative flex items-center flex-col justify-center bg-primary/40 w-full h-[30vh]">
                   <Image
-                    src="/images/rx.png"
-                    alt="Rx"
+                    src="/images/logo.png"
+                    alt="Logo"
                     width={80}
                     height={80}
-                    className="absolute bottom-5 right-5"
+                    className="absolute top-5 right-5"
                   />
-                )}
-              </div>
+                  <Image src={item.image} alt={item.name} fill className='object-cover' />
+                  <div className="border-4 w-[80%] overflow-hidden text-black text-center font-semibold truncate border-black p-3">
+                    {item.name}
+                  </div>
+                  <p className="text-black text-center font-semibold mt-3">
+                    {extractWeight(item.name) || ""}
+                  </p>
+                  {item.isPrescriptionRequired && (
+                    <Image
+                      src="/images/rx.png"
+                      alt="Rx"
+                      width={80}
+                      height={80}
+                      className="absolute bottom-5 right-5"
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="relative flex items-center flex-col justify-center bg-primary/40 w-full h-[30vh]">
+                  <Image
+                    src="/images/logo.png"
+                    alt="Logo"
+                    width={80}
+                    height={80}
+                    className="absolute top-5 right-5"
+                  />
+                  <div className="border-4 w-[80%] overflow-hidden text-black text-center font-semibold truncate border-black p-3">
+                    {item.name}
+                  </div>
+                  <p className="text-black text-center font-semibold mt-3">
+                    {extractWeight(item.name) || ""}
+                  </p>
+                  {item.isPrescriptionRequired && (
+                    <Image
+                      src="/images/rx.png"
+                      alt="Rx"
+                      width={80}
+                      height={80}
+                      className="absolute bottom-5 right-5"
+                    />
+                  )}
+                </div>
+              )}
             </div>
             <div className="p-3">
               <h1 className="font-semibold line-clamp-1 text-lg">

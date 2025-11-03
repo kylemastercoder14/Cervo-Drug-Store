@@ -35,19 +35,18 @@ const BlogsCarousel = () => {
         {blogs.map((item, index) => (
           <CarouselItem key={index} className="pl-2 md:basis-1/3">
             <div className="p-2">
-              <div className="relative">
+              <div className="relative w-full h-[200px]">
                 <Image
                   src={item.image}
                   alt="Blog"
-                  width={300}
-                  height={300}
+                  fill
                 />
                 <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/80 to-transparent" />
-                <p className="text-center bottom-4 inset-x-0 font-semibold text-white absolute">
+                <p className="text-center bottom-4 line-clamp-1 w-64 mx-auto truncate inset-x-0 font-semibold text-white absolute">
                   {item.title}
                 </p>
               </div>
-              <p className="text-sm mt-2">{item.content}</p>
+              <p className="text-sm mt-2 line-clamp-4">{item.content}</p>
             </div>
           </CarouselItem>
         ))}

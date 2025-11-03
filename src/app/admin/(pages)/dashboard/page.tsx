@@ -29,24 +29,27 @@ const AdminDashboard = async () => {
   const products = await getProductsStats();
   const customers = await getCustomerStats();
   const growths = await getGrowthStats();
+
+  // Use monthly data for trend calculations (month-over-month comparison)
+  // but display all-time data in the cards
   const revenueTrend = calculateTrend(
-    revenue.current,
-    revenue.previous,
+    revenue.monthlyCurrent ?? revenue.current,
+    revenue.monthlyPrevious ?? revenue.previous,
     "revenue"
   );
   const productTrend = calculateTrend(
-    products.current,
-    products.previous,
+    products.monthlyCurrent ?? products.current,
+    products.monthlyPrevious ?? products.previous,
     "products"
   );
   const customerTrend = calculateTrend(
-    customers.current,
-    customers.previous,
+    customers.monthlyCurrent ?? customers.current,
+    customers.monthlyPrevious ?? customers.previous,
     "customers"
   );
   const growthTrend = calculateTrend(
-    growths.current,
-    growths.previous,
+    growths.monthlyCurrent ?? growths.current,
+    growths.monthlyPrevious ?? growths.previous,
     "growth"
   );
 

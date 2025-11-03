@@ -24,6 +24,7 @@ import {
   IconUser,
   IconUsersGroup,
   IconWallet,
+  IconBook,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { Admin } from "@prisma/client";
@@ -88,6 +89,11 @@ const data = {
       title: "Logs",
       url: "/admin/logs",
       icon: IconLogs,
+    },
+    {
+      title: "Documentation",
+      url: "/admin/documentation",
+      icon: IconBook,
     },
   ],
 };
