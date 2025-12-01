@@ -23,6 +23,7 @@ import {
   getTopProducts,
 } from "@/actions/dashboard";
 import { calculateTrend } from "@/lib/utils";
+import DashboardReport from "./_components/report-generator";
 
 const AdminDashboard = async () => {
   const revenue = await getRevenueStats();
@@ -58,7 +59,10 @@ const AdminDashboard = async () => {
   const topProducts = await getTopProducts();
   return (
     <div className="py-5">
-      <div className="grid lg:grid-cols-4 grid-cols-1 gap-5">
+      <div>
+        <DashboardReport />
+      </div>
+      <div className="grid mt-5 lg:grid-cols-4 grid-cols-1 gap-5">
         <Card className="@container/card">
           <CardHeader>
             <CardDescription>Total Revenue</CardDescription>
