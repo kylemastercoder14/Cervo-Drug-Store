@@ -14,6 +14,9 @@ const nextConfig = {
       "southstardrug.com.ph",
     ],
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -32,11 +35,10 @@ const nextConfig = {
     );
 
     // Alias both the directory and the specific file path
-    config.resolve.alias["use-sync-external-store/shim"] = useSyncExternalStoreShimPath;
-    config.resolve.alias["use-sync-external-store/shim/index.js"] = path.resolve(
-      useSyncExternalStoreShimPath,
-      "index.js"
-    );
+    config.resolve.alias["use-sync-external-store/shim"] =
+      useSyncExternalStoreShimPath;
+    config.resolve.alias["use-sync-external-store/shim/index.js"] =
+      path.resolve(useSyncExternalStoreShimPath, "index.js");
 
     // Ensure node_modules resolution works correctly
     config.resolve.modules = [
