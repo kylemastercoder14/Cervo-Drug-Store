@@ -60,7 +60,7 @@ const Home = () => {
           </div>
         </div>
       </section>
-      <section className="bg-[url('/images/banner.jpg')] px-20 relative bg-cover bg-center xl:h-[60vh] h-[80vh]">
+      <section className="bg-green-800 px-20 relative bg-cover bg-center xl:h-[60vh] h-[80vh]">
         <div className="bg-green-800/80 w-full h-full absolute inset-0" />
         <div className="flex xl:flex-row flex-col items-center xl:gap-20 gap-10 mt-16 xl:px-40 px-10">
           <div className="flex flex-col space-y-2 relative">

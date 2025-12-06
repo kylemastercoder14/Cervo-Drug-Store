@@ -122,6 +122,7 @@ export const getProductsByCategory = async (categoryTag: string) => {
         },
         include: {
           category: true,
+          orderItems: true,
         },
       });
     } else {
@@ -134,6 +135,7 @@ export const getProductsByCategory = async (categoryTag: string) => {
         },
         include: {
           category: true,
+          orderItems: true,
         },
       });
     }
@@ -174,6 +176,7 @@ export const createProduct = async (
     description,
     image,
     isFeatured,
+    categoryTag,
   } = validatedField.data;
 
   const tags = name
@@ -193,6 +196,7 @@ export const createProduct = async (
         price,
         isVatItem,
         isPrescriptionRequired,
+        categoryTag: categoryTag || null,
       },
     });
 
@@ -290,6 +294,7 @@ export const updateProduct = async (
     isFeatured,
     isPrescriptionRequired,
     isVatItem,
+    categoryTag,
   } = validatedField.data;
 
   const tags = name
@@ -312,6 +317,7 @@ export const updateProduct = async (
         isFeatured,
         isPrescriptionRequired,
         isVatItem,
+        categoryTag: categoryTag || null,
       },
     });
 

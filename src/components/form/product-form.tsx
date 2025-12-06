@@ -44,6 +44,7 @@ const ProductForm = ({
       isFeatured: true,
       isVatItem: false,
       isPrescriptionRequired: false,
+      categoryTag: undefined,
     },
   });
 
@@ -73,6 +74,7 @@ const ProductForm = ({
             isVatItem: response.data.isVatItem ?? false,
             isPrescriptionRequired:
               response.data.isPrescriptionRequired ?? false,
+            categoryTag: response.data.categoryTag ?? undefined,
           });
         }
       };
@@ -119,6 +121,19 @@ const ProductForm = ({
                 isRequired={true}
                 name="price"
                 disabled={isSaving}
+              />
+              <CustomFormField
+                control={form.control}
+                fieldType={FormFieldType.SELECT}
+                label="Category"
+                placeholder="Select a category (optional)"
+                isRequired={false}
+                name="categoryTag"
+                disabled={isSaving}
+                dynamicOptions={categories.map((cat) => ({
+                  label: cat.name,
+                  value: cat.tags,
+                }))}
               />
               <CustomFormField
                 control={form.control}

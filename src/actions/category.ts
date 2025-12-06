@@ -45,6 +45,25 @@ export const getCategoriesNavbar = async () => {
   }
 };
 
+export const getCategoryByTag = async (tag: string) => {
+  try {
+    const data = await db.categories.findUnique({
+      where: {
+        tags: tag,
+      },
+    });
+
+    if (!data) {
+      return { error: "Category not found." };
+    }
+
+    return { data };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong." };
+  }
+};
+
 export const createCategory = async (
   values: z.infer<typeof CategoryValidation>
 ) => {

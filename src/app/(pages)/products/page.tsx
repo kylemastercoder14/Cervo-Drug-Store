@@ -10,13 +10,37 @@ import {
 } from "@/components/ui/breadcrumb";
 import ProductClient from "./client";
 import db from "@/lib/db";
+import { getProductsByCategory } from "@/actions/product";
+import { getCategoryByTag } from "@/actions/category";
 
-const Products = async () => {
-  const products = await db.products.findMany({
-    include: {
-      orderItems: true,
-    },
-  });
+interface ProductsProps {
+  searchParams: { category?: string };
+}
+
+const Products = async ({ searchParams }: ProductsProps) => {
+  const categoryTag = searchParams?.category;
+  let products;
+  let categoryName = null;
+
+  if (categoryTag) {
+    // Get products by category
+    const categoryResponse = await getCategoryByTag(categoryTag);
+    if (categoryResponse?.data) {
+      categoryName = categoryResponse.data.name;
+    }
+
+    const productsResponse = await getProductsByCategory(categoryTag);
+    // If category doesn't exist or has no products, show empty array
+    products = productsResponse?.data || [];
+  } else {
+    // Get all products
+    products = await db.products.findMany({
+      include: {
+        orderItems: true,
+      },
+    });
+  }
+
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Navbar />
@@ -28,11 +52,51 @@ const Products = async () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-[16px]">Products</BreadcrumbPage>
+              <BreadcrumbLink className="text-[16px]" href="/products">Products</BreadcrumbLink>
             </BreadcrumbItem>
+            {categoryName && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="text-[16px]">{categoryName}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            )}
           </BreadcrumbList>
         </Breadcrumb>
-        <ProductClient products={products} />
+        {categoryName && (
+          <div className="mt-4 mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {categoryName}
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {products.length} {products.length === 1 ? "product" : "products"} found
+              </p>
+            </div>
+            <BreadcrumbLink
+              href="/products"
+              className="text-[16px] text-primary hover:underline"
+            >
+              View All Products →
+            </BreadcrumbLink>
+          </div>
+        )}
+        {products.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <p className="text-xl font-semibold text-gray-600 mb-2">
+              No products found in this category
+            </p>
+            <BreadcrumbLink
+              href="/products"
+              className="text-[16px] text-primary hover:underline"
+            >
+              View All Products →
+            </BreadcrumbLink>
+          </div>
+        ) : (
+          <ProductClient products={products} />
+        )}
       </div>
     </div>
   );

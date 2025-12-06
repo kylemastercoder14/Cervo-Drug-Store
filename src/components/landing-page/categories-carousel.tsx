@@ -37,16 +37,19 @@ const CategoriesCarousel = () => {
             key={item.id}
             className="flex flex-col items-center justify-center p-4 lg:basis-[15%]"
           >
-            <div className="flex flex-col items-center justify-center">
+            <Link
+              href={`/products?category=${encodeURIComponent(item.tags)}`}
+              className="flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+            >
               <Image
                 src={item.image}
-                alt="Category"
-                width={300} // Change as needed for consistent size
-                height={300} // Change as needed for consistent size
+                alt={item.name}
+                width={300}
+                height={300}
                 className="object-contain"
               />
               <p className="text-center font-semibold mt-2">{item.name}</p>
-            </div>
+            </Link>
           </CarouselItem>
         ))}
       </CarouselContent>

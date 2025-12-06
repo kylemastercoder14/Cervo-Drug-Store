@@ -51,9 +51,9 @@ const UserDropdown = () => {
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-3 mr-14 cursor-pointer">
+            <div className="flex items-center gap-3 lg:mr-14 mr-2 cursor-pointer">
               <IconUser color="black" size={30} />
-              <div className="flex flex-col">
+              <div className="lg:flex flex-col hidden">
                 <p className="text-muted-foreground text-xs">
                   Hello, Get Started!
                 </p>

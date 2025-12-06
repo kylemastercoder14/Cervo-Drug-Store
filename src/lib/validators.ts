@@ -105,6 +105,7 @@ export const ProductValidation = z.object({
   isFeatured: z.boolean().optional(),
   isVatItem: z.boolean().optional(),
   isPrescriptionRequired: z.boolean().optional(),
+  categoryTag: z.string().optional(),
 });
 
 export const InventoryValidation = z.object({

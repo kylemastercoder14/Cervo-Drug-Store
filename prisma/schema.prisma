@@ -181,3 +181,39 @@ model Logs {
   adminId String
   admin   Admin  @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }
+
+model Career {
+  id                String   @id @default(cuid())
+  jobTitle          String
+  department        String
+  jobLocation       String
+  experienceNeeded  String   // "With Experience" or "No Experience Required"
+  yearsOfExperience Int?     // null if no experience required
+  jobDescription    String   @db.Text
+  jobQualification  String   @db.Text
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  applications CareerApplication[]
+}
+
+model CareerApplication {
+  id            String   @id @default(cuid())
+  firstName     String
+  middleName    String?
+  lastName      String
+  position      String   // Job title from Career
+  contactNumber String
+  email         String
+  address       String   @db.Text
+  message       String?  @db.Text
+  resumeUrl     String
+  status        String   @default("PENDING") // PENDING, REVIEWING, APPROVED, REJECTED
+  remarks       String?  @db.Text // Admin remarks for status update
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  careerId String?
+  career   Career? @relation(fields: [careerId], references: [id], onDelete: SetNull)
+}

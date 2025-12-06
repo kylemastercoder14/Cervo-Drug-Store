@@ -37,7 +37,7 @@ const SearchComponent = ({
         value={searchTerm}
         onChange={handleInputChange}
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-        className="w-[200px] xl:w-[500px]"
+        className="lg:w-[300px] w-full"
       />
       <Button onClick={handleSearch}  size="sm">
         <IconSearch color="white" />
