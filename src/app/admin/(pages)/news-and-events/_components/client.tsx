@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import Image from "next/image";
-import parse from "html-react-parser";
 import {
   ArrowUpDown,
   CalendarDays,
@@ -312,9 +311,10 @@ const NewsEventClient = () => {
 
               <CardContent className="space-y-3 p-5 pt-0">
                 {isExpanded ? (
-                  <div className="prose prose-sm max-w-none text-muted-foreground prose-headings:text-slate-900 prose-p:text-muted-foreground prose-li:text-muted-foreground">
-                    {parse(item.content)}
-                  </div>
+                  <div
+                    className="prose prose-sm max-w-none text-muted-foreground prose-headings:text-slate-900 prose-p:text-muted-foreground prose-li:text-muted-foreground"
+                    dangerouslySetInnerHTML={{ __html: item.content }}
+                  />
                 ) : (
                   <p className="whitespace-pre-line text-sm leading-6 text-muted-foreground">
                     {shouldClamp
