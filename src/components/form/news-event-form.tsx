@@ -54,7 +54,7 @@ const NewsEventForm = ({
   return (
     <>
       <Modal
-        className="max-w-lg"
+        className="max-w-3xl"
         isOpen={true}
         onClose={onClose}
         title={title}
@@ -76,10 +76,10 @@ const NewsEventForm = ({
                 />
                 <CustomFormField
                   control={form.control}
-                  fieldType={FormFieldType.TEXTAREA}
+                  fieldType={FormFieldType.RICHTEXT}
                   label="Content"
                   type="text"
-                  placeholder="Enter content"
+                  description="Use headings, lists, and emphasis to make the post easier to read."
                   isRequired={true}
                   name="content"
                   disabled={isSaving}

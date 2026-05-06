@@ -5,7 +5,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
-import { upload } from "@/lib/upload";
+import { UploadError, upload } from "@/lib/upload";
 import { Button } from "../ui/button";
 
 const ImageUpload = ({
@@ -16,6 +16,18 @@ const ImageUpload = ({
   defaultValue?: string;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>(defaultValue);
+
+  const getUploadErrorMessage = (error: unknown) => {
+    if (error instanceof UploadError) {
+      return error.message;
+    }
+
+    if (error instanceof Error && error.message.trim()) {
+      return error.message;
+    }
+
+    return "We could not upload your image right now. Please try again in a moment.";
+  };
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -60,7 +72,7 @@ const ImageUpload = ({
       } catch (error) {
         setImageUrl("");
         toast.dismiss(toastId);
-        toast.error("Image upload failed.");
+        toast.error(getUploadErrorMessage(error));
         console.log(error);
       }
     },

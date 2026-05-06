@@ -1,6 +1,6 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React from "react";
+import React, { useEffect } from "react";
 import Toolbar from "./tool-bar";
 import Heading from "@tiptap/extension-heading";
 
@@ -35,11 +35,25 @@ const RichTextEditor = ({
     onUpdate({ editor }) {
       onChange(editor.getHTML());
     },
+    editable: !disabled,
   });
+
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    editor.setEditable(!disabled);
+
+    if (value !== editor.getHTML()) {
+      editor.commands.setContent(value || "", false);
+    }
+  }, [disabled, editor, value]);
+
   return (
     <div className="flex flex-col justify-stretch">
       <Toolbar editor={editor} />
-      <EditorContent value={value} disabled={disabled} editor={editor} />
+      <EditorContent editor={editor} />
     </div>
   );
 };
