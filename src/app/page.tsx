@@ -14,16 +14,16 @@ const Home = () => {
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Navbar />
-      <div className="w-full xl:px-60 px-4 py-5 h-full mx-auto">
+      <div className="w-full px-3 py-5 h-full lg:px-20">
         <ImageSlider />
       </div>
-      <section className="xl:px-60 px-4 py-5">
+      <section className="lg:px-20 px-3 py-5">
         <div className="bg-[#EEEEEE] rounded-lg py-2 px-3 shadow-md border">
           <p className="text-lg font-semibold text-black">Categories</p>
         </div>
         <CategoriesCarousel />
       </section>
-      <section className="xl:px-60 px-4 py-5">
+      <section className="lg:px-20 px-3 py-5">
         <div className="bg-[#EEEEEE] rounded-lg py-2 px-3 shadow-md border">
           <p className="text-lg font-semibold text-black">
             Explore Our Special Offers
@@ -31,19 +31,19 @@ const Home = () => {
         </div>
         <PromotionContent />
       </section>
-      <section className="xl:px-60 bg-[#f5f5f5] px-4 py-10">
+      <section className="lg:px-20 px-3 bg-[#f5f5f5] py-10">
         <div className="bg-white rounded-lg py-2 px-3 shadow-md border">
           <p className="text-lg font-semibold text-black">Featured Products</p>
         </div>
         <FeaturedProducts />
       </section>
       <section className="bg-white">
-        <div className="xl:px-60 px-4 py-5">
+        <div className="lg:px-20 px-3 py-5">
           <BrandMarquee />
         </div>
       </section>
       <section className="bg-[#f5f5f5] pb-20">
-        <div className="xl:px-60 px-4 py-5 mt-10">
+        <div className="lg:px-20 px-3 py-5 mt-10">
           <div className="grid xl:grid-cols-3 grid-cols-1 gap-5 xl:gap-0">
             <div className="col-span-1 flex items-start">
               <div className="h-20 w-2 bg-[#437634]" />
@@ -62,7 +62,7 @@ const Home = () => {
       </section>
       <section className="bg-green-800 px-20 relative bg-cover bg-center xl:h-[60vh] h-[80vh]">
         <div className="bg-green-800/80 w-full h-full absolute inset-0" />
-        <div className="flex xl:flex-row flex-col items-center xl:gap-20 gap-10 mt-16 xl:px-40 px-10">
+        <div className="flex xl:flex-row flex-col items-center xl:gap-20 gap-10 mt-16 px-10">
           <div className="flex flex-col space-y-2 relative">
             <iframe
               src="https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2F100063781221493%2Fvideos%2F901886898263575%2F&show_text=false&width=336&t=0"
@@ -91,8 +91,8 @@ const Home = () => {
       </section>
       {/* Laboratory Services */}
       <section className="bg-[#f5f5f5]">
-        <div className="xl:px-60 px-4 py-14">
-          <div className="bg-white rounded-2xl shadow-lg border px-6 py-8 md:px-10 md:py-10">
+        <div className="lg:px-20 px-3 py-14">
+          <div className="bg-white shadow-lg border px-6 py-8 md:px-10 md:py-10">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
               <div>
                 <p className="text-xs font-semibold tracking-[0.2em] text-[#437634] uppercase">

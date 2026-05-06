@@ -25,9 +25,9 @@ const UserDropdown = () => {
       {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-3 lg:mr-10 mr-0 cursor-pointer">
-              <IconUser color="black" size={30} />
-              <div className="lg:flex flex-col hidden">
+            <div className="flex items-center gap-2 xl:gap-3 xl:mr-10 cursor-pointer">
+              <IconUser color="black" size={26} />
+              <div className="xl:flex flex-col hidden">
                 <p className="text-muted-foreground text-xs">
                   Hello, {user.firstName}!
                 </p>
@@ -51,9 +51,9 @@ const UserDropdown = () => {
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-3 lg:mr-14 mr-2 cursor-pointer">
-              <IconUser color="black" size={30} />
-              <div className="lg:flex flex-col hidden">
+            <div className="flex items-center gap-2 xl:gap-3 xl:mr-14 cursor-pointer">
+              <IconUser color="black" size={26} />
+              <div className="xl:flex flex-col hidden">
                 <p className="text-muted-foreground text-xs">
                   Hello, Get Started!
                 </p>

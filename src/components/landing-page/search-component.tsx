@@ -6,12 +6,20 @@ import { IconSearch } from "@tabler/icons-react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 
+export type SearchProduct = {
+  id: string | number;
+  name: string;
+  category?: {
+    name?: string | null;
+  } | null;
+};
+
 const SearchComponent = ({
   onSearch,
   filteredProducts,
 }: {
   onSearch: (query: string) => void;
-  filteredProducts: any[];
+  filteredProducts: SearchProduct[];
 }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");

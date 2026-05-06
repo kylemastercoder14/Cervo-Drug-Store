@@ -48,13 +48,13 @@ const CartSheet = () => {
   return (
     <Sheet>
       <SheetTrigger>
-        <div className="flex items-center gap-3">
-          <IconShoppingBag size={30} color="black" />
+        <div className="flex items-center gap-2 xl:gap-3">
+          <IconShoppingBag size={26} color="black" />
           <div className="flex flex-col items-start justify-start">
-            <p className="font-semibold lg:block hidden">
+            <p className="font-semibold xl:block hidden">
               Cart Items ({totalItems})
             </p>
-            <p className="text-sm text-muted-foreground lg:block hidden">
+            <p className="text-sm text-muted-foreground xl:block hidden">
               {formatPrice(totalPrice)}
             </p>
           </div>

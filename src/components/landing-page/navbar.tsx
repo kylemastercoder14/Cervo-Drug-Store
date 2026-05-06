@@ -6,11 +6,9 @@ import Link from "next/link";
 import Image from "next/image";
 import UserDropdown from "./user-dropdown";
 import CartSheet from "./cart-sheet";
-import NavLinks from "./nav-links";
-import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import SearchComponent from "./search-component";
+import SearchComponent, { type SearchProduct } from "./search-component";
 import { searchProducts } from "@/actions/product";
 import {
   NavigationMenu,
@@ -30,10 +28,8 @@ import {
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [products, setProducts] = useState<any[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<SearchProduct[]>([]);
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -54,108 +50,135 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 inset-x-0 w-full bg-white">
-      <div className="flex items-center border-b border-zinc-300 px-2 sm:px-4 gap-2 sm:gap-4 py-3 sm:py-4 md:py-6 lg:px-20 lg:justify-between justify-between">
-        {/* Left section: Logo and Search */}
-        <div className="flex items-center gap-2 sm:gap-4 md:gap-7 flex-1 lg:flex-initial">
-          {/* Mobile Menu Button */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="lg:hidden" size="sm" variant="ghost" aria-label="Open menu">
-                <Menu className="h-5 w-5" />
+      <div className="border-b border-zinc-300 px-3 py-3 sm:px-4 md:px-6 lg:px-8 xl:px-20">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3 md:gap-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  className="xl:hidden"
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Open menu"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <div className="flex flex-col gap-6 mt-6">
+                  <Link href="/" className="text-lg font-semibold hover:text-primary transition-colors">
+                    Home
+                  </Link>
+
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="laboratory-services">
+                      <AccordionTrigger className="text-base font-medium">
+                        Laboratory Services
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="flex flex-col gap-3 pl-4">
+                          <Link href="/laboratory-services" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                            All Laboratory Services
+                          </Link>
+                          <Link href="/laboratory-services/hematology" className="text-sm hover:text-primary transition-colors">
+                            Hematology
+                          </Link>
+                          <Link href="/laboratory-services/clinical-chemistry" className="text-sm hover:text-primary transition-colors">
+                            Clinical Chemistry
+                          </Link>
+                          <Link href="/laboratory-services/serology" className="text-sm hover:text-primary transition-colors">
+                            Serology
+                          </Link>
+                          <Link href="/laboratory-services/microbiology" className="text-sm hover:text-primary transition-colors">
+                            Microbiology
+                          </Link>
+                          <Link href="/laboratory-services/clinical-microscopy" className="text-sm hover:text-primary transition-colors">
+                            Clinical Microscopy
+                          </Link>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="medical-services">
+                      <AccordionTrigger className="text-base font-medium">
+                        Medical Services
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="flex flex-col gap-3 pl-4">
+                          <Link href="/medical-services" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                            All Medical Services
+                          </Link>
+                          <Link href="/medical-services/consultation" className="text-sm hover:text-primary transition-colors">
+                            Consultation
+                          </Link>
+                          <Link href="/medical-services/home-services" className="text-sm hover:text-primary transition-colors">
+                            Home Services
+                          </Link>
+                          <Link href="/medical-services/extraction" className="text-sm hover:text-primary transition-colors">
+                            Blood Extraction
+                          </Link>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+
+                  <Link href="/careers" className="text-lg font-semibold hover:text-primary transition-colors">
+                    Careers
+                  </Link>
+                  <Link href="/contact-us" className="text-lg font-semibold hover:text-primary transition-colors">
+                    Contact Us
+                  </Link>
+                  <Link href="/products" className="mt-4">
+                    <Button className="w-full">Browse Products &rarr;</Button>
+                  </Link>
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <Link href="/" className="flex-shrink-0">
+              <Image
+                src="/images/logo.png"
+                alt="Logo"
+                width={130}
+                height={130}
+                className="h-auto w-[110px] sm:w-[130px] xl:w-[150px]"
+              />
+            </Link>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <Link href="/products" className="hidden md:block xl:hidden">
+              <Button size="sm" className="px-3 text-xs sm:text-sm">
+                Products
               </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col gap-6 mt-6">
-                <Link href="/" className="text-lg font-semibold hover:text-primary transition-colors">
-                  Home
-                </Link>
+            </Link>
+            <Link href="/products" className="hidden xl:block">
+              <Button size="sm" className="text-sm">
+                <span>Browse Products</span>
+                <span>&rarr;</span>
+              </Button>
+            </Link>
+            <UserDropdown />
+            <CartSheet />
+          </div>
+        </div>
 
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="laboratory-services">
-                    <AccordionTrigger className="text-base font-medium">
-                      Laboratory Services
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex flex-col gap-3 pl-4">
-                        <Link href="/laboratory-services" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                          All Laboratory Services
-                        </Link>
-                        <Link href="/laboratory-services/hematology" className="text-sm hover:text-primary transition-colors">
-                          Hematology
-                        </Link>
-                        <Link href="/laboratory-services/clinical-chemistry" className="text-sm hover:text-primary transition-colors">
-                          Clinical Chemistry
-                        </Link>
-                        <Link href="/laboratory-services/serology" className="text-sm hover:text-primary transition-colors">
-                          Serology
-                        </Link>
-                        <Link href="/laboratory-services/microbiology" className="text-sm hover:text-primary transition-colors">
-                          Microbiology
-                        </Link>
-                        <Link href="/laboratory-services/clinical-microscopy" className="text-sm hover:text-primary transition-colors">
-                          Clinical Microscopy
-                        </Link>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+        <div className="mt-3 md:mt-4 xl:hidden">
+          <SearchComponent
+            onSearch={handleSearch}
+            filteredProducts={filteredProducts}
+          />
+        </div>
 
-                  <AccordionItem value="medical-services">
-                    <AccordionTrigger className="text-base font-medium">
-                      Medical Services
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex flex-col gap-3 pl-4">
-                        <Link href="/medical-services" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                          All Medical Services
-                        </Link>
-                        <Link href="/medical-services/consultation" className="text-sm hover:text-primary transition-colors">
-                          Consultation
-                        </Link>
-                        <Link href="/medical-services/home-services" className="text-sm hover:text-primary transition-colors">
-                          Home Services
-                        </Link>
-                        <Link href="/medical-services/extraction" className="text-sm hover:text-primary transition-colors">
-                          Blood Extraction
-                        </Link>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-
-                <Link href="/careers" className="text-lg font-semibold hover:text-primary transition-colors">
-                  Careers
-                </Link>
-                <Link href="/contact-us" className="text-lg font-semibold hover:text-primary transition-colors">
-                  Contact Us
-                </Link>
-                <Link href="/products" className="mt-4">
-                  <Button className="w-full">Browse Products &rarr;</Button>
-                </Link>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <Link href="/" className="flex-shrink-0">
-            <Image
-              src="/images/logo.png"
-              alt="Logo"
-              width={130}
-              height={130}
-            />
-          </Link>
-
-          {/* Search Component - Hidden on very small screens, visible from sm and up */}
-          <div className="hidden sm:block flex-1 max-w-xs lg:max-w-md">
+        <div className="hidden xl:mt-4 xl:flex xl:items-center xl:justify-between xl:gap-8">
+          <div className="w-full max-w-md">
             <SearchComponent
               onSearch={handleSearch}
               filteredProducts={filteredProducts}
             />
           </div>
-        </div>
 
-        {/* Desktop Navigation Menu */}
-        <div className="hidden lg:flex items-center gap-2">
-          <NavigationMenu>
+          <NavigationMenu className="max-w-none">
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Laboratory Services</NavigationMenuTrigger>
@@ -247,27 +270,6 @@ const Navbar = () => {
             <NavigationMenuViewport />
           </NavigationMenu>
         </div>
-
-        {/* Right section: Browse Products Button, User Dropdown, Cart */}
-        <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
-          <Link href="/products" className="hidden sm:block lg:mr-2">
-            <Button size="sm" className="text-xs sm:text-sm">
-              <span className="hidden md:inline">Browse Products</span>
-              <span className="md:hidden">Products</span>
-              <span className="hidden lg:inline">&rarr;</span>
-            </Button>
-          </Link>
-          <UserDropdown />
-          <CartSheet />
-        </div>
-      </div>
-
-      {/* Mobile Search Bar - Only visible on very small screens when desktop search is hidden */}
-      <div className="sm:hidden px-2 pb-3 pt-3 border-b border-zinc-200">
-        <SearchComponent
-          onSearch={handleSearch}
-          filteredProducts={filteredProducts}
-        />
       </div>
     </header>
   );

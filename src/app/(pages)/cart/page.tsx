@@ -144,7 +144,7 @@ const Cart = () => {
                     Remove All Cart
                   </Button>
                   <Button
-                    onClick={() => router.push("/collections/all")}
+                    onClick={() => router.push("/products")}
                     className="w-full"
                   >
                     Continue Shopping
