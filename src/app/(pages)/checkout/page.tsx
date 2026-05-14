@@ -16,14 +16,16 @@ import db from "@/lib/db";
 
 const Checkout = async () => {
   const { userId } = auth();
-  const user = await db.user.findUnique({
-    where: {
-      id: userId as string,
-    },
-    include: {
-      address: true,
-    },
-  });
+  const user = userId
+    ? await db.user.findUnique({
+        where: {
+          id: userId,
+        },
+        include: {
+          address: true,
+        },
+      })
+    : null;
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Navbar />
