@@ -4,7 +4,6 @@ import Link from "next/link";
 import React from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import Image from "next/image";
 import { toast } from "sonner";
 
 const Footer = () => {
@@ -83,7 +82,7 @@ const Footer = () => {
           </p>
         </div>
       </footer>
-      <div className="bg-white px-4 xl:px-60 py-5 grid xl:grid-cols-3 grid-cols-1 xl:gap-20 gap-10">
+      {/* <div className="bg-white px-4 xl:px-60 py-5 grid xl:grid-cols-3 grid-cols-1 xl:gap-20 gap-10">
         <p className="text-muted-foreground text-sm">
           Cervo Drugstore and Medical Clinic
         </p>
@@ -107,7 +106,7 @@ const Footer = () => {
             <Image src="/brands/maya.png" alt="maya" width={80} height={80} />
           </div>
         </div>
-      </div>
+      </div> */}
       <div className="px-4 md:px-60 py-3 bg-[#437634]">
         <p className="text-lg text-center text-white">
           &copy; 2024{" "}

@@ -42,7 +42,7 @@ const Home = () => {
           <BrandMarquee />
         </div>
       </section>
-      <section className="bg-[#f5f5f5] pb-20">
+      <section id="blogs" className="bg-[#f5f5f5] pb-20">
         <div className="lg:px-20 px-3 py-5 mt-10">
           <div className="grid xl:grid-cols-3 grid-cols-1 gap-5 xl:gap-0">
             <div className="col-span-1 flex items-start">

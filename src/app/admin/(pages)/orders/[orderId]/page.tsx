@@ -14,7 +14,25 @@ const OrderId = async (
     where: {
       id: params.orderId,
     },
-    include: {
+    select: {
+      id: true,
+      orderNumber: true,
+      userId: true,
+      email: true,
+      totalAmount: true,
+      discountPrice: true,
+      orderOption: true,
+      deliveryFee: true,
+      method: true,
+      prescription: true,
+      branch: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      processingAt: true,
+      shippedAt: true,
+      completedAt: true,
+      addressId: true,
       user: true,
       address: true,
       OrderItems: {

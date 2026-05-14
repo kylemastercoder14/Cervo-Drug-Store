@@ -7,4 +7,7 @@ export type NewsEventColumn = {
   image: string;
   createdAt: string;
   createdAtRaw: string;
+  facebookPostId?: string | null;
+  facebookPermalink?: string | null;
+  facebookPublishedAt?: string | null;
 };

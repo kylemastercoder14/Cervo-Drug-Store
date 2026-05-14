@@ -1,93 +1,63 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { IconFileExcel } from "@tabler/icons-react";
-import { toast } from "sonner";
+
+import React from "react";
 import * as XLSX from "xlsx";
-import { createBulkProducts, getProductsCount } from "@/actions/product";
+import { IconDownload } from "@tabler/icons-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  BULK_PRODUCT_TEMPLATE_GUIDELINES,
+  BULK_PRODUCT_TEMPLATE_HEADERS,
+} from "@/constants/product-bulk-upload";
 
 const Page = () => {
-  const [productCount, setProductCount] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [excelData, setExcelData] = useState<any[]>([]);
+  const handleDownloadTemplate = () => {
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      [...BULK_PRODUCT_TEMPLATE_HEADERS],
+    ]);
+    const instructionsSheet = XLSX.utils.aoa_to_sheet([
+      ["Bulk Upload Product Guide"],
+      [""],
+      ["Guidelines"],
+      ...BULK_PRODUCT_TEMPLATE_GUIDELINES.map((guide, index) => [
+        `${index + 1}. ${guide}`,
+      ]),
+    ]);
+    const workbook = XLSX.utils.book_new();
 
-  useEffect(() => {
-    const fetchProductCount = async () => {
-      const { data } = await getProductsCount();
-      if (data) {
-        setProductCount(data.count);
-      }
-    };
-
-    fetchProductCount();
-  }, []);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      previewAndSaveData(selectedFile);
-    }
-  };
-
-  const previewAndSaveData = async (file: File) => {
-    if (file) {
-      const toastId = toast.loading("Processing file, please wait...");
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const data = e.target?.result;
-        if (data) {
-          const workbook = XLSX.read(data, { type: "binary" });
-          const sheetName = workbook.SheetNames[0];
-          const workSheet = workbook.Sheets[sheetName];
-          const json = XLSX.utils.sheet_to_json(workSheet);
-
-          console.log("Excel Data:", json);
-          setExcelData(json);
-          try {
-            await createBulkProducts(json);
-            toast.success("Data processed successfully");
-          } catch (error) {
-            console.error(error);
-          } finally {
-            toast.dismiss(toastId);
-          }
-        }
-      };
-      reader.readAsBinaryString(file);
-    }
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
+    XLSX.utils.book_append_sheet(workbook, instructionsSheet, "Instructions");
+    XLSX.writeFile(workbook, "bulk-product-template.xlsx");
   };
 
   return (
-    <div>
-      <h1 className="font-bold text-4xl mb-5">
-        Total Products: {productCount}
-      </h1>
-      <pre className="p-4 bg-gray-100 border rounded text-sm overflow-x-auto">
-        {excelData.length > 0
-          ? JSON.stringify(excelData, null, 2)
-          : "No data uploaded yet."}
-      </pre>
-      <div className="flex items-center gap-2 mt-4">
-        <input
-          className="hidden"
-          id="file_input"
-          type="file"
-          ref={fileInputRef}
-          accept=".xls,.xlsx"
-          onChange={handleFileChange}
-        />
-        <Button
-          onClick={() => fileInputRef.current?.click()}
-          variant="secondary"
-          className="h-7 gap-1"
-          size="sm"
-        >
-          <IconFileExcel className="w-4 h-4" />
-          Import from Excel
-        </Button>
+    <div className="space-y-5">
+      <div>
+        <h1 className="mb-2 text-4xl font-bold">Bulk Upload Product Template</h1>
+        <p className="text-sm text-muted-foreground">
+          Use these plain-language Excel headers for bulk product upload.
+        </p>
       </div>
+
+      <div className="rounded-lg border bg-muted/30 p-4">
+        <pre className="overflow-x-auto text-sm">
+          {BULK_PRODUCT_TEMPLATE_HEADERS.join("\n")}
+        </pre>
+      </div>
+
+      <div className="rounded-lg border p-4">
+        <p className="mb-2 font-medium">Guidelines</p>
+        <ul className="space-y-1 text-sm text-muted-foreground">
+          {BULK_PRODUCT_TEMPLATE_GUIDELINES.map((guide) => (
+            <li key={guide}>{guide}</li>
+          ))}
+        </ul>
+      </div>
+
+      <Button onClick={handleDownloadTemplate} variant="secondary">
+        <IconDownload className="size-4" />
+        <span>Download Template</span>
+      </Button>
     </div>
   );
 };

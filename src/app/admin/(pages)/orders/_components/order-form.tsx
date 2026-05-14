@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Orders, OrderItems, Products, User, Address } from "@prisma/client";
+import { OrderItems, Products, User, Address } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,13 +15,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
-import { updateOrderStatus } from "@/actions/order";
+import { submitShippingFeeOffer, updateOrderStatus } from "@/actions/order";
+import { Input } from "@/components/ui/input";
 
 interface OrderItemWithProduct extends OrderItems {
   product: Products;
 }
 
-interface OrderFormProps extends Orders {
+interface OrderFormProps {
+  id: string;
+  orderNumber: string;
+  userId: string;
+  email: string;
+  totalAmount: number;
+  discountPrice: number | null;
+  orderOption: string;
+  deliveryFee: number | null;
+  method: string;
+  prescription: string | null;
+  branch: string | null;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  processingAt: Date | null;
+  shippedAt: Date | null;
+  completedAt: Date | null;
+  addressId: string;
   user: User;
   address: Address;
   OrderItems: OrderItemWithProduct[];
@@ -33,6 +52,15 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
     data?.status || "PENDING"
   );
   const [loading, setLoading] = React.useState(false);
+  const [shippingFeeInput, setShippingFeeInput] = React.useState(
+    data.deliveryFee ? String(data.deliveryFee) : ""
+  );
+  const isDeliveryOrder = data.orderOption !== "Pick-Up";
+  const requiresShippingFeeConfirmation =
+    data.orderOption === "In-House Rider" ||
+    data.orderOption === "Third-Party Courier";
+  const orderTotal =
+    data.totalAmount - (data.discountPrice || 0) + (data.deliveryFee || 0);
 
   const orderStepsDelivery = [
     {
@@ -41,6 +69,13 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
       image:
         "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/pending.svg",
       date: data.createdAt,
+    },
+    {
+      id: "awaiting_shipping_fee_confirmation",
+      label: "To Confirm",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/processing.svg",
+      date: data.updatedAt || undefined,
     },
     {
       id: "processing",
@@ -89,10 +124,9 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
     },
   ];
 
-  const orderSteps =
-    data.orderOption === "Delivery"
-      ? orderStepsDelivery
-      : orderStepsInstallation;
+  const orderSteps = isDeliveryOrder ? orderStepsDelivery : orderStepsInstallation;
+
+  const normalizedStatus = data.status.toUpperCase();
 
   const handleStatusChange = async (value: string) => {
     setOrderStatus(value);
@@ -101,6 +135,28 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
     await updateOrderStatus(data.id, value);
     router.refresh();
     toast.success("Order status updated");
+    setLoading(false);
+  };
+
+  const handleSendShippingFee = async () => {
+    const parsedFee = Number(shippingFeeInput);
+
+    if (!shippingFeeInput || Number.isNaN(parsedFee) || parsedFee <= 0) {
+      toast.error("Please enter a valid shipping fee amount.");
+      return;
+    }
+
+    setLoading(true);
+    const result = await submitShippingFeeOffer(data.id, parsedFee);
+
+    if (result.error) {
+      toast.error(result.error);
+      setLoading(false);
+      return;
+    }
+
+    toast.success(result.success);
+    router.refresh();
     setLoading(false);
   };
   return (
@@ -118,22 +174,32 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
           {/* Order Status Steps */}
           <div className="mb-6">
             <div
-              className={`grid ${
-                data.orderOption === "Delivery"
-                  ? "lg:grid-cols-4"
-                  : "lg:grid-cols-3"
-              } grid-cols-1 gap-10`}
+              className={
+                isDeliveryOrder
+                  ? "overflow-x-auto pb-3"
+                  : `grid ${isDeliveryOrder ? "lg:grid-cols-4" : "lg:grid-cols-3"} grid-cols-1 gap-10`
+              }
             >
-              {orderSteps.map((step) => {
-                const isActive =
-                  step.id.toLowerCase() === data.status.toLowerCase();
+              <div
+                className={
+                  isDeliveryOrder
+                    ? "flex min-w-max items-stretch gap-6"
+                    : "contents"
+                }
+              >
+                {orderSteps.map((step) => {
+                  const activeStepId =
+                    data.status === "SHIPPING_FEE_REJECTED"
+                      ? "awaiting_shipping_fee_confirmation"
+                      : data.status.toLowerCase();
+                  const isActive = step.id.toLowerCase() === activeStepId;
 
-                return (
-                  <React.Fragment key={step.id}>
+                  return (
                     <div
-                      className={`flex w-full relative tracking-panel gap-4 items-center ${
-                        isActive ? "bg-[#e2f7e2] active" : "bg-zinc-100"
-                      }`}
+                      key={step.id}
+                      className={`relative tracking-panel flex items-center gap-4 ${
+                        isDeliveryOrder ? "min-w-[260px] flex-shrink-0" : "w-full"
+                      } ${isActive ? "bg-[#e2f7e2] active" : "bg-zinc-100"}`}
                     >
                       <div className="relative size-10">
                         <Image
@@ -160,9 +226,9 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
                         )}
                       </div>
                     </div>
-                  </React.Fragment>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
           {/* Order Info */}
@@ -181,8 +247,18 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PENDING">Pending</SelectItem>
+                  {requiresShippingFeeConfirmation && (
+                    <SelectItem value="AWAITING_SHIPPING_FEE_CONFIRMATION">
+                      To Confirm
+                    </SelectItem>
+                  )}
+                  {requiresShippingFeeConfirmation && (
+                    <SelectItem value="SHIPPING_FEE_REJECTED">
+                      Fee Rejected
+                    </SelectItem>
+                  )}
                   <SelectItem value="PROCESSING">Processing</SelectItem>
-                  {data.orderOption === "Delivery" && (
+                  {isDeliveryOrder && (
                     <SelectItem value="SHIPPED">Shipped</SelectItem>
                   )}
                   <SelectItem value="COMPLETED">Completed</SelectItem>
@@ -190,7 +266,7 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
               </Select>
             </div>
             <p>Branch: {data.branch || "N/A"}</p>
-            <p>Order Option: {data.method}</p>
+            <p>Order Option: {data.orderOption}</p>
             <p>
               Prescription:{" "}
               {data.prescription ? (
@@ -204,8 +280,53 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
                 "No Prescription"
               )}
             </p>
-            <p>Total Amount: {formatPrice(data.totalAmount)}</p>
+            <p>Total Amount: {formatPrice(orderTotal)}</p>
           </div>
+
+          {requiresShippingFeeConfirmation && (
+            <div className="bg-white border shadow rounded-sm p-5">
+              <h3 className="text-base font-bold">Shipping Fee Confirmation</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                Send the shipping fee offer to the customer first. The customer
+                must accept the fee before you proceed with processing.
+              </p>
+              <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-end">
+                <div className="w-full md:max-w-xs">
+                  <p className="mb-2 text-sm font-medium text-gray-700">
+                    Shipping Fee
+                  </p>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={shippingFeeInput}
+                    onChange={(event) => setShippingFeeInput(event.target.value)}
+                    placeholder="Enter shipping fee"
+                    disabled={loading}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleSendShippingFee}
+                  disabled={loading}
+                >
+                  Send Fee Offer
+                </Button>
+              </div>
+              <p className="mt-3 text-sm text-gray-600">
+                Current response state:{" "}
+                <span className="font-semibold">
+                  {normalizedStatus === "AWAITING_SHIPPING_FEE_CONFIRMATION"
+                    ? "Waiting for customer confirmation"
+                    : normalizedStatus === "SHIPPING_FEE_REJECTED"
+                    ? "Customer rejected the offer"
+                    : data.deliveryFee && data.deliveryFee > 0
+                    ? "Fee available"
+                    : "No fee sent yet"}
+                </span>
+              </p>
+            </div>
+          )}
 
           {/* Order Items */}
           <div className="bg-white border shadow rounded-sm p-5 overflow-x-auto">
@@ -281,9 +402,19 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
               <span>Discount</span>
               <span>{formatPrice(data.discountPrice || 0)}</span>
             </div>
+            {isDeliveryOrder && (
+              <div className="flex justify-between text-sm">
+                <span>Shipping Fee</span>
+                <span>
+                  {data.deliveryFee && data.deliveryFee > 0
+                    ? formatPrice(data.deliveryFee)
+                    : "To be confirmed"}
+                </span>
+              </div>
+            )}
             <div className="border-t border-gray-200 pt-2 flex justify-between font-bold">
               <span>Total</span>
-              <span>{formatPrice(data.totalAmount)}</span>
+              <span>{formatPrice(orderTotal)}</span>
             </div>
 
             <h3 className="text-base font-bold mt-5">Customer Details</h3>

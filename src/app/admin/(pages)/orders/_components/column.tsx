@@ -21,6 +21,17 @@ export type OrdersColumn = {
   createdAt: string;
 };
 
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case "AWAITING_SHIPPING_FEE_CONFIRMATION":
+      return "To Confirm";
+    case "SHIPPING_FEE_REJECTED":
+      return "Fee Rejected";
+    default:
+      return status;
+  }
+};
+
 export const columns: ColumnDef<OrdersColumn>[] = [
   {
     accessorKey: "orderNumber",
@@ -51,7 +62,9 @@ export const columns: ColumnDef<OrdersColumn>[] = [
     },
     cell: ({row}) => {
       const order = row.original;
-      const total = formatPrice((order.totalAmount - order.discountPrice) + order.deliveryFee);
+      const total = formatPrice(
+        order.totalAmount - order.discountPrice + order.deliveryFee
+      );
       return (
         <span>{total}</span>
       )
@@ -90,6 +103,10 @@ export const columns: ColumnDef<OrdersColumn>[] = [
         className={
           row.original.status === "PENDING"
             ? "bg-yellow-500/20 text-yellow-700 border-yellow-500"
+            : row.original.status === "AWAITING_SHIPPING_FEE_CONFIRMATION"
+            ? "bg-amber-500/20 text-amber-700 border-amber-500"
+            : row.original.status === "SHIPPING_FEE_REJECTED"
+            ? "bg-red-500/20 text-red-700 border-red-500"
             : row.original.status === "PROCESSING"
             ? "bg-blue-500/20 text-blue-700 border-blue-500"
             : row.original.status === "COMPLETED"
@@ -99,7 +116,7 @@ export const columns: ColumnDef<OrdersColumn>[] = [
             : ""
         }
       >
-        {row.original.status}
+        {getStatusLabel(row.original.status)}
       </Badge>
     ),
   },

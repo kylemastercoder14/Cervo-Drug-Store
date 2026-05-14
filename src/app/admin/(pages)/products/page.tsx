@@ -8,6 +8,7 @@ import React from "react";
 import { getAllProducts } from "@/actions/product";
 import ProductClient from "./_components/client";
 import AddProduct from "./_components/add-product";
+import BulkUploadProducts from "./_components/bulk-upload-products";
 
 const AdminProducts = async () => {
   const queryClient = new QueryClient();
@@ -27,7 +28,10 @@ const AdminProducts = async () => {
           title="Manage Products"
           description="Easily manage and organize your pharmacy's products."
         />
-        <AddProduct />
+        <div className="flex items-center gap-2">
+          <BulkUploadProducts />
+          <AddProduct />
+        </div>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <ProductClient />

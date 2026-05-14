@@ -187,6 +187,13 @@ export async function getRecentTransactions() {
     orderBy: {
       createdAt: "desc",
     },
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      branch: true,
+      totalAmount: true,
+    },
   });
 }
 

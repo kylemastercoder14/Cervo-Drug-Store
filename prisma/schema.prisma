@@ -113,10 +113,10 @@ model Products {
 
 model Orders {
   id              String   @id @default(cuid())
-  lalamoveOrderId String?
   orderNumber     String
   userId          String
   email           String
+  contactNumber   String?
   totalAmount     Float
   discountPrice   Float?
   orderOption     String   @default("Pick-up")
@@ -164,12 +164,17 @@ model Inventory {
 }
 
 model News {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  image     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  title              String
+  content            String
+  image              String
+  facebookPostId     String?  @unique
+  facebookPermalink  String?
+  facebookSyncSource String?
+  facebookPublishedAt DateTime?
+  lastFacebookSyncAt DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Logs {

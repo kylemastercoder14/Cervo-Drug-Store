@@ -12,6 +12,7 @@ import {
 import db from "@/lib/db";
 import Image from "next/image";
 import { formatDate } from "@/lib/utils";
+import ShippingFeeResponse from "./shipping-fee-response";
 
 interface OrderPageProps {
   params: {
@@ -24,14 +25,46 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
     where: {
       id: params.orderId,
     },
-    include: {
+    select: {
+      id: true,
+      orderNumber: true,
+      totalAmount: true,
+      discountPrice: true,
+      orderOption: true,
+      deliveryFee: true,
+      method: true,
+      prescription: true,
+      branch: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      processingAt: true,
+      shippedAt: true,
+      completedAt: true,
       OrderItems: {
-        include: {
-          product: true,
+        select: {
+          id: true,
+          quantity: true,
+          product: {
+            select: {
+              name: true,
+              price: true,
+              image: true,
+            },
+          },
         },
       },
-      address: true,
-      user: true,
+      address: {
+        select: {
+          firstName: true,
+          lastName: true,
+          homeAddress: true,
+          city: true,
+          province: true,
+          zipCode: true,
+          contactNumber: true,
+        },
+      },
     },
   });
 
@@ -45,13 +78,20 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
               Order Not Found
             </h1>
             <p className="text-gray-600 mt-2">
-              The order you're looking for doesn't exist or has been removed.
+              The order you&apos;re looking for doesn&apos;t exist or has been removed.
             </p>
           </div>
         </div>
       </div>
     );
   }
+
+  const isDeliveryOrder = order.orderOption !== "Pick-Up";
+  const requiresShippingFeeConfirmation =
+    order.orderOption === "In-House Rider" ||
+    order.orderOption === "Third-Party Courier";
+  const orderTotal =
+    order.totalAmount - (order.discountPrice ?? 0) + (order.deliveryFee ?? 0);
 
   const orderStepsDelivery = [
     {
@@ -60,6 +100,13 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
       image:
         "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/pending.svg",
       date: order.createdAt,
+    },
+    {
+      id: "awaiting_shipping_fee_confirmation",
+      label: "To Confirm",
+      image:
+        "https://angular.pixelstrap.com/multikart-admin/assets/svg/tracking/processing.svg",
+      date: order.updatedAt || undefined,
     },
     {
       id: "processing",
@@ -108,10 +155,9 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
     },
   ];
 
-  const orderSteps =
-    order.orderOption === "Delivery"
-      ? orderStepsDelivery
-      : orderStepsInstallation;
+  const orderSteps = isDeliveryOrder
+    ? orderStepsDelivery
+    : orderStepsInstallation;
 
   return (
     <div className="flex relative min-h-screen w-full flex-col">
@@ -146,24 +192,56 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
           </p>
         </div>
 
+        {order.status === "AWAITING_SHIPPING_FEE_CONFIRMATION" &&
+          requiresShippingFeeConfirmation &&
+          Boolean(order.deliveryFee) && (
+            <ShippingFeeResponse
+              orderId={order.id}
+              deliveryFee={order.deliveryFee ?? 0}
+            />
+          )}
+
+        {order.status === "SHIPPING_FEE_REJECTED" && requiresShippingFeeConfirmation && (
+          <div className="mt-6 rounded-lg border border-red-300 bg-red-50 p-5">
+            <h3 className="text-base font-bold text-red-900">
+              Shipping Fee Offer Rejected
+            </h3>
+            <p className="mt-2 text-sm text-red-800">
+              You rejected the current shipping fee offer. Please wait for the
+              store to send an updated fee if you still want to continue with
+              this order.
+            </p>
+          </div>
+        )}
+
         <div className="py-5">
           <div
-            className={`grid ${
-              order.orderOption === "Delivery"
-                ? "lg:grid-cols-4"
-                : "lg:grid-cols-3"
-            } grid-cols-1 gap-10`}
+            className={
+              isDeliveryOrder
+                ? "overflow-x-auto pb-3"
+                : `grid ${isDeliveryOrder ? "lg:grid-cols-4" : "lg:grid-cols-3"} grid-cols-1 gap-10`
+            }
           >
-            {orderSteps.map((step) => {
-              const isActive =
-                step.id.toLowerCase() === order.status.toLowerCase();
+            <div
+              className={
+                isDeliveryOrder
+                  ? "flex min-w-max items-stretch gap-6"
+                  : "contents"
+              }
+            >
+              {orderSteps.map((step) => {
+                const activeStepId =
+                  order.status === "SHIPPING_FEE_REJECTED"
+                    ? "awaiting_shipping_fee_confirmation"
+                    : order.status.toLowerCase();
+                const isActive = step.id.toLowerCase() === activeStepId;
 
-              return (
-                <React.Fragment key={step.id}>
+                return (
                   <div
-                    className={`flex w-full relative tracking-panel gap-4 items-center ${
-                      isActive ? "bg-[#e2f7e2] active" : "bg-zinc-100"
-                    }`}
+                    key={step.id}
+                    className={`relative tracking-panel flex items-center gap-4 ${
+                      isDeliveryOrder ? "min-w-[260px] flex-shrink-0" : "w-full"
+                    } ${isActive ? "bg-[#e2f7e2] active" : "bg-zinc-100"}`}
                   >
                     <div className="relative size-10">
                       <Image
@@ -190,9 +268,9 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
                       )}
                     </div>
                   </div>
-                </React.Fragment>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -203,7 +281,7 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
 
           <div className="px-6 py-4">
             <div className="space-y-4">
-              {order.OrderItems.map((item: any) => (
+              {order.OrderItems.map((item) => (
                 <div
                   key={item.id}
                   className="flex items-start gap-3 py-2 border-b border-gray-100"
@@ -257,15 +335,19 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
                 <span>Discount</span>
                 <span>₱ {formatCurrency(order.discountPrice ?? 0)}</span>
               </div>
-              {order.orderOption === "Delivery" && (
+              {isDeliveryOrder && (
                 <div className="flex justify-between text-sm">
-                  <span>Estimated Delivery Fee</span>
-                  <span>₱ {formatCurrency(order.deliveryFee ?? 0)}</span>
+                  <span>Shipping Fee</span>
+                  <span>
+                    {order.deliveryFee && order.deliveryFee > 0
+                      ? `₱ ${formatCurrency(order.deliveryFee)}`
+                      : "To be confirmed"}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between font-medium text-base mt-4 pt-4 border-t border-gray-200">
                 <span>Total</span>
-                <span>₱ {formatCurrency((order.totalAmount - (order.discountPrice ?? 0)) + (order.deliveryFee ?? 0))}</span>
+                <span>₱ {formatCurrency(orderTotal)}</span>
               </div>
             </div>
           </div>
@@ -292,7 +374,9 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
                     {order.address.zipCode}
                   </p>
                   <p>Philippines</p>
-                  <p className="mt-2">Phone: {order.address.contactNumber}</p>
+                  <p className="mt-2">
+                    Phone: {order.address.contactNumber}
+                  </p>
                 </div>
               ) : (
                 <p className="text-gray-600">
@@ -313,6 +397,10 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
                 <p>
                   <span className="font-medium">Order Option:</span>{" "}
                   {order.orderOption}
+                </p>
+                <p>
+                  <span className="font-medium">Contact Number:</span>{" "}
+                  {order.address.contactNumber}
                 </p>
                 <p>
                   <span className="font-medium">Branch:</span>{" "}
@@ -343,11 +431,6 @@ const OrderDetailsPage = async ({ params }: OrderPageProps) => {
           </div>
         </div>
 
-        {order.lalamoveOrderId && (
-          <div className="mt-6 text-sm text-gray-500">
-            <p>Order Tracking ID: {order.lalamoveOrderId}</p>
-          </div>
-        )}
       </div>
     </div>
   );

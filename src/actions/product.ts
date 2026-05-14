@@ -6,6 +6,17 @@ import db from "@/lib/db";
 import { ProductValidation } from "@/lib/validators";
 import { z } from "zod";
 
+const bulkProductRowSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  description: z.string().optional(),
+  price: z.number().min(1, { message: "Price is required" }),
+  categoryTag: z.string().optional(),
+  isFeatured: z.boolean().optional(),
+  isPrescriptionRequired: z.boolean().optional(),
+  isVatItem: z.boolean().optional(),
+  image: z.string().optional(),
+});
+
 export const getAllProducts = async () => {
   try {
     const data = await db.products.findMany({
@@ -211,32 +222,65 @@ export const createProduct = async (
   }
 };
 
-export const createProductFromExcel = async (values: {
-  name: string;
-  price: number;
-  isPrescriptionRequired: boolean;
-  isVatItem: boolean;
-}) => {
+export const createProductFromExcel = async (
+  values: z.infer<typeof bulkProductRowSchema>
+) => {
   const { user } = await getUserFromCookies();
 
   if (!user) {
     return { error: "User not found." };
   }
 
-  const tags = values.name
+  const validatedField = bulkProductRowSchema.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.issues.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const {
+    name,
+    description,
+    price,
+    categoryTag,
+    isFeatured,
+    isPrescriptionRequired,
+    isVatItem,
+    image,
+  } = validatedField.data;
+
+  const tags = name
     .toLowerCase()
     .replace(/,/g, "")
     .replace(/\s+/g, "-")
     .replace(/&/g, "and");
 
   try {
+    const existingProduct = await db.products.findFirst({
+      where: {
+        OR: [{ tags }, { name: { equals: name, mode: "insensitive" } }],
+      },
+    });
+
+    if (existingProduct) {
+      return {
+        skipped: true,
+        data: existingProduct,
+        message: `${name} already exists and was skipped.`,
+      };
+    }
+
     const data = await db.products.create({
       data: {
-        name: values.name,
+        name,
+        description: description || undefined,
+        image: image || undefined,
+        isFeatured: isFeatured ?? false,
         tags,
-        price: values.price,
-        isVatItem: values.isVatItem,
-        isPrescriptionRequired: values.isPrescriptionRequired,
+        price,
+        isVatItem: isVatItem ?? false,
+        isPrescriptionRequired: isPrescriptionRequired ?? false,
+        categoryTag: categoryTag || null,
       },
     });
 
@@ -252,16 +296,70 @@ export const createProductFromExcel = async (values: {
 };
 
 export const createBulkProducts = async (data: any[]) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
   try {
+    const createdProducts: Awaited<
+      ReturnType<typeof db.products.create>
+    >[] = [];
+    const skippedProducts: Awaited<
+      ReturnType<typeof db.products.findFirst>
+    >[] = [];
+    const errors: { name: string; error: string }[] = [];
+
     for (const product of data) {
       const result = await createProductFromExcel(product);
+
       if (result.error) {
-        console.error("Error creating product:", result.error);
+        errors.push({
+          name: product?.name || "Unknown product",
+          error: result.error,
+        });
+        continue;
+      }
+
+      if (result.skipped) {
+        skippedProducts.push(result.data);
+        continue;
+      }
+
+      if (result.data) {
+        createdProducts.push(result.data);
       }
     }
+
+    if (createdProducts.length > 0) {
+      await db.logs.create({
+        data: {
+          action: `${user.name} bulk uploaded ${createdProducts.length} product(s) at ${new Date().toLocaleString()}`,
+          adminId: user.id,
+        },
+      });
+    }
+
+    return {
+      success:
+        errors.length === 0
+          ? "Bulk upload completed successfully."
+          : "Bulk upload completed with some skipped rows.",
+      data: {
+        createdCount: createdProducts.length,
+        skippedCount: skippedProducts.length,
+        errorCount: errors.length,
+        createdProducts,
+        skippedProducts,
+        errors,
+      },
+    };
   } catch (error) {
     console.error("Error in createBulkProducts:", error);
-    throw new Error(error instanceof Error ? error.message : String(error));
+    return {
+      error: error instanceof Error ? error.message : "Bulk upload failed.",
+    };
   }
 };
 

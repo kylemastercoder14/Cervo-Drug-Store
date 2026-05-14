@@ -3,6 +3,8 @@
 
 import { getUserFromCookies } from "@/hooks/use-user";
 import db from "@/lib/db";
+import { fetchFacebookPageFeed, publishFacebookPageNews } from "@/lib/facebook";
+import { syncFacebookPostToNews } from "@/lib/facebook-news";
 import { NewsEventValidation } from "@/lib/validators";
 import { z } from "zod";
 
@@ -158,6 +160,141 @@ export const deleteNewsEvent = async (newsId: string) => {
       error: `Failed to delete news/event. Please try again. ${
         error.message || ""
       }`,
+    };
+  }
+};
+
+export const publishExistingNewsEventsToFacebook = async () => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
+  const pageId = process.env.FACEBOOK_PAGE_ID?.trim();
+
+  if (!pageId) {
+    return { error: "Missing FACEBOOK_PAGE_ID in .env." };
+  }
+
+  try {
+    const unpublishedNews = await db.news.findMany({
+      where: {
+        facebookPostId: null,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    let publishedCount = 0;
+    const errors: string[] = [];
+
+    for (const item of unpublishedNews) {
+      try {
+        const result = await publishFacebookPageNews(pageId, {
+          newsId: item.id,
+          title: item.title,
+          content: item.content,
+          image: item.image,
+          link: process.env.NEXT_PUBLIC_APP_URL?.trim()
+            ? `${process.env.NEXT_PUBLIC_APP_URL.trim()}/#blogs`
+            : undefined,
+        });
+
+        await db.news.update({
+          where: {
+            id: item.id,
+          },
+          data: {
+            facebookPostId: result.postId,
+            facebookPermalink: result.permalinkUrl || null,
+            facebookPublishedAt: new Date(),
+            facebookSyncSource: "APP_BULK_PUBLISH",
+            lastFacebookSyncAt: new Date(),
+          },
+        });
+
+        publishedCount += 1;
+      } catch (error) {
+        errors.push(
+          `${item.title}: ${
+            error instanceof Error ? error.message : "Unknown Facebook publish error."
+          }`,
+        );
+      }
+    }
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} bulk published ${publishedCount} news/event post(s) to Facebook at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    });
+
+    return {
+      success: `Published ${publishedCount} news/event post(s) to Facebook.`,
+      data: {
+        publishedCount,
+        skippedCount: unpublishedNews.length - publishedCount,
+        errors,
+      },
+    };
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to publish existing news/events to Facebook.",
+    };
+  }
+};
+
+export const syncFacebookPostsToNews = async () => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
+  const pageId = process.env.FACEBOOK_PAGE_ID?.trim();
+
+  if (!pageId) {
+    return { error: "Missing FACEBOOK_PAGE_ID in .env." };
+  }
+
+  try {
+    const posts = await fetchFacebookPageFeed(pageId, 25);
+    let syncedCount = 0;
+
+    for (const post of posts) {
+      if (!post.id) {
+        continue;
+      }
+
+      await syncFacebookPostToNews(post, "FACEBOOK_IMPORT");
+      syncedCount += 1;
+    }
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} imported ${syncedCount} Facebook page post(s) into news/events at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    });
+
+    return {
+      success: `Imported ${syncedCount} Facebook post(s) into news/events.`,
+      data: {
+        syncedCount,
+      },
+    };
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to sync Facebook posts into news/events.",
     };
   }
 };

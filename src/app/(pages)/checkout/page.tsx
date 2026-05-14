@@ -1,4 +1,3 @@
-import Chatbot from "@/components/landing-page/chatbot";
 import Navbar from "@/components/landing-page/navbar";
 import React from "react";
 import {

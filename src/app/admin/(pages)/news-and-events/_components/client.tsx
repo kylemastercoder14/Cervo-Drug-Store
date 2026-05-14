@@ -9,12 +9,18 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronUp,
+  Download,
   Newspaper,
+  RefreshCcw,
   Search,
   Sparkles,
   Star,
 } from "lucide-react";
-import { useGetNewsEvent } from "@/data/news-event";
+import {
+  useGetNewsEvent,
+  usePublishExistingNewsEventsToFacebook,
+  useSyncFacebookPostsToNews,
+} from "@/data/news-event";
 import { NewsEventColumn } from "./column";
 import { CellAction } from "./cell-action";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +48,10 @@ const stripHtml = (value: string) =>
 
 const NewsEventClient = () => {
   const { data: newsEventData, error, isLoading } = useGetNewsEvent();
+  const { mutate: publishExistingToFacebook, isPending: isPublishingExisting } =
+    usePublishExistingNewsEventsToFacebook();
+  const { mutate: importFacebookPosts, isPending: isImportingFacebook } =
+    useSyncFacebookPostsToNews();
   const [isMounted, setIsMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
@@ -67,8 +77,18 @@ const NewsEventClient = () => {
         image: item.image,
         createdAt: format(item.createdAt, "MMMM do, yyyy"),
         createdAtRaw: new Date(item.createdAt).toISOString(),
+        facebookPostId: item.facebookPostId,
+        facebookPermalink: item.facebookPermalink,
+        facebookPublishedAt: item.facebookPublishedAt
+          ? new Date(item.facebookPublishedAt).toISOString()
+          : null,
       })) || [],
     [newsEventData]
+  );
+
+  const unpublishedCount = useMemo(
+    () => formattedData.filter((item) => !item.facebookPostId).length,
+    [formattedData]
   );
 
   const filteredAndSortedData = useMemo(() => {
@@ -159,6 +179,7 @@ const NewsEventClient = () => {
         </div>
 
         <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
+
           <div className="relative w-full md:w-[320px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -343,7 +364,9 @@ const NewsEventClient = () => {
                 )}
 
                 <div className="flex items-center justify-between border-t pt-4 text-xs text-muted-foreground">
-                  <span>{plainContent.length} characters</span>
+                  <span>
+                    {item.facebookPostId ? "Synced to Facebook" : "Not yet posted to Facebook"}
+                  </span>
                   <span>ID: {item.id.slice(0, 8)}</span>
                 </div>
               </CardContent>

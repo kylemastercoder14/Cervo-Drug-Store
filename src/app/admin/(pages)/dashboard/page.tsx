@@ -12,7 +12,6 @@ import {
 import { SalesChart } from "@/components/globals/sales-chart";
 import RecentTransaction from "@/components/globals/recent-transaction";
 import { TopProducts } from "@/components/globals/top-products";
-import db from "@/lib/db";
 import {
   getCustomerStats,
   getGrowthStats,

@@ -1,5 +1,4 @@
 import React from "react";
-import Chatbot from "@/components/landing-page/chatbot";
 import Navbar from "@/components/landing-page/navbar";
 import Footer from "@/components/landing-page/footer";
 import {
@@ -10,14 +9,23 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { getUserByEmail } from "@/actions/user";
 import { auth } from "@clerk/nextjs/server";
 import db from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { Package, MapPin, User } from "lucide-react";
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case "AWAITING_SHIPPING_FEE_CONFIRMATION":
+      return "To Confirm";
+    case "SHIPPING_FEE_REJECTED":
+      return "Fee Rejected";
+    default:
+      return status;
+  }
+};
 
 const MyProfile = async () => {
   const { userId } = auth();
@@ -27,7 +35,30 @@ const MyProfile = async () => {
     },
     include: {
       address: true,
-      orders: { orderBy: {createdAt: "desc"}, include: { OrderItems: { include: { product: true } } } },
+      orders: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          orderNumber: true,
+          totalAmount: true,
+          discountPrice: true,
+          deliveryFee: true,
+          orderOption: true,
+          status: true,
+          OrderItems: {
+            select: {
+              id: true,
+              quantity: true,
+              product: {
+                select: {
+                  name: true,
+                  categoryTag: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 
@@ -80,6 +111,11 @@ const MyProfile = async () => {
                           className={`px-4 py-1.5 capitalize rounded-sm text-sm font-medium ${
                             order.status === "PENDING"
                               ? "bg-yellow-100 text-yellow-700"
+                              : order.status ===
+                                "AWAITING_SHIPPING_FEE_CONFIRMATION"
+                              ? "bg-amber-100 text-amber-700"
+                              : order.status === "SHIPPING_FEE_REJECTED"
+                              ? "bg-red-100 text-red-700"
                               : order.status === "PROCESSING"
                               ? "bg-blue-100 text-blue-700"
                               : order.status === "SHIPPED"
@@ -91,7 +127,7 @@ const MyProfile = async () => {
                               : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          {order.status}
+                          {getStatusLabel(order.status)}
                         </span>
                       </div>
 
@@ -120,8 +156,18 @@ const MyProfile = async () => {
                         <div>
                           <p className="text-sm text-gray-500">Total Amount</p>
                           <p className="text-lg font-bold text-gray-900">
-                            {formatPrice((order.totalAmount - (order.discountPrice ?? 0)) + (order.deliveryFee ?? 0))}
+                            {formatPrice(
+                              order.totalAmount -
+                                (order.discountPrice ?? 0) +
+                                (order.deliveryFee ?? 0)
+                            )}
                           </p>
+                          {order.orderOption !== "Pick-Up" &&
+                            (!order.deliveryFee || order.deliveryFee === 0) && (
+                              <p className="text-xs text-amber-700">
+                                Shipping fee to be confirmed
+                              </p>
+                            )}
                           <p className="text-xs text-gray-500">
                             {order.OrderItems.length}{" "}
                             {order.OrderItems.length > 1 ? "items" : "item"}
@@ -140,7 +186,7 @@ const MyProfile = async () => {
                 <div className="text-center py-12">
                   <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 text-lg">
-                    You haven't placed any orders yet.
+                    You haven&apos;t placed any orders yet.
                   </p>
                   <Link href="/">
                     <Button className="mt-4">Start Shopping</Button>

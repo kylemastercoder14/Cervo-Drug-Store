@@ -6,8 +6,6 @@ import { toast } from "sonner";
 import { columns, OrdersColumn } from "./column";
 import { format } from "date-fns";
 import { useGetOrders } from "@/data/orders";
-import { formatPrice } from '@/lib/utils';
-
 const OrdersClient = () => {
   const { data: ordersData, error, isLoading } = useGetOrders();
   const [isMounted, setIsMounted] = useState(false);
@@ -30,7 +28,7 @@ const OrdersClient = () => {
       discountPrice: item.discountPrice ?? 0,
       deliveryFee: item.deliveryFee ?? 0,
       status: item.status,
-      orderOption: item.method,
+      orderOption: item.orderOption,
       createdAt: format(item.createdAt, "MMMM do, yyyy"),
     })) || [];
 

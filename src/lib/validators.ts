@@ -75,6 +75,7 @@ export const CheckoutValidation = z.object({
     .string()
     .email({ message: "Enter a valid email address" })
     .min(1, { message: "Email address is required" }),
+  contactNumber: z.string().min(1, { message: "Contact number is required" }),
   acceptPolicy: z.boolean().refine((value) => value === true, {
     message: "You must accept the terms and conditions",
   }),

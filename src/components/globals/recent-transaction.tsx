@@ -1,7 +1,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -16,10 +15,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Orders } from "@prisma/client";
 import { Badge } from '@/components/ui/badge';
 
-const RecentTransaction = ({ transactions }: { transactions: Orders[] }) => {
+type RecentTransactionItem = {
+  id: string;
+  orderNumber: string;
+  status: string;
+  branch: string | null;
+  totalAmount: number;
+};
+
+const RecentTransaction = ({
+  transactions,
+}: {
+  transactions: RecentTransactionItem[];
+}) => {
   return (
     <Card>
       <CardHeader>
