@@ -6,11 +6,20 @@ import {
 } from "@tanstack/react-query";
 import React from "react";
 import { getAllNewsEvents } from "@/actions/news-events";
+import { getFacebookSyncStatus, runFacebookNewsSync } from "@/lib/facebook-sync";
 import NewsEventClient from "./_components/client";
 import AddNewsEvents from "./_components/add-news-event";
 
 const AdminNewsAndEvents = async () => {
   const queryClient = new QueryClient();
+
+  try {
+    await runFacebookNewsSync("facebook-to-system", "admin:news-page");
+  } catch (error) {
+    console.error("Failed to sync Facebook posts before rendering news page:", error);
+  }
+
+  const syncStatus = await getFacebookSyncStatus();
 
   // Prefetch the data from the server
   await queryClient.prefetchQuery({
@@ -31,7 +40,7 @@ const AdminNewsAndEvents = async () => {
         <AddNewsEvents />
       </div>
       <HydrationBoundary state={dehydratedState}>
-        <NewsEventClient />
+        <NewsEventClient syncStatus={syncStatus} />
       </HydrationBoundary>
     </div>
   );

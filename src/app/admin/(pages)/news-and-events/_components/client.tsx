@@ -6,18 +6,19 @@ import { format } from "date-fns";
 import Image from "next/image";
 import {
   ArrowUpDown,
+  CheckCircle2,
   CalendarDays,
   ChevronDown,
   ChevronUp,
+  Clock3,
   Newspaper,
+  RefreshCw,
   Search,
   Sparkles,
   Star,
+  TriangleAlert,
 } from "lucide-react";
-import {
-  useGetNewsEvent,
-  useSyncFacebookPostsToNews,
-} from "@/data/news-event";
+import { useGetNewsEvent } from "@/data/news-event";
 import { NewsEventColumn } from "./column";
 import { CellAction } from "./cell-action";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +37,17 @@ import { Button } from "@/components/ui/button";
 const RECENT_DAYS = 30;
 const PREVIEW_LIMIT = 260;
 
+type SyncStatus = {
+  ok: boolean;
+  mode: "both" | "facebook-to-system" | "system-to-facebook";
+  source: string;
+  publishedToFacebookCount: number;
+  importedFromFacebookCount: number;
+  publishErrors: string[];
+  ranAt: string;
+  message: string;
+} | null;
+
 const stripHtml = (value: string) =>
   value
     .replace(/<[^>]*>/g, " ")
@@ -43,11 +55,8 @@ const stripHtml = (value: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-const NewsEventClient = () => {
+const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
   const { data: newsEventData, error, isLoading } = useGetNewsEvent();
-  const { mutate: importFacebookPosts } = useSyncFacebookPostsToNews({
-    silent: true,
-  });
   const [isMounted, setIsMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
@@ -57,14 +66,6 @@ const NewsEventClient = () => {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (!isMounted) {
-      return;
-    }
-
-    importFacebookPosts();
-  }, [importFacebookPosts, isMounted]);
 
   useEffect(() => {
     if (error) {
@@ -166,6 +167,60 @@ const NewsEventClient = () => {
 
   return (
     <div className="space-y-5">
+      <div className="rounded-xl border bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3">
+            <div
+              className={[
+                "rounded-full p-2",
+                syncStatus?.ok
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-amber-100 text-amber-700",
+              ].join(" ")}
+            >
+              {syncStatus?.ok ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : (
+                <TriangleAlert className="h-5 w-5" />
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">
+                Last Facebook Sync Status
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {syncStatus?.message || "No sync run has been recorded yet."}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 text-xs">
+            <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+              <Clock3 className="h-3.5 w-3.5" />
+              {syncStatus?.ranAt
+                ? format(new Date(syncStatus.ranAt), "MMM d, yyyy h:mm a")
+                : "No timestamp"}
+            </Badge>
+            <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+              <RefreshCw className="h-3.5 w-3.5" />
+              {syncStatus?.mode || "No mode"}
+            </Badge>
+            <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+              <RefreshCw className="h-3.5 w-3.5" />
+              {syncStatus
+                ? `Imported ${syncStatus.importedFromFacebookCount}`
+                : "Imported 0"}
+            </Badge>
+            <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+              <Newspaper className="h-3.5 w-3.5" />
+              {syncStatus
+                ? `Published ${syncStatus.publishedToFacebookCount}`
+                : "Published 0"}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="gap-2 rounded-full px-3 py-1 text-xs">

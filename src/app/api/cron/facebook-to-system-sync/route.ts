@@ -9,12 +9,14 @@ async function handleSync(req: NextRequest) {
   }
 
   try {
-    const result = await runFacebookNewsSync("both", "cron:facebook-news-sync");
+    const result = await runFacebookNewsSync(
+      "facebook-to-system",
+      "cron:facebook-to-system-sync",
+    );
 
     return NextResponse.json({
       success: true,
       ...result,
-      ranAt: new Date().toISOString(),
     });
   } catch (error) {
     return NextResponse.json(
@@ -22,7 +24,7 @@ async function handleSync(req: NextRequest) {
         error:
           error instanceof Error
             ? error.message
-            : "Facebook cron sync failed.",
+            : "Facebook to system cron sync failed.",
       },
       { status: 500 },
     );
