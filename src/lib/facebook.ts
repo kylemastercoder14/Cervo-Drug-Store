@@ -32,6 +32,12 @@ export type FacebookPublishResult = {
   permalinkUrl?: string;
 };
 
+export type FacebookUpdateResult = {
+  success: true;
+  postId: string;
+  permalinkUrl?: string;
+};
+
 export type FacebookGraphPost = {
   id: string;
   message?: string;
@@ -277,6 +283,44 @@ export async function publishFacebookPageNews(
     postId: publishedId,
     mediaId,
     mode,
+    permalinkUrl,
+  };
+}
+
+export async function updateFacebookPageNews(
+  pageId: string,
+  postId: string,
+  payload: Pick<FacebookPostPayload, "title" | "content" | "link">,
+): Promise<FacebookUpdateResult> {
+  const accessToken = await resolvePageAccessToken(pageId);
+  const message = buildFacebookPostMessage(payload);
+
+  const body = new URLSearchParams({
+    access_token: accessToken,
+    message,
+  });
+
+  const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${postId}`;
+  const response = await readGraphJson<{ success?: boolean }>(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
+  });
+
+  if (!response.ok || response.data.success !== true) {
+    throw new Error(
+      normalizeFacebookError(response.data.error?.message) ||
+        "Failed to update Facebook post.",
+    );
+  }
+
+  const permalinkUrl = await fetchFacebookPermalink(postId, accessToken);
+
+  return {
+    success: true,
+    postId,
     permalinkUrl,
   };
 }

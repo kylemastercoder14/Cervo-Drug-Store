@@ -3,7 +3,11 @@
 
 import { getUserFromCookies } from "@/hooks/use-user";
 import db from "@/lib/db";
-import { fetchFacebookPageFeed, publishFacebookPageNews } from "@/lib/facebook";
+import {
+  fetchFacebookPageFeed,
+  publishFacebookPageNews,
+  updateFacebookPageNews,
+} from "@/lib/facebook";
 import { syncFacebookPostToNews } from "@/lib/facebook-news";
 import { NewsEventValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -295,6 +299,67 @@ export const syncFacebookPostsToNews = async () => {
         error instanceof Error
           ? error.message
           : "Failed to sync Facebook posts into news/events.",
+    };
+  }
+};
+
+export const syncNewsEventUpdateToFacebook = async (
+  newsId: string,
+  values: z.infer<typeof NewsEventValidation>,
+) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
+  const pageId = process.env.FACEBOOK_PAGE_ID?.trim();
+
+  if (!pageId) {
+    return { error: "Missing FACEBOOK_PAGE_ID in .env." };
+  }
+
+  try {
+    const news = await db.news.findUnique({
+      where: {
+        id: newsId,
+      },
+      select: {
+        id: true,
+        facebookPostId: true,
+      },
+    });
+
+    if (!news?.facebookPostId) {
+      return { error: "This news/event does not have a Facebook post yet." };
+    }
+
+    const result = await updateFacebookPageNews(pageId, news.facebookPostId, {
+      title: values.title,
+      content: values.content,
+      link: process.env.NEXT_PUBLIC_APP_URL?.trim()
+        ? `${process.env.NEXT_PUBLIC_APP_URL.trim()}/#blogs`
+        : undefined,
+    });
+
+    await db.news.update({
+      where: {
+        id: newsId,
+      },
+      data: {
+        facebookPermalink: result.permalinkUrl || null,
+        facebookSyncSource: "APP_UPDATE",
+        lastFacebookSyncAt: new Date(),
+      },
+    });
+
+    return { success: "Facebook post updated successfully." };
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to sync news/event update to Facebook.",
     };
   }
 };

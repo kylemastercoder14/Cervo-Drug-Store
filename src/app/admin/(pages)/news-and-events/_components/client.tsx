@@ -9,16 +9,13 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronUp,
-  Download,
   Newspaper,
-  RefreshCcw,
   Search,
   Sparkles,
   Star,
 } from "lucide-react";
 import {
   useGetNewsEvent,
-  usePublishExistingNewsEventsToFacebook,
   useSyncFacebookPostsToNews,
 } from "@/data/news-event";
 import { NewsEventColumn } from "./column";
@@ -48,10 +45,9 @@ const stripHtml = (value: string) =>
 
 const NewsEventClient = () => {
   const { data: newsEventData, error, isLoading } = useGetNewsEvent();
-  const { mutate: publishExistingToFacebook, isPending: isPublishingExisting } =
-    usePublishExistingNewsEventsToFacebook();
-  const { mutate: importFacebookPosts, isPending: isImportingFacebook } =
-    useSyncFacebookPostsToNews();
+  const { mutate: importFacebookPosts } = useSyncFacebookPostsToNews({
+    silent: true,
+  });
   const [isMounted, setIsMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
@@ -61,6 +57,14 @@ const NewsEventClient = () => {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!isMounted) {
+      return;
+    }
+
+    importFacebookPosts();
+  }, [importFacebookPosts, isMounted]);
 
   useEffect(() => {
     if (error) {
@@ -84,11 +88,6 @@ const NewsEventClient = () => {
           : null,
       })) || [],
     [newsEventData]
-  );
-
-  const unpublishedCount = useMemo(
-    () => formattedData.filter((item) => !item.facebookPostId).length,
-    [formattedData]
   );
 
   const filteredAndSortedData = useMemo(() => {

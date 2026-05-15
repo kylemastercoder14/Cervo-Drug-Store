@@ -3,8 +3,8 @@ import {
   createNewsEvent,
   deleteNewsEvent,
   getAllNewsEvents,
-  publishExistingNewsEventsToFacebook,
   syncFacebookPostsToNews,
+  syncNewsEventUpdateToFacebook,
   updateNewsEvent,
 } from "@/actions/news-events";
 import { NewsEventValidation } from "@/lib/validators";
@@ -89,6 +89,31 @@ export function useSaveNewsEvent(initialData?: any) {
             );
           }
         }
+
+        if (initialData?.id && initialData?.facebookPostId) {
+          const syncToastId = toast.loading("Syncing update to Facebook...");
+
+          try {
+            const syncResult = await syncNewsEventUpdateToFacebook(
+              initialData.id,
+              values
+            );
+
+            if (syncResult?.error) {
+              throw new Error(syncResult.error);
+            }
+
+            toast.dismiss(syncToastId);
+            toast.success("News/event update was also synced to Facebook.");
+            queryClient.invalidateQueries({ queryKey: ["news-and-events"] });
+          } catch (error: any) {
+            toast.dismiss(syncToastId);
+            toast.error(
+              error.message ||
+                "News/event was updated, but Facebook sync failed."
+            );
+          }
+        }
       }
     },
     onError: (error: any) => {
@@ -97,40 +122,22 @@ export function useSaveNewsEvent(initialData?: any) {
   });
 }
 
-export function usePublishExistingNewsEventsToFacebook() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => publishExistingNewsEventsToFacebook(),
-    onSuccess: (data) => {
-      if (data?.success) {
-        toast.success(data.success);
-        queryClient.invalidateQueries({ queryKey: ["news-and-events"] });
-      }
-
-      if (data?.data?.errors?.length) {
-        toast.error(`Facebook publish finished with ${data.data.errors.length} error(s).`);
-      }
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "An error occurred");
-    },
-  });
-}
-
-export function useSyncFacebookPostsToNews() {
+export function useSyncFacebookPostsToNews(options?: { silent?: boolean }) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => syncFacebookPostsToNews(),
     onSuccess: (data) => {
-      if (data?.success) {
+      if (data?.success && !options?.silent) {
         toast.success(data.success);
-        queryClient.invalidateQueries({ queryKey: ["news-and-events"] });
       }
+
+      queryClient.invalidateQueries({ queryKey: ["news-and-events"] });
     },
     onError: (error: any) => {
-      toast.error(error.message || "An error occurred");
+      if (!options?.silent) {
+        toast.error(error.message || "An error occurred");
+      }
     },
   });
 }
