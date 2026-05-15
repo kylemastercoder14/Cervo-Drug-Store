@@ -57,7 +57,7 @@ export function useSaveNewsEvent(initialData?: any) {
         return createNewsEvent(values);
       }
     },
-    onSuccess: async (data) => {
+    onSuccess: async (data, values) => {
       if (data.success) {
         toast.success(data.success);
         queryClient.invalidateQueries({ queryKey: ["news-and-events"] });

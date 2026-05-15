@@ -23,7 +23,10 @@ const deriveTitleFromMessage = (message?: string, createdTime?: string) => {
 
 export async function syncFacebookPostToNews(
   post: FacebookGraphPost,
-  source: "FACEBOOK_WEBHOOK" | "FACEBOOK_IMPORT" = "FACEBOOK_WEBHOOK",
+  source:
+    | "FACEBOOK_WEBHOOK"
+    | "FACEBOOK_IMPORT"
+    | "FACEBOOK_CRON_IMPORT" = "FACEBOOK_WEBHOOK",
 ) {
   const title = deriveTitleFromMessage(post.message, post.created_time);
   const message = stripHtml(post.message || "");

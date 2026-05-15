@@ -15,6 +15,14 @@ type GraphPageAccount = {
   access_token?: string;
 };
 
+type FacebookTokenCandidate = {
+  token: string;
+  source:
+    | "FACEBOOK_PAGE_ACCESS_TOKEN"
+    | "FACEBOOK_USER_ACCESS_TOKEN_PAGE"
+    | "FACEBOOK_USER_ACCESS_TOKEN";
+};
+
 export type FacebookPostPayload = {
   newsId?: string;
   title: string;
@@ -64,6 +72,10 @@ export const normalizeFacebookError = (message?: string) => {
 
   if (message.includes("Error validating access token")) {
     return "The configured Facebook access token is invalid or expired. Generate a new token and update your Facebook env settings.";
+  }
+
+  if (message.includes("pages_read_engagement")) {
+    return "The Facebook token used by the server cannot read the Page feed. Reload PM2 with the updated env and make sure the token was generated for the same Meta app connected to this Page.";
   }
 
   return message;
@@ -148,6 +160,90 @@ export async function resolvePageAccessToken(pageId: string) {
   }
 
   return pageAccount.access_token;
+}
+
+async function resolveReadTokenCandidates(
+  pageId: string,
+): Promise<FacebookTokenCandidate[]> {
+  const candidates: FacebookTokenCandidate[] = [];
+  const seenTokens = new Set<string>();
+  const pushCandidate = (candidate: FacebookTokenCandidate | null) => {
+    if (!candidate?.token || seenTokens.has(candidate.token)) {
+      return;
+    }
+
+    seenTokens.add(candidate.token);
+    candidates.push(candidate);
+  };
+
+  const explicitPageToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN?.trim();
+  if (explicitPageToken) {
+    pushCandidate({
+      token: explicitPageToken,
+      source: "FACEBOOK_PAGE_ACCESS_TOKEN",
+    });
+  }
+
+  const userToken = process.env.FACEBOOK_USER_ACCESS_TOKEN?.trim();
+  if (!userToken) {
+    if (candidates.length === 0) {
+      throw new Error(
+        "Missing Facebook access token. Set FACEBOOK_PAGE_ACCESS_TOKEN or FACEBOOK_USER_ACCESS_TOKEN in .env.",
+      );
+    }
+
+    return candidates;
+  }
+
+  const accountsUrl = new URL(
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/me/accounts`,
+  );
+  accountsUrl.searchParams.set("fields", "id,name,access_token");
+  accountsUrl.searchParams.set("access_token", userToken);
+
+  const accountsResponse = await readGraphJson<{ data?: GraphPageAccount[] }>(
+    accountsUrl.toString(),
+  );
+
+  if (accountsResponse.ok) {
+    const pageAccount = accountsResponse.data.data?.find(
+      (account) => account.id === pageId,
+    );
+
+    if (pageAccount?.access_token) {
+      pushCandidate({
+        token: pageAccount.access_token,
+        source: "FACEBOOK_USER_ACCESS_TOKEN_PAGE",
+      });
+    }
+  }
+
+  pushCandidate({
+    token: userToken,
+    source: "FACEBOOK_USER_ACCESS_TOKEN",
+  });
+
+  return candidates;
+}
+
+async function readWithFacebookToken<T>(
+  pageId: string,
+  run: (candidate: FacebookTokenCandidate) => Promise<T>,
+): Promise<T> {
+  const candidates = await resolveReadTokenCandidates(pageId);
+  const errors: string[] = [];
+
+  for (const candidate of candidates) {
+    try {
+      return await run(candidate);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown Facebook read error.";
+      errors.push(`${candidate.source}: ${message}`);
+    }
+  }
+
+  throw new Error(errors.join(" | "));
 }
 
 export async function fetchFacebookPermalink(
@@ -329,50 +425,52 @@ export async function fetchFacebookPost(
   pageId: string,
   postId: string,
 ): Promise<FacebookGraphPost | null> {
-  const accessToken = await resolvePageAccessToken(pageId);
-  const postUrl = new URL(
-    `https://graph.facebook.com/${GRAPH_API_VERSION}/${postId}`,
-  );
-  postUrl.searchParams.set(
-    "fields",
-    "id,message,full_picture,permalink_url,created_time",
-  );
-  postUrl.searchParams.set("access_token", accessToken);
-
-  const response = await readGraphJson<FacebookGraphPost>(postUrl.toString());
-
-  if (!response.ok) {
-    throw new Error(
-      normalizeFacebookError(response.data.error?.message) ||
-        "Failed to fetch the Facebook post.",
+  return readWithFacebookToken(pageId, async ({ token }) => {
+    const postUrl = new URL(
+      `https://graph.facebook.com/${GRAPH_API_VERSION}/${postId}`,
     );
-  }
+    postUrl.searchParams.set(
+      "fields",
+      "id,message,full_picture,permalink_url,created_time",
+    );
+    postUrl.searchParams.set("access_token", token);
 
-  return response.data?.id ? response.data : null;
+    const response = await readGraphJson<FacebookGraphPost>(postUrl.toString());
+
+    if (!response.ok) {
+      throw new Error(
+        normalizeFacebookError(response.data.error?.message) ||
+          "Failed to fetch the Facebook post.",
+      );
+    }
+
+    return response.data?.id ? response.data : null;
+  });
 }
 
 export async function fetchFacebookPageFeed(pageId: string, limit = 25) {
-  const accessToken = await resolvePageAccessToken(pageId);
-  const feedUrl = new URL(
-    `https://graph.facebook.com/${GRAPH_API_VERSION}/${pageId}/feed`,
-  );
-  feedUrl.searchParams.set(
-    "fields",
-    "id,message,full_picture,permalink_url,created_time",
-  );
-  feedUrl.searchParams.set("limit", String(limit));
-  feedUrl.searchParams.set("access_token", accessToken);
-
-  const response = await readGraphJson<{ data?: FacebookGraphPost[] }>(
-    feedUrl.toString(),
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      normalizeFacebookError(response.data.error?.message) ||
-        "Failed to fetch Facebook page posts.",
+  return readWithFacebookToken(pageId, async ({ token }) => {
+    const feedUrl = new URL(
+      `https://graph.facebook.com/${GRAPH_API_VERSION}/${pageId}/feed`,
     );
-  }
+    feedUrl.searchParams.set(
+      "fields",
+      "id,message,full_picture,permalink_url,created_time",
+    );
+    feedUrl.searchParams.set("limit", String(limit));
+    feedUrl.searchParams.set("access_token", token);
 
-  return response.data.data ?? [];
+    const response = await readGraphJson<{ data?: FacebookGraphPost[] }>(
+      feedUrl.toString(),
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        normalizeFacebookError(response.data.error?.message) ||
+          "Failed to fetch Facebook page posts.",
+      );
+    }
+
+    return response.data.data ?? [];
+  });
 }
