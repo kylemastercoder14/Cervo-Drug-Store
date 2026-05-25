@@ -14,9 +14,7 @@ const Home = () => {
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Navbar />
-      <div className="w-full px-3 py-5 h-full lg:px-20">
-        <ImageSlider />
-      </div>
+      <ImageSlider />
       <section className="lg:px-20 px-3 py-5">
         <div className="bg-[#EEEEEE] rounded-lg py-2 px-3 shadow-md border">
           <p className="text-lg font-semibold text-black">Categories</p>
