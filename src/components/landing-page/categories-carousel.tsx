@@ -13,6 +13,7 @@ import { Categories } from "@prisma/client";
 import { toast } from "sonner";
 import { getAllCategories } from "@/actions/category";
 import Link from "next/link";
+import Autoplay from "embla-carousel-autoplay";
 
 const CategoriesCarousel = () => {
   const [categories, setCategories] = useState<Categories[]>([]);
@@ -30,7 +31,14 @@ const CategoriesCarousel = () => {
   }, []);
 
   return (
-    <Carousel className="w-full">
+    <Carousel
+      plugins={[
+        Autoplay({
+          delay: 3000,
+        }),
+      ]}
+      className="w-full"
+    >
       <CarouselContent className="flex space-x-4">
         {categories.map((item) => (
           <CarouselItem

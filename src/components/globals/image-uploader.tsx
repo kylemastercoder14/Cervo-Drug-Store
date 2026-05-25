@@ -2,7 +2,7 @@
 
 import { Inbox, X } from "lucide-react";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { UploadError, upload } from "@/lib/upload";
@@ -16,6 +16,11 @@ const ImageUpload = ({
   defaultValue?: string;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>(defaultValue);
+  const pasteTargetRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setImageUrl(defaultValue);
+  }, [defaultValue]);
 
   const getUploadErrorMessage = (error: unknown) => {
     if (error instanceof UploadError) {
@@ -28,6 +33,111 @@ const ImageUpload = ({
 
     return "We could not upload your image right now. Please try again in a moment.";
   };
+
+  const handleUploadFile = useCallback(
+    async (file?: File) => {
+      if (!file) {
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Please upload a smaller image.");
+        return;
+      }
+
+      const toastId = toast.loading("Uploading image...");
+
+      try {
+        for (let i = 0; i <= 100; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 30));
+        }
+
+        const { url } = await upload(file);
+
+        toast.dismiss(toastId);
+        toast.success("Image uploaded successfully!");
+        setImageUrl(url);
+        onImageUpload(url);
+      } catch (error) {
+        setImageUrl("");
+        toast.dismiss(toastId);
+        toast.error(getUploadErrorMessage(error));
+        console.log(error);
+      }
+    },
+    [onImageUpload]
+  );
+
+  const handlePaste = useCallback(
+    async (event: React.ClipboardEvent<HTMLDivElement>) => {
+      const clipboardItems = event.clipboardData?.items;
+
+      if (!clipboardItems) {
+        return;
+      }
+
+      const imageItem = Array.from(clipboardItems).find((item) =>
+        item.type.startsWith("image/")
+      );
+
+      if (!imageItem) {
+        return;
+      }
+
+      const pastedFile = imageItem.getAsFile();
+
+      if (!pastedFile) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const extension = pastedFile.type.split("/")[1]?.split("+")[0] || "png";
+      const screenshotFile = new File(
+        [pastedFile],
+        `pasted-image-${Date.now()}.${extension}`,
+        { type: pastedFile.type }
+      );
+
+      await handleUploadFile(screenshotFile);
+    },
+    [handleUploadFile]
+  );
+
+  const handlePasteFromClipboardApi = useCallback(async () => {
+    if (!navigator.clipboard?.read) {
+      return false;
+    }
+
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+
+      for (const clipboardItem of clipboardItems) {
+        const imageType = clipboardItem.types.find((type) =>
+          type.startsWith("image/")
+        );
+
+        if (!imageType) {
+          continue;
+        }
+
+        const blob = await clipboardItem.getType(imageType);
+        const extension = imageType.split("/")[1]?.split("+")[0] || "png";
+        const screenshotFile = new File(
+          [blob],
+          `pasted-image-${Date.now()}.${extension}`,
+          { type: imageType }
+        );
+
+        await handleUploadFile(screenshotFile);
+        return true;
+      }
+    } catch (error) {
+      console.error("Clipboard image read failed:", error);
+    }
+
+    return false;
+  }, [handleUploadFile]);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -43,40 +153,15 @@ const ImageUpload = ({
         return;
       }
 
-      const file = acceptedFiles[0];
-
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("Please upload a smaller image.");
-        return;
-      }
-
-      // Show initial loading toast and get the toast id
-      const toastId = toast.loading("Uploading image...");
-
-      try {
-        // Simulate upload progress
-        for (let i = 0; i <= 100; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 30));
-        }
-
-        // Simulate the upload process and get the URL
-        const { url } = await upload(file);
-
-        // Dismiss the loading toast and show success
-        toast.dismiss(toastId);
-        toast.success("Image uploaded successfully!");
-        // const previewUrl = URL.createObjectURL(file);
-        // setImageUrl(previewUrl);
-        setImageUrl(url);
-        onImageUpload(url);
-      } catch (error) {
-        setImageUrl("");
-        toast.dismiss(toastId);
-        toast.error(getUploadErrorMessage(error));
-        console.log(error);
-      }
+      await handleUploadFile(acceptedFiles[0]);
     },
   });
+
+  useEffect(() => {
+    if (!imageUrl) {
+      pasteTargetRef.current?.focus();
+    }
+  }, [imageUrl]);
 
   const handleRemoveImage = () => {
     setImageUrl("");
@@ -89,8 +174,21 @@ const ImageUpload = ({
       <div
         {...getRootProps({
           className:
-            "border-dashed border-2 rounded-xl cursor-pointer bg-zinc-100 py-8 flex justify-center items-center flex-col",
+            "relative border-dashed border-2 rounded-xl cursor-pointer bg-zinc-100 py-8 flex justify-center items-center flex-col outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         })}
+        onClick={() => pasteTargetRef.current?.focus()}
+        onPaste={handlePaste}
+        onKeyDown={async (event) => {
+          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "v") {
+            const didUpload = await handlePasteFromClipboardApi();
+
+            if (didUpload) {
+              event.preventDefault();
+            }
+          }
+        }}
+        ref={pasteTargetRef}
+        tabIndex={imageUrl ? -1 : 0}
       >
         <input {...getInputProps()} />
         {imageUrl ? (
@@ -110,7 +208,8 @@ const ImageUpload = ({
         ) : (
           <>
             <Inbox className="w-10 h-10 text-[#437634]" />
-            <p className="mt-2 text-sm text-slate-400">Drop your image here.</p>
+            <p className="mt-2 text-sm text-slate-400">Drop or paste your image here.</p>
+            <p className="mt-1 text-xs text-slate-400">Click the box, then press Ctrl+V to paste a screenshot.</p>
           </>
         )}
       </div>

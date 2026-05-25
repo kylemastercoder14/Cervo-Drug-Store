@@ -263,10 +263,27 @@ export const createProductFromExcel = async (
     });
 
     if (existingProduct) {
+      const data = await db.products.update({
+        where: {
+          id: existingProduct.id,
+        },
+        data: {
+          name,
+          description: description || undefined,
+          image: image || undefined,
+          isFeatured: isFeatured ?? false,
+          tags,
+          price,
+          isVatItem: isVatItem ?? false,
+          isPrescriptionRequired: isPrescriptionRequired ?? false,
+          categoryTag: categoryTag || null,
+        },
+      });
+
       return {
-        skipped: true,
-        data: existingProduct,
-        message: `${name} already exists and was skipped.`,
+        updated: true,
+        data,
+        message: `${name} already exists and was updated.`,
       };
     }
 
@@ -306,8 +323,8 @@ export const createBulkProducts = async (data: any[]) => {
     const createdProducts: Awaited<
       ReturnType<typeof db.products.create>
     >[] = [];
-    const skippedProducts: Awaited<
-      ReturnType<typeof db.products.findFirst>
+    const updatedProducts: Awaited<
+      ReturnType<typeof db.products.update>
     >[] = [];
     const errors: { name: string; error: string }[] = [];
 
@@ -322,8 +339,8 @@ export const createBulkProducts = async (data: any[]) => {
         continue;
       }
 
-      if (result.skipped) {
-        skippedProducts.push(result.data);
+      if (result.updated) {
+        updatedProducts.push(result.data);
         continue;
       }
 
@@ -332,10 +349,10 @@ export const createBulkProducts = async (data: any[]) => {
       }
     }
 
-    if (createdProducts.length > 0) {
+    if (createdProducts.length > 0 || updatedProducts.length > 0) {
       await db.logs.create({
         data: {
-          action: `${user.name} bulk uploaded ${createdProducts.length} product(s) at ${new Date().toLocaleString()}`,
+          action: `${user.name} bulk uploaded ${createdProducts.length} new and ${updatedProducts.length} updated product(s) at ${new Date().toLocaleString()}`,
           adminId: user.id,
         },
       });
@@ -345,13 +362,13 @@ export const createBulkProducts = async (data: any[]) => {
       success:
         errors.length === 0
           ? "Bulk upload completed successfully."
-          : "Bulk upload completed with some skipped rows.",
+          : "Bulk upload completed with some failed rows.",
       data: {
         createdCount: createdProducts.length,
-        skippedCount: skippedProducts.length,
+        updatedCount: updatedProducts.length,
         errorCount: errors.length,
         createdProducts,
-        skippedProducts,
+        updatedProducts,
         errors,
       },
     };

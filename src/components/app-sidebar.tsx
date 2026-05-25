@@ -26,7 +26,6 @@ import {
   IconWallet,
   IconBook,
   IconBriefcase,
-  IconFileDescription,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { Admin } from "@prisma/client";

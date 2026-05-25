@@ -10,7 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Send, Share2, Trash } from "lucide-react";
+import { Copy, Edit, Image as ImageIcon, MoreHorizontal, Send, Trash } from "lucide-react";
 import { useState, useTransition } from "react";
 import AlertModal from "@/components/ui/alert-modal";
 import {
@@ -47,11 +47,89 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     return `${window.location.origin}/#blogs`;
   };
 
-  const getShareText = () => {
-    const preview = stripHtml(data.content).slice(0, 140).trim();
-    return preview
-      ? `${data.title}\n\n${preview}${stripHtml(data.content).length > 140 ? "..." : ""}`
-      : data.title;
+  const getAbsoluteImageUrl = () => {
+    if (!data.image) {
+      return "";
+    }
+
+    if (data.image.startsWith("http://") || data.image.startsWith("https://")) {
+      return data.image;
+    }
+
+    if (typeof window === "undefined") {
+      return data.image;
+    }
+
+    return new URL(data.image, window.location.origin).toString();
+  };
+
+  const getFacebookCaption = () => {
+    const plainContent = stripHtml(data.content);
+    const shareUrl = getShareUrl();
+
+    return [
+      "Cervo Drug Store News & Events",
+      data.title,
+      plainContent,
+      shareUrl ? `Read more: ${shareUrl}` : null,
+      "#CervoDrugStore #NewsAndEvents",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  };
+
+  const copyShareDetails = async () => {
+    const caption = getFacebookCaption();
+    const absoluteImageUrl = getAbsoluteImageUrl();
+
+    if (
+      absoluteImageUrl &&
+      typeof ClipboardItem !== "undefined" &&
+      navigator.clipboard?.write
+    ) {
+      try {
+        const imageResponse = await fetch(absoluteImageUrl);
+        if (!imageResponse.ok) {
+          throw new Error("Unable to load the image for clipboard copy.");
+        }
+
+        const imageBlob = await imageResponse.blob();
+        const clipboardItem = new ClipboardItem({
+          "text/plain": new Blob([caption], { type: "text/plain" }),
+          [imageBlob.type || "image/png"]: imageBlob,
+        });
+
+        await navigator.clipboard.write([clipboardItem]);
+        toast.success(
+          "Caption and image copied. Paste them into your Facebook post.",
+        );
+        return;
+      } catch {
+        // Fall back to caption-only copy below.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(caption);
+      toast.success(
+        absoluteImageUrl
+          ? "Caption copied. Use the image action to open the real image for Facebook."
+          : "Caption copied. You can now paste it into Facebook.",
+      );
+    } catch {
+      toast.error("Unable to copy post details on this browser.");
+    }
+  };
+
+  const openImageForFacebook = () => {
+    const absoluteImageUrl = getAbsoluteImageUrl();
+
+    if (!absoluteImageUrl) {
+      toast.error("This news/event does not have an image to open.");
+      return;
+    }
+
+    window.open(absoluteImageUrl, "_blank", "noopener,noreferrer");
   };
 
   const publishToFacebook = () => {
@@ -79,26 +157,6 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         );
       }
     });
-  };
-
-  const handleNativeShare = async () => {
-    const shareUrl = getShareUrl();
-    const text = getShareText();
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: data.title,
-          text,
-          url: shareUrl,
-        });
-      } catch {
-        // User cancelled the share dialog.
-      }
-      return;
-    }
-
-    toast.error("Native sharing is not available on this device/browser.");
   };
 
   const onDelete = async () => {
@@ -137,6 +195,14 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={copyShareDetails}>
+            <Copy className="w-4 h-4 mr-2" />
+            Copy Facebook caption
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={openImageForFacebook}>
+            <ImageIcon className="w-4 h-4 mr-2" />
+            Open post image
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={publishToFacebook}
             disabled={isPublishing}

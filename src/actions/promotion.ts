@@ -34,7 +34,6 @@ export const getFeaturedPromotion = async () => {
       where: {
         isFeatured: true,
       },
-      take: 3,
     });
 
     if (!data) {

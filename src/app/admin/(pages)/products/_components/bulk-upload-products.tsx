@@ -247,8 +247,8 @@ const BulkUploadProducts = () => {
       const summary = response.data;
       toast.success(
         `${summary?.createdCount || 0} created, ${
-          summary?.skippedCount || 0
-        } skipped, ${summary?.errorCount || 0} failed.`
+          summary?.updatedCount || 0
+        } updated, ${summary?.errorCount || 0} failed.`
       );
       handleDialogChange(false);
     } catch (error) {
@@ -270,8 +270,8 @@ const BulkUploadProducts = () => {
           <DialogTitle>Bulk Upload Products</DialogTitle>
           <DialogDescription>
             Upload an Excel file that matches the product template, review the
-            extracted rows, then save the new products. Existing products will
-            be skipped.
+            extracted rows, then save the products. Existing products with the
+            same name or tag will be updated.
           </DialogDescription>
         </DialogHeader>
 

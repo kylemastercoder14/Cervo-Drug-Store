@@ -62,7 +62,6 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [selectedFilterValue, setSelectedFilterValue] =
     React.useState<string>("");
-  const [globalFilter, setGlobalFilter] = React.useState<string>("");
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -77,7 +76,6 @@ export function DataTable<TData, TValue>({
     state: {
       columnFilters,
       sorting,
-      globalFilter,
     },
     initialState: {
       pagination: {
@@ -95,13 +93,16 @@ export function DataTable<TData, TValue>({
     }
   };
 
+  const searchValue =
+    (table.getColumn(searchKey)?.getFilterValue() as string) ?? "";
+
   const handleResetFilter = () => {
     setSelectedFilterValue("");
-    setGlobalFilter("");
+    table.getColumn(searchKey)?.setFilterValue("");
     setColumnFilters([]);
   };
 
-  const showResetButton = globalFilter || selectedFilterValue;
+  const showResetButton = searchValue || selectedFilterValue;
 
   return (
     <div className="overflow-x-auto">
@@ -110,8 +111,10 @@ export function DataTable<TData, TValue>({
           <Search className="absolute left-3 top-[33%] transform -translate-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder="Search keyword here..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
+            value={searchValue}
+            onChange={(e) =>
+              table.getColumn(searchKey)?.setFilterValue(e.target.value)
+            }
             className="lg:w-[300px] pl-8 border border-zinc-200"
           />
         </div>
@@ -206,16 +209,20 @@ export function DataTable<TData, TValue>({
       <div className="flex md:flex-row flex-col md:items-center md:justify-between no-print gap-2 py-3">
         <p className="text-sm font-semibold text-muted-foreground">
           Showing{" "}
-          {table.getState().pagination.pageIndex *
-            table.getState().pagination.pageSize +
-            1}{" "}
+          {table.getRowModel().rows.length === 0
+            ? 0
+            : table.getState().pagination.pageIndex *
+                table.getState().pagination.pageSize +
+              1}{" "}
           to{" "}
-          {Math.min(
-            (table.getState().pagination.pageIndex + 1) *
-              table.getState().pagination.pageSize,
-            data.length
-          )}{" "}
-          of {data.length} results
+          {table.getRowModel().rows.length === 0
+            ? 0
+            : Math.min(
+                (table.getState().pagination.pageIndex + 1) *
+                  table.getState().pagination.pageSize,
+                table.getFilteredRowModel().rows.length
+              )}{" "}
+          of {table.getFilteredRowModel().rows.length} results
         </p>
 
         <div className="flex items-center gap-x-5">

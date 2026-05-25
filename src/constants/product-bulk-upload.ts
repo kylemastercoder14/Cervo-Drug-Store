@@ -68,5 +68,5 @@ export const BULK_PRODUCT_TEMPLATE_GUIDELINES = [
   "For Yes/No fields, you may use Yes, No, True, False, 1, or 0.",
   "Category should match an existing saved category tag in the system.",
   "Leave optional fields blank if they are not needed.",
-  "Existing products are skipped during save.",
+  "Existing products with the same name or generated tag are updated during save.",
 ] as const;

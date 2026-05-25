@@ -9,14 +9,12 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { News } from '@prisma/client';
 import { toast } from 'sonner';
 import { getAllNewsEvents } from '@/actions/news-events';
 
 const BlogsCarousel = () => {
   const [blogs, setBlogs] = useState<News[]>([]);
-  const router = useRouter();
   useEffect(() => {
     const fetchNews = async () => {
       const response = await getAllNewsEvents();
