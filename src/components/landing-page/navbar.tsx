@@ -10,6 +10,7 @@ import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import SearchComponent, { type SearchProduct } from "./search-component";
 import { searchProducts } from "@/actions/product";
+import { getActiveLaboratoryServiceCategories } from "@/actions/laboratory-services";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -27,9 +28,20 @@ import {
 } from "../ui/accordion";
 import { cn } from "@/lib/utils";
 
+type LaboratoryNavCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  services: string[];
+};
+
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState<SearchProduct[]>([]);
+  const [laboratoryCategories, setLaboratoryCategories] = useState<
+    LaboratoryNavCategory[]
+  >([]);
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -43,6 +55,15 @@ const Navbar = () => {
 
     fetchSearchResults();
   }, [searchTerm]);
+
+  useEffect(() => {
+    const fetchLaboratoryCategories = async () => {
+      const response = await getActiveLaboratoryServiceCategories();
+      setLaboratoryCategories(response.data || []);
+    };
+
+    fetchLaboratoryCategories();
+  }, []);
 
   const handleSearch = (query: string) => {
     setSearchTerm(query);
@@ -80,21 +101,15 @@ const Navbar = () => {
                           <Link href="/laboratory-services" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                             All Laboratory Services
                           </Link>
-                          <Link href="/laboratory-services/hematology" className="text-sm hover:text-primary transition-colors">
-                            Hematology
-                          </Link>
-                          <Link href="/laboratory-services/clinical-chemistry" className="text-sm hover:text-primary transition-colors">
-                            Clinical Chemistry
-                          </Link>
-                          <Link href="/laboratory-services/serology" className="text-sm hover:text-primary transition-colors">
-                            Serology
-                          </Link>
-                          <Link href="/laboratory-services/microbiology" className="text-sm hover:text-primary transition-colors">
-                            Microbiology
-                          </Link>
-                          <Link href="/laboratory-services/clinical-microscopy" className="text-sm hover:text-primary transition-colors">
-                            Clinical Microscopy
-                          </Link>
+                          {laboratoryCategories.map((category) => (
+                            <Link
+                              key={category.id}
+                              href={`/laboratory-services/${category.slug}`}
+                              className="text-sm hover:text-primary transition-colors"
+                            >
+                              {category.name}
+                            </Link>
+                          ))}
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -199,21 +214,16 @@ const Navbar = () => {
                         </a>
                       </NavigationMenuLink>
                     </li>
-                    <ListItem href="/laboratory-services/hematology" title="Hematology">
-                      Complete blood count, blood typing, and coagulation studies
-                    </ListItem>
-                    <ListItem href="/laboratory-services/clinical-chemistry" title="Clinical Chemistry">
-                      Blood glucose, lipid profile, liver function tests, and more
-                    </ListItem>
-                    <ListItem href="/laboratory-services/serology" title="Serology">
-                      Infectious disease testing, antibody screening, and immunology
-                    </ListItem>
-                    <ListItem href="/laboratory-services/microbiology" title="Microbiology">
-                      Culture and sensitivity, bacterial identification
-                    </ListItem>
-                    <ListItem href="/laboratory-services/clinical-microscopy" title="Clinical Microscopy">
-                      Urinalysis, fecalysis, and microscopic examinations
-                    </ListItem>
+                    {laboratoryCategories.map((category) => (
+                      <ListItem
+                        key={category.id}
+                        href={`/laboratory-services/${category.slug}`}
+                        title={category.name}
+                      >
+                        {category.description ||
+                          `${category.services.length} available laboratory service(s)`}
+                      </ListItem>
+                    ))}
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>

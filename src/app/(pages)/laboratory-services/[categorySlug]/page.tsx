@@ -16,16 +16,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Microscope, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Microscope } from "lucide-react";
+import { getLaboratoryServiceCategoryBySlug } from "@/actions/laboratory-services";
+import { notFound } from "next/navigation";
+import Link from "next/link";
 
-const ClinicalMicroscopyServices = () => {
-  const tests = [
-    "Urinalysis",
-    "Fecalysis",
-    "Fecal Occult Blood Test (FOBT)",
-    "Pregnancy Test Urine / Serum",
-    "Microalbumin",
-  ];
+type LaboratoryServiceCategoryPageProps = {
+  params: {
+    categorySlug: string;
+  };
+};
+
+const LaboratoryServiceCategoryPage = async ({
+  params,
+}: LaboratoryServiceCategoryPageProps) => {
+  const response = await getLaboratoryServiceCategoryBySlug(
+    params.categorySlug,
+  );
+
+  if (!response.data) {
+    notFound();
+  }
+
+  const category = response.data;
 
   return (
     <div className="flex relative min-h-screen w-full flex-col">
@@ -40,61 +53,67 @@ const ClinicalMicroscopyServices = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-[16px]" href="/laboratory-services">
+              <BreadcrumbLink
+                className="text-[16px]"
+                href="/laboratory-services"
+              >
                 Laboratory Services
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-[16px]">Clinical Microscopy</BreadcrumbPage>
+              <BreadcrumbPage className="text-[16px]">
+                {category.name}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
         <div className="mt-8 mb-12">
           <div className="flex items-center gap-4 mb-6">
-            <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
-              <Microscope className="h-8 w-8 text-purple-600" />
+            <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+              <Microscope className="h-8 w-8 text-green-700" />
             </div>
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-                Clinical Microscopy
+                {category.name}
               </h1>
-              <p className="text-lg text-gray-600 mt-2">
-                Detailed microscopic examination of body fluids and specimens
-              </p>
+              {category.description && (
+                <p className="text-lg text-gray-600 mt-2">
+                  {category.description}
+                </p>
+              )}
             </div>
           </div>
         </div>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-2xl">About Clinical Microscopy</CardTitle>
-            <CardDescription className="text-base">
-              Clinical microscopy involves the examination of body fluids, cells, and tissues
-              under a microscope to detect abnormalities, infections, and diseases. These tests
-              are essential for diagnosing urinary tract infections, gastrointestinal issues,
-              and other conditions.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        {category.description && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl">About {category.name}</CardTitle>
+              <CardDescription className="text-base">
+                {category.description}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Available Tests</CardTitle>
             <CardDescription>
-              Comprehensive microscopic examination services
+              Available laboratory services under {category.name}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
-              {tests.map((test, index) => (
+              {category.services.map((service) => (
                 <div
-                  key={index}
+                  key={service}
                   className="flex items-start gap-3 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-800">{test}</span>
+                  <span className="text-gray-800">{service}</span>
                 </div>
               ))}
             </div>
@@ -104,12 +123,15 @@ const ClinicalMicroscopyServices = () => {
         <div className="mt-8 bg-blue-50 rounded-lg p-6 border border-blue-200">
           <h3 className="font-semibold text-lg mb-2">Need More Information?</h3>
           <p className="text-gray-700 mb-4">
-            Contact our laboratory team to schedule your test or learn more about
-            our clinical microscopy services.
+            Contact our laboratory team to schedule your test or learn more
+            about our laboratory services.
           </p>
-          <a href="/contact-us" className="text-primary hover:underline font-medium">
-            Contact Us →
-          </a>
+          <Link
+            href="/contact-us"
+            className="text-primary hover:underline font-medium"
+          >
+            Contact Us
+          </Link>
         </div>
       </div>
       <Footer />
@@ -117,5 +139,4 @@ const ClinicalMicroscopyServices = () => {
   );
 };
 
-export default ClinicalMicroscopyServices;
-
+export default LaboratoryServiceCategoryPage;

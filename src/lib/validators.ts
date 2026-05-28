@@ -120,6 +120,16 @@ export const NewsEventValidation = z.object({
   image: z.string().min(1, { message: "Image is required" }),
 });
 
+export const LaboratoryServiceValidation = z.object({
+  name: z.string().min(1, { message: "Category is required" }),
+  description: z.string().optional(),
+  servicesText: z
+    .string()
+    .min(1, { message: "Add at least one laboratory service" }),
+  displayOrder: z.number().optional(),
+  isActive: z.boolean().optional(),
+});
+
 export const StaffValidation = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   email: z.string().min(1, { message: "Email address is required" }),

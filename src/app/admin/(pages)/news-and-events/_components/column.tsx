@@ -5,6 +5,7 @@ export type NewsEventColumn = {
   title: string;
   content: string;
   image: string;
+  videoUrl?: string | null;
   createdAt: string;
   createdAtRaw: string;
   facebookPostId?: string | null;

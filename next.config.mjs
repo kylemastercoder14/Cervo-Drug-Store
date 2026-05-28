@@ -13,6 +13,16 @@ const nextConfig = {
       "coffeeprince.s3.us-east-1.amazonaws.com",
       "southstardrug.com.ph",
     ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.fbcdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "**.cdninstagram.com",
+      },
+    ],
   },
   typescript: {
     ignoreBuildErrors: true,

@@ -1,4 +1,6 @@
 const GRAPH_API_VERSION = "v25.0";
+const POST_READ_FIELDS =
+  "id,message,full_picture,permalink_url,created_time,attachments{type,url,target{id,url},media,subattachments{type,url,target{id,url},media}}";
 
 type GraphErrorPayload = {
   error?: {
@@ -52,6 +54,35 @@ export type FacebookGraphPost = {
   full_picture?: string;
   permalink_url?: string;
   created_time?: string;
+  video_source_url?: string;
+  video_thumbnail_url?: string;
+  attachments?: {
+    data?: FacebookGraphAttachment[];
+  };
+};
+
+type FacebookGraphAttachment = {
+  type?: string;
+  url?: string;
+  media?: {
+    source?: string;
+    image?: {
+      src?: string;
+    };
+  };
+  target?: {
+    id?: string;
+    url?: string;
+  };
+  subattachments?: {
+    data?: FacebookGraphAttachment[];
+  };
+};
+
+type FacebookVideoDetails = {
+  source?: string;
+  picture?: string;
+  permalink_url?: string;
 };
 
 export const stripHtml = (value: string) =>
@@ -246,6 +277,46 @@ async function readWithFacebookToken<T>(
   throw new Error(errors.join(" | "));
 }
 
+const findVideoAttachment = (
+  attachments?: FacebookGraphAttachment[],
+): FacebookGraphAttachment | undefined => {
+  for (const attachment of attachments ?? []) {
+    const type = attachment.type?.toLowerCase() || "";
+
+    if (type.includes("video") || attachment.media?.source) {
+      return attachment;
+    }
+
+    const nested = findVideoAttachment(attachment.subattachments?.data);
+    if (nested) {
+      return nested;
+    }
+  }
+
+  return undefined;
+};
+
+async function fetchFacebookVideoDetails(
+  videoId: string,
+  accessToken: string,
+) {
+  const videoUrl = new URL(
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/${videoId}`,
+  );
+  videoUrl.searchParams.set("fields", "source,picture,permalink_url");
+  videoUrl.searchParams.set("access_token", accessToken);
+
+  const response = await readGraphJson<FacebookVideoDetails>(
+    videoUrl.toString(),
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.data;
+}
+
 export async function fetchFacebookPermalink(
   postId: string,
   accessToken: string,
@@ -431,7 +502,7 @@ export async function fetchFacebookPost(
     );
     postUrl.searchParams.set(
       "fields",
-      "id,message,full_picture,permalink_url,created_time",
+      POST_READ_FIELDS,
     );
     postUrl.searchParams.set("access_token", token);
 
@@ -444,7 +515,25 @@ export async function fetchFacebookPost(
       );
     }
 
-    return response.data?.id ? response.data : null;
+    if (!response.data?.id) {
+      return null;
+    }
+
+    const videoAttachment = findVideoAttachment(response.data.attachments?.data);
+    const videoDetails = videoAttachment?.target?.id
+      ? await fetchFacebookVideoDetails(videoAttachment.target.id, token)
+      : null;
+
+    return {
+      ...response.data,
+      video_source_url:
+        videoAttachment?.media?.source || videoDetails?.source || undefined,
+      video_thumbnail_url:
+        videoAttachment?.media?.image?.src ||
+        videoDetails?.picture ||
+        response.data.full_picture ||
+        undefined,
+    };
   });
 }
 
@@ -455,7 +544,7 @@ export async function fetchFacebookPageFeed(pageId: string, limit = 25) {
     );
     feedUrl.searchParams.set(
       "fields",
-      "id,message,full_picture,permalink_url,created_time",
+      POST_READ_FIELDS,
     );
     feedUrl.searchParams.set("limit", String(limit));
     feedUrl.searchParams.set("access_token", token);
@@ -471,6 +560,26 @@ export async function fetchFacebookPageFeed(pageId: string, limit = 25) {
       );
     }
 
-    return response.data.data ?? [];
+    const posts = response.data.data ?? [];
+
+    return Promise.all(
+      posts.map(async (post) => {
+        const videoAttachment = findVideoAttachment(post.attachments?.data);
+        const videoDetails = videoAttachment?.target?.id
+          ? await fetchFacebookVideoDetails(videoAttachment.target.id, token)
+          : null;
+
+        return {
+          ...post,
+          video_source_url:
+            videoAttachment?.media?.source || videoDetails?.source || undefined,
+          video_thumbnail_url:
+            videoAttachment?.media?.image?.src ||
+            videoDetails?.picture ||
+            post.full_picture ||
+            undefined,
+        };
+      }),
+    );
   });
 }

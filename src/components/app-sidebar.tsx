@@ -26,6 +26,7 @@ import {
   IconWallet,
   IconBook,
   IconBriefcase,
+  IconMicroscope,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { Admin } from "@prisma/client";
@@ -80,6 +81,11 @@ const data = {
       title: "News & Events",
       url: "/admin/news-and-events",
       icon: IconBlockquote,
+    },
+    {
+      title: "Laboratory Services",
+      url: "/admin/laboratory-services",
+      icon: IconMicroscope,
     },
     {
       title: "Careers",

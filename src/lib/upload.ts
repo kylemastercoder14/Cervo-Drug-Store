@@ -7,6 +7,22 @@ export class UploadError extends Error {
   }
 }
 
+const S3_REGION = "ap-southeast-2";
+
+const createS3Client = () => {
+  AWS.config.update({
+    accessKeyId: process.env.NEXT_PUBLIC_S3_ACCESS_KEY_ID,
+    secretAccessKey: process.env.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY,
+  });
+
+  return new AWS.S3({
+    params: {
+      Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
+    },
+    region: S3_REGION,
+  });
+};
+
 export async function upload(
   file: File,
   progressCallback?: (progress: number) => void
@@ -22,17 +38,7 @@ export async function upload(
       );
     }
 
-    AWS.config.update({
-      accessKeyId: process.env.NEXT_PUBLIC_S3_ACCESS_KEY_ID,
-      secretAccessKey: process.env.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY,
-    });
-
-    const s3 = new AWS.S3({
-      params: {
-        Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
-      },
-      region: "ap-southeast-2",
-    });
+    const s3 = createS3Client();
 
     const file_key = `uploads/${Date.now().toString()}_${file.name.replace(
       / /g,
@@ -59,7 +65,7 @@ export async function upload(
 
     console.log("Successfully uploaded to S3:", file_key);
 
-    const url = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.ap-southeast-2.amazonaws.com/${file_key}`;
+    const url = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${S3_REGION}.amazonaws.com/${file_key}`;
     return { url };
   } catch (error) {
     console.error("Error uploading to S3:", error);

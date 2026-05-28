@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock3,
+  Film,
   Newspaper,
   RefreshCw,
   Search,
@@ -80,6 +81,7 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
         title: item.title,
         content: item.content,
         image: item.image,
+        videoUrl: item.videoUrl,
         createdAt: format(item.createdAt, "MMMM do, yyyy"),
         createdAtRaw: new Date(item.createdAt).toISOString(),
         facebookPostId: item.facebookPostId,
@@ -117,6 +119,10 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
       }
 
       if (filterBy === "has-image" && !item.image) {
+        return false;
+      }
+
+      if (filterBy === "has-video" && !item.videoUrl) {
         return false;
       }
 
@@ -267,6 +273,7 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
               <SelectItem value="recent">Last 30 days</SelectItem>
               <SelectItem value="this-month">This month</SelectItem>
               <SelectItem value="has-image">Has image</SelectItem>
+              <SelectItem value="has-video">Has video</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -324,18 +331,28 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
               ].join(" ")}
             >
               <div className="relative h-52 w-full overflow-hidden bg-zinc-100">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className={[
-                    "object-cover",
-                    isLatest ? "scale-[1.02]" : "",
-                  ].join(" ")}
-                />
+                {item.videoUrl ? (
+                  <video
+                    src={item.videoUrl}
+                    poster={item.image}
+                    controls
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className={[
+                      "object-cover",
+                      isLatest ? "scale-[1.02]" : "",
+                    ].join(" ")}
+                  />
+                )}
                 <div
                   className={[
-                    "absolute inset-0",
+                    "pointer-events-none absolute inset-0",
                     isLatest
                       ? "bg-gradient-to-t from-[#1f3d18]/80 via-[#1f3d18]/10 to-transparent"
                       : "bg-gradient-to-t from-black/35 to-transparent",
@@ -346,6 +363,12 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
                     <Badge className="rounded-full bg-[#437634] px-3 py-1 text-white hover:bg-[#437634]">
                       <Star className="mr-1 h-3.5 w-3.5" />
                       Latest post
+                    </Badge>
+                  )}
+                  {item.videoUrl && (
+                    <Badge className="rounded-full bg-slate-950/80 px-3 py-1 text-white hover:bg-slate-950/80">
+                      <Film className="mr-1 h-3.5 w-3.5" />
+                      Video
                     </Badge>
                   )}
                   {isRecent && !isLatest && (
