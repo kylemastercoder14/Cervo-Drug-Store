@@ -12,6 +12,7 @@ export type FacebookSyncResult = {
   publishedToFacebookCount: number;
   importedFromFacebookCount: number;
   publishErrors: string[];
+  importErrors: string[];
   ranAt: string;
   source: string;
 };
@@ -23,6 +24,7 @@ export type FacebookSyncStatus = {
   publishedToFacebookCount: number;
   importedFromFacebookCount: number;
   publishErrors: string[];
+  importErrors?: string[];
   ranAt: string;
   message: string;
 };
@@ -43,6 +45,11 @@ async function appendSyncLog(line: string) {
 async function writeSyncStatus(status: FacebookSyncStatus) {
   await ensureSyncLogDir();
   await fs.writeFile(SYNC_STATUS_FILE, JSON.stringify(status, null, 2), "utf8");
+}
+
+export async function recordFacebookSyncStatus(status: FacebookSyncStatus) {
+  await appendSyncLog(JSON.stringify(status));
+  await writeSyncStatus(status);
 }
 
 export async function getFacebookSyncStatus(): Promise<FacebookSyncStatus | null> {
@@ -114,17 +121,36 @@ export async function runFacebookNewsSync(
   }
 
   let importedFromFacebookCount = 0;
+  const importErrors: string[] = [];
 
   if (mode === "both" || mode === "facebook-to-system") {
-    const posts = await fetchFacebookPageFeed(pageId, 25);
+    try {
+      const posts = await fetchFacebookPageFeed(pageId, 25);
 
-    for (const post of posts) {
-      if (!post.id) {
-        continue;
+      for (const post of posts) {
+        if (!post.id) {
+          continue;
+        }
+
+        try {
+          await syncFacebookPostToNews(post, "FACEBOOK_CRON_IMPORT");
+          importedFromFacebookCount += 1;
+        } catch (error) {
+          importErrors.push(
+            `${post.id}: ${
+              error instanceof Error
+                ? error.message
+                : "Unknown Facebook import error."
+            }`,
+          );
+        }
       }
-
-      await syncFacebookPostToNews(post, "FACEBOOK_CRON_IMPORT");
-      importedFromFacebookCount += 1;
+    } catch (error) {
+      importErrors.push(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch Facebook page feed.",
+      );
     }
   }
 
@@ -134,35 +160,27 @@ export async function runFacebookNewsSync(
     publishedToFacebookCount,
     importedFromFacebookCount,
     publishErrors,
+    importErrors,
     ranAt,
     source,
   };
 
   const status: FacebookSyncStatus = {
-    ok: publishErrors.length === 0,
+    ok: publishErrors.length === 0 && importErrors.length === 0,
     mode,
     source,
     publishedToFacebookCount,
     importedFromFacebookCount,
     publishErrors,
+    importErrors,
     ranAt,
     message:
-      publishErrors.length === 0
+      publishErrors.length === 0 && importErrors.length === 0
         ? "Facebook sync completed successfully."
-        : "Facebook sync completed with publish errors.",
+        : "Facebook sync completed with errors.",
   };
 
-  await appendSyncLog(
-    JSON.stringify({
-      ranAt,
-      mode,
-      source,
-      publishedToFacebookCount,
-      importedFromFacebookCount,
-      publishErrors,
-    }),
-  );
-  await writeSyncStatus(status);
+  await recordFacebookSyncStatus(status);
 
   return result;
 }

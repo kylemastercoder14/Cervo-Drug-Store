@@ -45,6 +45,7 @@ type SyncStatus = {
   publishedToFacebookCount: number;
   importedFromFacebookCount: number;
   publishErrors: string[];
+  importErrors?: string[];
   ranAt: string;
   message: string;
 } | null;
@@ -197,6 +198,16 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
               <p className="text-sm text-muted-foreground">
                 {syncStatus?.message || "No sync run has been recorded yet."}
               </p>
+              {syncStatus?.importErrors?.length ? (
+                <p className="mt-1 max-w-3xl text-xs text-red-600">
+                  {syncStatus.importErrors[0]}
+                </p>
+              ) : null}
+              {syncStatus?.publishErrors?.length ? (
+                <p className="mt-1 max-w-3xl text-xs text-red-600">
+                  {syncStatus.publishErrors[0]}
+                </p>
+              ) : null}
             </div>
           </div>
 

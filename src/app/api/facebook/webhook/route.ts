@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { fetchFacebookPost } from "@/lib/facebook";
 import { syncFacebookPostToNews } from "@/lib/facebook-news";
+import { recordFacebookSyncStatus } from "@/lib/facebook-sync";
 
 type FacebookWebhookBody = {
   entry?: Array<{
@@ -13,6 +14,7 @@ type FacebookWebhookBody = {
         item?: string;
         verb?: string;
         post_id?: string;
+        parent_id?: string;
       };
     }>;
   }>;
@@ -78,14 +80,16 @@ export async function POST(req: NextRequest) {
   }
 
   const payload = JSON.parse(rawBody) as FacebookWebhookBody;
+  const errors: string[] = [];
+  let importedFromFacebookCount = 0;
 
   for (const entry of payload.entry ?? []) {
     for (const change of entry.changes ?? []) {
-      const postId = change.value?.post_id;
-      const isFeedPost = change.field === "feed" && change.value?.item === "post";
+      const postId = change.value?.post_id || change.value?.parent_id;
+      const isFeedChange = change.field === "feed";
       const isSupportedVerb = ["add", "edit"].includes(change.value?.verb ?? "");
 
-      if (!isFeedPost || !isSupportedVerb || !postId) {
+      if (!isFeedChange || !isSupportedVerb || !postId) {
         continue;
       }
 
@@ -94,11 +98,34 @@ export async function POST(req: NextRequest) {
 
         if (post?.id) {
           await syncFacebookPostToNews(post, "FACEBOOK_WEBHOOK");
+          importedFromFacebookCount += 1;
         }
       } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unknown Facebook webhook import error.";
+        errors.push(`${postId}: ${message}`);
         console.error("Failed to sync Facebook webhook post:", error);
       }
     }
+  }
+
+  if (importedFromFacebookCount > 0 || errors.length > 0) {
+    await recordFacebookSyncStatus({
+      ok: errors.length === 0,
+      mode: "facebook-to-system",
+      source: "facebook:webhook",
+      publishedToFacebookCount: 0,
+      importedFromFacebookCount,
+      publishErrors: [],
+      importErrors: errors,
+      ranAt: new Date().toISOString(),
+      message:
+        errors.length === 0
+          ? "Facebook webhook sync completed successfully."
+          : "Facebook webhook sync completed with errors.",
+    });
   }
 
   return NextResponse.json({ success: true });
