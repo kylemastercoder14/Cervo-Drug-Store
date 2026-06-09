@@ -66,7 +66,7 @@ const BlogDetailsPage = async ({ params }: BlogDetailsPageProps) => {
                   poster={blog.image}
                   controls
                   preload="metadata"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                 />
               ) : (
                 <Image
@@ -74,7 +74,7 @@ const BlogDetailsPage = async ({ params }: BlogDetailsPageProps) => {
                   alt={blog.title}
                   fill
                   priority
-                  className="object-cover"
+                  className="object-contain"
                 />
               )}
             </div>
@@ -115,7 +115,7 @@ const BlogDetailsPage = async ({ params }: BlogDetailsPageProps) => {
                         src={item.image}
                         alt={item.title}
                         fill
-                        className="object-cover transition-transform group-hover:scale-105"
+                        className="object-contain transition-transform group-hover:scale-105"
                       />
                     </div>
                     <div>

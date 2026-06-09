@@ -2,14 +2,19 @@
 "use server";
 
 import db from "@/lib/db";
+import type { CartItem } from "@/hooks/use-cart";
 import { CheckoutValidation } from "@/lib/validators";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
+type OrderCartItem = Partial<CartItem> & {
+  productId?: string;
+};
+
 export const createOrder = async (
   values: z.infer<typeof CheckoutValidation>,
   userId: string,
-  items: any[],
+  items: OrderCartItem[],
   orderOption: string,
   selectedAddress: string,
   totalPrice: any,
@@ -24,53 +29,95 @@ export const createOrder = async (
   }
 
   const { prescription, email, branch } = validatedField.data;
+  const cartItems = Array.isArray(items) ? items : [];
+  const validOrderItems = cartItems
+    .map((item) => ({
+      productId: String(item.id || item.productId || "").trim(),
+      quantity: Math.max(1, Math.floor(Number(item.quantity ?? 1))),
+    }))
+    .filter((item) => item.productId && Number.isFinite(item.quantity));
+
+  if (!userId?.trim()) {
+    return { error: "Please sign in before placing your order." };
+  }
+
+  if (!selectedAddress?.trim()) {
+    return { error: "Please select an address before placing your order." };
+  }
+
+  if (validOrderItems.length === 0 || validOrderItems.length !== cartItems.length) {
+    return {
+      error:
+        "Your cart has no valid products. Please remove the item and add it again.",
+    };
+  }
 
   const orderId = `${String.fromCharCode(
     65 + Math.floor(Math.random() * 26)
   )}${Math.floor(Math.random() * 1000000)}`;
 
   try {
-    const order = await db.orders.create({
-      data: {
-        orderNumber: orderId,
-        deliveryFee,
-        userId,
-        email,
-        addressId: selectedAddress,
-        totalAmount: totalPrice,
-        method: orderOption,
-        orderOption: orderOption,
-        prescription,
-        branch: branch || "",
-        discountPrice: discount,
-      },
-      select: {
-        id: true,
-        orderNumber: true,
-        userId: true,
-        email: true,
-        totalAmount: true,
-        discountPrice: true,
-        orderOption: true,
-        deliveryFee: true,
-        method: true,
-        prescription: true,
-        branch: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-        addressId: true,
+    const productIds = validOrderItems.map((item) => item.productId);
+    const uniqueProductIds = Array.from(new Set(productIds));
+    const productCount = await db.products.count({
+      where: {
+        id: {
+          in: uniqueProductIds,
+        },
       },
     });
 
-    const orderItems = items.map((item) => ({
-      orderId: order.id,
-      productId: item.id,
-      quantity: item.quantity,
-    }));
+    if (productCount !== uniqueProductIds.length) {
+      return {
+        error:
+          "One or more products in your cart are no longer available. Please remove them and add the product again.",
+      };
+    }
 
-    await db.orderItems.createMany({
-      data: orderItems,
+    const order = await db.$transaction(async (tx) => {
+      const createdOrder = await tx.orders.create({
+        data: {
+          orderNumber: orderId,
+          deliveryFee,
+          userId,
+          email,
+          contactNumber: validatedField.data.contactNumber,
+          addressId: selectedAddress,
+          totalAmount: totalPrice,
+          method: orderOption,
+          orderOption: orderOption,
+          prescription,
+          branch: branch || "",
+          discountPrice: discount,
+        },
+        select: {
+          id: true,
+          orderNumber: true,
+          userId: true,
+          email: true,
+          totalAmount: true,
+          discountPrice: true,
+          orderOption: true,
+          deliveryFee: true,
+          method: true,
+          prescription: true,
+          branch: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+          addressId: true,
+        },
+      });
+
+      await tx.orderItems.createMany({
+        data: validOrderItems.map((item) => ({
+          orderId: createdOrder.id,
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      });
+
+      return createdOrder;
     });
 
     return { success: "Order created successfully", orderData: order };

@@ -39,14 +39,14 @@ const BlogsPage = async () => {
                     poster={item.image}
                     controls
                     preload="metadata"
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain"
                   />
                 ) : (
                   <Image
                     src={item.image}
                     alt={item.title}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                   />
                 )}
               </div>

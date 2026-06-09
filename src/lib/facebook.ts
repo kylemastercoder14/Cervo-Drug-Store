@@ -85,12 +85,51 @@ type FacebookVideoDetails = {
   permalink_url?: string;
 };
 
+const decodeHtmlEntities = (value: string) =>
+  value.replace(
+    /&(#(?:x[0-9a-f]+|\d+)|[a-z]+);/gi,
+    (entity, code: string) => {
+      const namedEntities: Record<string, string> = {
+        amp: "&",
+        apos: "'",
+        gt: ">",
+        lt: "<",
+        nbsp: " ",
+        quot: '"',
+      };
+
+      if (code.startsWith("#x") || code.startsWith("#X")) {
+        const codePoint = Number.parseInt(code.slice(2), 16);
+        return Number.isNaN(codePoint) || codePoint > 0x10ffff
+          ? entity
+          : String.fromCodePoint(codePoint);
+      }
+
+      if (code.startsWith("#")) {
+        const codePoint = Number.parseInt(code.slice(1), 10);
+        return Number.isNaN(codePoint) || codePoint > 0x10ffff
+          ? entity
+          : String.fromCodePoint(codePoint);
+      }
+
+      return namedEntities[code.toLowerCase()] ?? entity;
+    },
+  );
+
 export const stripHtml = (value: string) =>
-  value
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  decodeHtmlEntities(
+    value
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|h[1-6]|blockquote)>/gi, "\n")
+      .replace(/<li[^>]*>/gi, "\n- ")
+      .replace(/<\/li>/gi, "")
+      .replace(/<\/(ul|ol)>/gi, "\n")
+      .replace(/<[^>]*>/g, "")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n[ \t]+/g, "\n")
+      .replace(/[ \t]{2,}/g, " ")
+      .replace(/\n{3,}/g, "\n\n"),
+  ).trim();
 
 export const normalizeFacebookError = (message?: string) => {
   if (!message) {
@@ -105,8 +144,11 @@ export const normalizeFacebookError = (message?: string) => {
     return "The configured Facebook access token is invalid or expired. Generate a new token and update your Facebook env settings.";
   }
 
-  if (message.includes("pages_read_engagement")) {
-    return "The Facebook token used by the server cannot read the Page feed. Reload PM2 with the updated env and make sure the token was generated for the same Meta app connected to this Page.";
+  if (
+    message.includes("pages_read_engagement") ||
+    message.includes("pages_read_user_content")
+  ) {
+    return "The Facebook token used by the server cannot read the Page feed. Generate a Page access token that includes pages_read_engagement and pages_read_user_content for this Page, then reload PM2 with the updated env.";
   }
 
   return message;
@@ -122,16 +164,12 @@ export const buildFacebookPostMessage = ({
   link?: string;
 }) => {
   const plainContent = stripHtml(content);
-  const messagePreview =
-    plainContent.length > 300
-      ? `${plainContent.slice(0, 300).trim()}...`
-      : plainContent;
 
   const normalizedTitle = title.trim();
   const templateSections = [
     "Cervo Drug Store News & Events",
     normalizedTitle,
-    messagePreview,
+    plainContent,
     link?.trim() ? `Read more: ${link.trim()}` : null,
     "#CervoDrugStore #NewsAndEvents",
   ].filter(Boolean);

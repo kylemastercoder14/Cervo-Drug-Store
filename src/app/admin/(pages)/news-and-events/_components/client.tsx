@@ -341,14 +341,14 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
                   : "bg-white",
               ].join(" ")}
             >
-              <div className="relative h-52 w-full overflow-hidden bg-zinc-100">
+              <div className="relative h-60 w-full overflow-hidden bg-zinc-100">
                 {item.videoUrl ? (
                   <video
                     src={item.videoUrl}
                     poster={item.image}
                     controls
                     preload="metadata"
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain"
                   />
                 ) : (
                   <Image
@@ -356,7 +356,7 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
                     alt={item.title}
                     fill
                     className={[
-                      "object-cover",
+                      "object-contain",
                       isLatest ? "scale-[1.02]" : "",
                     ].join(" ")}
                   />

@@ -53,10 +53,10 @@ const BlogsCarousel = () => {
                       poster={item.image}
                       controls
                       preload="metadata"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                     />
                   ) : (
-                    <Image src={item.image} alt="Blog" fill />
+                    <Image src={item.image} alt="Blog" fill className="object-contain" />
                   )}
                   <div className="pointer-events-none absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/80 to-transparent" />
                   <Link

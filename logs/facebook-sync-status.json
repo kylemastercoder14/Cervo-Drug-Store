@@ -1,13 +1,11 @@
 {
-  "ok": false,
+  "ok": true,
   "mode": "facebook-to-system",
   "source": "admin:news-page",
   "publishedToFacebookCount": 0,
-  "importedFromFacebookCount": 0,
+  "importedFromFacebookCount": 25,
   "publishErrors": [],
-  "importErrors": [
-    "FACEBOOK_PAGE_ACCESS_TOKEN: The configured Facebook access token is invalid or expired. Generate a new token and update your Facebook env settings. | FACEBOOK_USER_ACCESS_TOKEN: The configured Facebook access token is invalid or expired. Generate a new token and update your Facebook env settings."
-  ],
-  "ranAt": "2026-05-28T10:45:13.030Z",
-  "message": "Facebook sync completed with errors."
+  "importErrors": [],
+  "ranAt": "2026-06-09T06:00:02.393Z",
+  "message": "Facebook sync completed successfully."
 }
