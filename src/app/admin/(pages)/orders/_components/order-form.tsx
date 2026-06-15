@@ -17,6 +17,14 @@ import {
 import { ArrowLeft } from "lucide-react";
 import { submitShippingFeeOffer, updateOrderStatus } from "@/actions/order";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface OrderItemWithProduct extends OrderItems {
   product: Products;
@@ -61,6 +69,11 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
     data.orderOption === "Third-Party Courier";
   const orderTotal =
     data.totalAmount - (data.discountPrice || 0) + (data.deliveryFee || 0);
+  const prescriptionUrl = data.prescription || "";
+  const isPrescriptionImage = /\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(
+    prescriptionUrl
+  );
+  const isPrescriptionPdf = /\.pdf(\?.*)?$/i.test(prescriptionUrl);
 
   const orderStepsDelivery = [
     {
@@ -132,10 +145,20 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
     setOrderStatus(value);
     setLoading(true);
 
-    await updateOrderStatus(data.id, value);
-    router.refresh();
-    toast.success("Order status updated");
-    setLoading(false);
+    try {
+      await updateOrderStatus(data.id, value);
+      router.refresh();
+      toast.success("Order status updated");
+    } catch (error) {
+      setOrderStatus(data.status);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to update order status."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSendShippingFee = async () => {
@@ -238,7 +261,7 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
                 Order Number: {data.orderNumber}
               </h2>
               <Select
-                defaultValue={orderStatus}
+                value={orderStatus}
                 onValueChange={handleStatusChange}
                 disabled={loading}
               >
@@ -270,12 +293,54 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
             <p>
               Prescription:{" "}
               {data.prescription ? (
-                <span
-                  className="cursor-pointer underline text-green-500"
-                  onClick={() => toast(data.prescription)}
-                >
-                  View Prescription
-                </span>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      className="cursor-pointer underline text-green-500"
+                    >
+                      View Prescription
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Prescription</DialogTitle>
+                      <DialogDescription>
+                        Uploaded prescription for order {data.orderNumber}.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {isPrescriptionImage ? (
+                      <div className="relative min-h-[70vh] w-full overflow-hidden rounded-md border bg-muted">
+                        <Image
+                          src={prescriptionUrl}
+                          alt={`Prescription for order ${data.orderNumber}`}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    ) : isPrescriptionPdf ? (
+                      <iframe
+                        src={prescriptionUrl}
+                        title={`Prescription for order ${data.orderNumber}`}
+                        className="h-[70vh] w-full rounded-md border"
+                      />
+                    ) : (
+                      <div className="rounded-md border bg-muted p-4">
+                        <p className="break-all text-sm">{prescriptionUrl}</p>
+                      </div>
+                    )}
+
+                    <a
+                      href={prescriptionUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium text-green-600 underline"
+                    >
+                      Open prescription in new tab
+                    </a>
+                  </DialogContent>
+                </Dialog>
               ) : (
                 "No Prescription"
               )}

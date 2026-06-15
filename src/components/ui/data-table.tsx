@@ -91,6 +91,7 @@ export function DataTable<TData, TValue>({
     if (filterColumn) {
       table.getColumn(filterColumn)?.setFilterValue(value);
     }
+    table.setPageIndex(0);
   };
 
   const searchValue =
@@ -100,7 +101,12 @@ export function DataTable<TData, TValue>({
     setSelectedFilterValue("");
     table.getColumn(searchKey)?.setFilterValue("");
     setColumnFilters([]);
+    table.setPageIndex(0);
   };
+
+  React.useEffect(() => {
+    table.setPageIndex(0);
+  }, [data, table]);
 
   const showResetButton = searchValue || selectedFilterValue;
 
@@ -112,9 +118,10 @@ export function DataTable<TData, TValue>({
           <Input
             placeholder="Search keyword here..."
             value={searchValue}
-            onChange={(e) =>
-              table.getColumn(searchKey)?.setFilterValue(e.target.value)
-            }
+            onChange={(e) => {
+              table.getColumn(searchKey)?.setFilterValue(e.target.value);
+              table.setPageIndex(0);
+            }}
             className="lg:w-[300px] pl-8 border border-zinc-200"
           />
         </div>

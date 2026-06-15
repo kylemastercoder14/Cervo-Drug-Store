@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 export type SearchProduct = {
   id: string | number;
   name: string;
+  tags?: string | null;
   category?: {
     name?: string | null;
   } | null;
@@ -53,7 +54,9 @@ const SearchComponent = ({
       {showDropdown && filteredProducts.length > 0 && (
         <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded shadow-lg z-50">
           {filteredProducts.map((product) => {
-            const productUrl = `/products/${product.id}`;
+            const productUrl = `/products/${encodeURIComponent(
+              product.tags || String(product.id)
+            )}`;
             return (
               <div
               key={product.id}

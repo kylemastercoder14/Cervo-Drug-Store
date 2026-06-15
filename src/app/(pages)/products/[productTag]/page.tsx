@@ -13,6 +13,7 @@ import Footer from "@/components/landing-page/footer";
 import FeaturedProducts from "@/components/landing-page/featured-products";
 import db from "@/lib/db";
 import SingleProductClient from "./client";
+import { notFound } from "next/navigation";
 
 const ViewProduct = async (props: {
   params: Promise<{
@@ -23,12 +24,17 @@ const ViewProduct = async (props: {
   const decodedParams = decodeURIComponent(params.productTag);
   const product = await db.products.findFirst({
     where: {
-      id: decodedParams,
+      OR: [{ id: decodedParams }, { tags: decodedParams }],
     },
     include: {
       orderItems: true,
-    }
+    },
   });
+
+  if (!product) {
+    notFound();
+  }
+
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Navbar />
