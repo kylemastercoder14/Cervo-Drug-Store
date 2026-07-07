@@ -11,9 +11,11 @@ import { Button } from "../ui/button";
 const ImageUpload = ({
   onImageUpload,
   defaultValue = "",
+  guidelines,
 }: {
   onImageUpload: (url: string) => void;
   defaultValue?: string;
+  guidelines?: React.ReactNode;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>(defaultValue);
   const pasteTargetRef = useRef<HTMLDivElement | null>(null);
@@ -213,6 +215,11 @@ const ImageUpload = ({
           </>
         )}
       </div>
+      {guidelines && (
+        <p className="mt-2 text-xs leading-5 text-muted-foreground">
+          {guidelines}
+        </p>
+      )}
     </div>
   );
 };

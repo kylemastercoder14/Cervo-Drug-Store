@@ -70,6 +70,7 @@ const PromotionForm = ({
                   label="Image"
                   isRequired={true}
                   name="image"
+                  description="Recommended resolution: 1200 x 1600 px. Use JPG, PNG, WebP, or SVG. Max file size: 10 MB."
                   disabled={isSaving}
                 />
                 <CustomFormField

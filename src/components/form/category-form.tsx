@@ -77,6 +77,7 @@ const CategoryForm = ({
                   label="Image"
                   isRequired={true}
                   name="image"
+                  description="Recommended resolution: 600 x 600 px. Use JPG, PNG, WebP, or SVG. Max file size: 10 MB."
                   disabled={isSaving}
                 />
                 <Button type="submit" disabled={isSaving}>

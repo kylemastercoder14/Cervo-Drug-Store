@@ -206,6 +206,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
               <p className="text-sm text-muted-foreground">{data.name}</p>
               <ImageUpload
                 defaultValue={uploadedImage}
+                guidelines="Recommended resolution: 1200 x 1200 px. Use JPG, PNG, WebP, or SVG. Max file size: 10 MB."
                 onImageUpload={setUploadedImage}
               />
               {uploadedImage && (

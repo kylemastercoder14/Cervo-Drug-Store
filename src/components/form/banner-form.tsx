@@ -68,6 +68,7 @@ const BannerForm = ({
                   label="Image"
                   isRequired={true}
                   name="image"
+                  description="Recommended resolution: 1920 x 720 px. Use JPG, PNG, WebP, or SVG. Max file size: 10 MB."
                   disabled={isSaving}
                 />
                 <Button type="submit" disabled={isSaving}>

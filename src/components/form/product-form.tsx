@@ -149,6 +149,7 @@ const ProductForm = ({
                 label="Image"
                 isRequired={false}
                 name="image"
+                description="Recommended resolution: 1200 x 1200 px. Use JPG, PNG, WebP, or SVG. Max file size: 10 MB."
                 disabled={isSaving}
               />
               <CustomFormField

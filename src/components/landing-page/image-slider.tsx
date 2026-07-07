@@ -103,7 +103,7 @@ const ImageSlider = () => {
             alt={`Slider ${idx + 1}`}
             fill
             priority={idx === 0}
-            className="object-cover"
+            className="object-contain"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-black/10" />

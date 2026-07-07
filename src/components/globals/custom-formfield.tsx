@@ -380,6 +380,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           <ImageUpload
             defaultValue={field.value || ""}
             onImageUpload={(url) => field.onChange(url)}
+            guidelines={description}
           />
         </FormControl>
       );
