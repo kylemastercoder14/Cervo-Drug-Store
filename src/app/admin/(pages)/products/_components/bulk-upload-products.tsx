@@ -7,6 +7,7 @@ import { Loader } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { createBulkProducts } from "@/actions/product";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -248,17 +249,15 @@ const BulkUploadProducts = () => {
     setIsSaving(true);
 
     try {
-      const bulkUploadResponse = await fetch("/api/products/bulk-upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ products: previewRows }),
-      });
-      const response = await bulkUploadResponse.json();
+      const response = await createBulkProducts(previewRows);
 
-      if (!bulkUploadResponse.ok || response?.error) {
-        toast.error(response?.error || "Bulk upload failed.");
+      if (!response) {
+        toast.error("Bulk upload failed. No server response was returned.");
+        return;
+      }
+
+      if (response.error) {
+        toast.error(response.error);
         return;
       }
 
