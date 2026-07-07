@@ -44,6 +44,8 @@ type ParsedBulkProductRow = {
   image?: string;
 };
 
+const BULK_UPLOAD_CHUNK_SIZE = 50;
+
 const normalizeBoolean = (value: unknown) => {
   if (typeof value === "boolean") {
     return value;
@@ -99,6 +101,10 @@ const BulkUploadProducts = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    processed: number;
+    total: number;
+  } | null>(null);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [previewRows, setPreviewRows] = useState<ParsedBulkProductRow[]>([]);
 
@@ -134,11 +140,16 @@ const BulkUploadProducts = () => {
   };
 
   const handleDialogChange = (open: boolean) => {
+    if (isSaving) {
+      return;
+    }
+
     setIsOpen(open);
 
     if (!open) {
       setSelectedFileName("");
       setPreviewRows([]);
+      setUploadProgress(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -247,23 +258,45 @@ const BulkUploadProducts = () => {
     }
 
     setIsSaving(true);
+    setUploadProgress({ processed: 0, total: previewRows.length });
 
     try {
-      const response = await createBulkProducts(previewRows);
+      const summary = {
+        createdCount: 0,
+        updatedCount: 0,
+        errorCount: 0,
+        errors: [] as { name: string; error: string }[],
+      };
 
-      if (!response) {
-        toast.error("Bulk upload failed. No server response was returned.");
-        return;
-      }
+      for (let startIndex = 0; startIndex < previewRows.length; startIndex += BULK_UPLOAD_CHUNK_SIZE) {
+        const chunk = previewRows.slice(startIndex, startIndex + BULK_UPLOAD_CHUNK_SIZE);
+        const response = await createBulkProducts(chunk);
 
-      if (response.error) {
-        toast.error(response.error);
-        return;
+        if (!response) {
+          toast.error(
+            `Bulk upload failed after ${startIndex} row(s). No server response was returned.`
+          );
+          return;
+        }
+
+        if (response.error) {
+          toast.error(response.error);
+          return;
+        }
+
+        summary.createdCount += response.data?.createdCount || 0;
+        summary.updatedCount += response.data?.updatedCount || 0;
+        summary.errorCount += response.data?.errorCount || 0;
+        summary.errors.push(...(response.data?.errors || []));
+
+        setUploadProgress({
+          processed: Math.min(startIndex + chunk.length, previewRows.length),
+          total: previewRows.length,
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ["products"] });
 
-      const summary = response.data;
       const firstError = summary?.errors?.[0];
       toast.success(
         `${summary?.createdCount || 0} created, ${
@@ -283,6 +316,7 @@ const BulkUploadProducts = () => {
       );
     } finally {
       setIsSaving(false);
+      setUploadProgress(null);
     }
   };
 
@@ -374,6 +408,13 @@ const BulkUploadProducts = () => {
           </div>
         </div>
 
+        {uploadProgress && (
+          <div className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
+            Saving products {uploadProgress.processed} of {uploadProgress.total}
+            ...
+          </div>
+        )}
+
         <DialogFooter>
           <Button
             type="button"
@@ -389,7 +430,7 @@ const BulkUploadProducts = () => {
             disabled={!hasPreviewRows || isSaving}
           >
             {isSaving && <Loader className="mr-2 size-4 animate-spin" />}
-            Save Products
+            {isSaving ? "Saving..." : "Save Products"}
           </Button>
         </DialogFooter>
       </DialogContent>
