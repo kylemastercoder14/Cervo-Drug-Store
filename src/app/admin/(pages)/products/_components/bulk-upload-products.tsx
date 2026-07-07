@@ -18,7 +18,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -83,12 +82,16 @@ const normalizePrice = (value: unknown) => {
   }
 
   if (typeof value === "string") {
-    const parsedValue = Number(value.trim());
+    const numericValue = value.trim().replace(/,/g, "").replace(/[^0-9.-]/g, "");
+    const parsedValue = Number(numericValue);
     return Number.isFinite(parsedValue) ? parsedValue : 0;
   }
 
   return 0;
 };
+
+const normalizeHeaderKey = (value: string) =>
+  value.trim().toLowerCase().replace(/\s+/g, " ");
 
 const BulkUploadProducts = () => {
   const queryClient = useQueryClient();
@@ -169,7 +172,18 @@ const BulkUploadProducts = () => {
           headerLabel: string
         ) => {
           const fieldName = BULK_PRODUCT_TEMPLATE_HEADER_TO_FIELD[headerLabel];
-          return row[headerLabel] ?? row[fieldName] ?? "";
+          const normalizedHeaderLabel = normalizeHeaderKey(headerLabel);
+          const normalizedFieldName = normalizeHeaderKey(fieldName);
+          const matchedEntry = Object.entries(row).find(([key]) => {
+            const normalizedKey = normalizeHeaderKey(key);
+
+            return (
+              normalizedKey === normalizedHeaderLabel ||
+              normalizedKey === normalizedFieldName
+            );
+          });
+
+          return matchedEntry?.[1] ?? "";
         };
 
         const parsedRows = jsonRows
@@ -265,7 +279,7 @@ const BulkUploadProducts = () => {
         <IconFileExcel className="size-4" />
         <span>Bulk Upload</span>
       </Button>
-      <DialogContent className="max-w-5xl">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-6xl overflow-hidden">
         <DialogHeader>
           <DialogTitle>Bulk Upload Products</DialogTitle>
           <DialogDescription>
@@ -277,7 +291,7 @@ const BulkUploadProducts = () => {
 
         <div className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-1 items-center gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               <Input
                 ref={fileInputRef}
                 type="file"
@@ -300,14 +314,19 @@ const BulkUploadProducts = () => {
             {selectedFileName ? ` | Uploaded file: ${selectedFileName}` : ""}
           </div>
 
-          <div className="rounded-lg border">
-            <ScrollArea className="h-[380px] w-full">
+          <div className="max-w-full overflow-hidden rounded-lg border">
+            <div className="max-h-[380px] overflow-auto">
               {hasPreviewRows ? (
-                <Table>
+                <Table className="min-w-[1080px]">
                   <TableHeader>
                     <TableRow>
                       {previewColumns.map((column) => (
-                        <TableHead key={column.field}>{column.label}</TableHead>
+                        <TableHead
+                          className="whitespace-nowrap"
+                          key={column.field}
+                        >
+                          {column.label}
+                        </TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
@@ -315,7 +334,11 @@ const BulkUploadProducts = () => {
                     {previewRows.map((row, index) => (
                       <TableRow key={`${row.name}-${index}`}>
                         {previewColumns.map((column) => (
-                          <TableCell key={`${column.field}-${index}`}>
+                          <TableCell
+                            className="max-w-[240px] truncate whitespace-nowrap"
+                            key={`${column.field}-${index}`}
+                            title={String(row[column.field] ?? "")}
+                          >
                             {String(row[column.field] ?? "")}
                           </TableCell>
                         ))}
@@ -334,7 +357,7 @@ const BulkUploadProducts = () => {
                   </div>
                 </div>
               )}
-            </ScrollArea>
+            </div>
           </div>
         </div>
 
