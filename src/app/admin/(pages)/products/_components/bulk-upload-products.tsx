@@ -259,15 +259,23 @@ const BulkUploadProducts = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
 
       const summary = response.data;
+      const firstError = summary?.errors?.[0];
       toast.success(
         `${summary?.createdCount || 0} created, ${
           summary?.updatedCount || 0
         } updated, ${summary?.errorCount || 0} failed.`
       );
+
+      if (firstError) {
+        toast.error(`${firstError.name}: ${firstError.error}`);
+      }
+
       handleDialogChange(false);
     } catch (error) {
       console.error(error);
-      toast.error("Bulk upload failed.");
+      toast.error(
+        error instanceof Error ? error.message : "Bulk upload failed."
+      );
     } finally {
       setIsSaving(false);
     }

@@ -17,6 +17,13 @@ const bulkProductRowSchema = z.object({
   image: z.string().optional(),
 });
 
+const createProductTag = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/,/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/&/g, "and");
+
 export const getAllProducts = async () => {
   try {
     const data = await db.products.findMany({
@@ -190,11 +197,7 @@ export const createProduct = async (
     categoryTag,
   } = validatedField.data;
 
-  const tags = name
-    .toLowerCase()
-    .replace(/,/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/&/g, "and");
+  const tags = createProductTag(name);
 
   try {
     const data = await db.products.create({
@@ -249,11 +252,7 @@ export const createProductFromExcel = async (
     image,
   } = validatedField.data;
 
-  const tags = name
-    .toLowerCase()
-    .replace(/,/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/&/g, "and");
+  const tags = createProductTag(name);
 
   try {
     const existingProduct = await db.products.findFirst({
@@ -320,39 +319,85 @@ export const createBulkProducts = async (data: any[]) => {
   }
 
   try {
-    const createdProducts: Awaited<
-      ReturnType<typeof db.products.create>
-    >[] = [];
-    const updatedProducts: Awaited<
-      ReturnType<typeof db.products.update>
-    >[] = [];
+    let createdCount = 0;
+    let updatedCount = 0;
     const errors: { name: string; error: string }[] = [];
 
     for (const product of data) {
-      const result = await createProductFromExcel(product);
+      const validatedField = bulkProductRowSchema.safeParse(product);
 
-      if (result.error) {
+      if (!validatedField.success) {
+        const validationErrors = validatedField.error.issues.map(
+          (err) => err.message
+        );
         errors.push({
           name: product?.name || "Unknown product",
-          error: result.error,
+          error: `Validation Error: ${validationErrors.join(", ")}`,
         });
         continue;
       }
 
-      if (result.updated) {
-        updatedProducts.push(result.data);
-        continue;
-      }
+      const {
+        name,
+        description,
+        price,
+        categoryTag,
+        isFeatured,
+        isPrescriptionRequired,
+        isVatItem,
+        image,
+      } = validatedField.data;
+      const tags = createProductTag(name);
 
-      if (result.data) {
-        createdProducts.push(result.data);
+      try {
+        const existingProduct = await db.products.findFirst({
+          where: {
+            OR: [{ tags }, { name: { equals: name, mode: "insensitive" } }],
+          },
+        });
+        const productData = {
+          name,
+          description: description || undefined,
+          image: image || undefined,
+          isFeatured: isFeatured ?? false,
+          tags,
+          price,
+          isVatItem: isVatItem ?? false,
+          isPrescriptionRequired: isPrescriptionRequired ?? false,
+          categoryTag: categoryTag || null,
+        };
+
+        if (existingProduct) {
+          await db.products.update({
+            where: {
+              id: existingProduct.id,
+            },
+            data: productData,
+          });
+          updatedCount += 1;
+          continue;
+        }
+
+        await db.products.create({
+          data: productData,
+        });
+        createdCount += 1;
+      } catch (error) {
+        console.error(`Failed to save bulk product "${name}":`, error);
+        errors.push({
+          name,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to save product row.",
+        });
       }
     }
 
-    if (createdProducts.length > 0 || updatedProducts.length > 0) {
+    if (createdCount > 0 || updatedCount > 0) {
       await db.logs.create({
         data: {
-          action: `${user.name} bulk uploaded ${createdProducts.length} new and ${updatedProducts.length} updated product(s) at ${new Date().toLocaleString()}`,
+          action: `${user.name} bulk uploaded ${createdCount} new and ${updatedCount} updated product(s) at ${new Date().toLocaleString()}`,
           adminId: user.id,
         },
       });
@@ -364,12 +409,10 @@ export const createBulkProducts = async (data: any[]) => {
           ? "Bulk upload completed successfully."
           : "Bulk upload completed with some failed rows.",
       data: {
-        createdCount: createdProducts.length,
-        updatedCount: updatedProducts.length,
+        createdCount,
+        updatedCount,
         errorCount: errors.length,
-        createdProducts,
-        updatedProducts,
-        errors,
+        errors: errors.slice(0, 10),
       },
     };
   } catch (error) {
@@ -412,11 +455,7 @@ export const updateProduct = async (
     categoryTag,
   } = validatedField.data;
 
-  const tags = name
-    .toLowerCase()
-    .replace(/,/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/&/g, "and");
+  const tags = createProductTag(name);
 
   try {
     const data = await db.products.update({
