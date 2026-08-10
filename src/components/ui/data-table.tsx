@@ -105,8 +105,22 @@ export function DataTable<TData, TValue>({
   };
 
   React.useEffect(() => {
-    table.setPageIndex(0);
-  }, [data, table]);
+    const pageIndex = table.getState().pagination.pageIndex;
+    const pageCount = table.getPageCount();
+
+    if (pageIndex === 0) {
+      return;
+    }
+
+    if (pageCount === 0) {
+      table.setPageIndex(0);
+      return;
+    }
+
+    if (pageIndex >= pageCount) {
+      table.setPageIndex(pageCount - 1);
+    }
+  }, [data.length, table]);
 
   const showResetButton = searchValue || selectedFilterValue;
 
