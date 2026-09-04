@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -27,6 +28,7 @@ import { logout } from "@/actions/manage-staff";
 export function NavUser({ admin }: { admin: Admin | null }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
   const { isMobile } = useSidebar();
   const handleLogout = async () => {
     setLoading(true);
@@ -84,6 +86,10 @@ export function NavUser({ admin }: { admin: Admin | null }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => router.push("/admin/account-settings")}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Account Settings
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setOpen(true)}>
                   <LogOut className="w-4 h-4 mr-2" />

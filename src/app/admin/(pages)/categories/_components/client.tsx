@@ -5,10 +5,12 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, CategoryColumn } from "./column";
 import { format } from "date-fns";
-import { useGetCategories } from "@/data/category";
+import { useDeleteCategory, useGetCategories } from "@/data/category";
 
 const CategoryClient = () => {
   const { data: categoryData, error, isLoading } = useGetCategories();
+  const { mutateAsync: deleteCategory, isPending: isDeleting } =
+    useDeleteCategory();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -39,6 +41,11 @@ const CategoryClient = () => {
         searchKey="name"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteCategory(id)));
+        }}
       />
     </>
   );

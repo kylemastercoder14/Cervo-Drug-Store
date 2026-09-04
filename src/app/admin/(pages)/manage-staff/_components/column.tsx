@@ -13,6 +13,7 @@ export type StaffColumn = {
   name: string;
   email: string;
   role: string;
+  branch: string;
   password: string;
   createdAt: string;
 };
@@ -58,6 +59,21 @@ export const columns: ColumnDef<StaffColumn>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <p>Role</p>
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
+  {
+    accessorKey: "branch",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={"ghost"}
+
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <p>Branch</p>
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       );

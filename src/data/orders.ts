@@ -1,15 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  createNewsEvent,
-  deleteNewsEvent,
-  getAllNewsEvents,
-  updateNewsEvent,
-} from "@/actions/news-events";
-import { NewsEventValidation } from "@/lib/validators";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { z } from "zod";
-import { getAllOrders } from "../actions/order";
+import { deleteOrder, getAllOrders } from "../actions/order";
 
 export function useGetOrders() {
   return useQuery({
@@ -18,21 +9,21 @@ export function useGetOrders() {
   });
 }
 
-// export function useDeleteNewsEvent() {
-//   const queryClient = useQueryClient();
+export function useDeleteOrder() {
+  const queryClient = useQueryClient();
 
-//   return useMutation({
-//     mutationFn: async (newsId: string) => {
-//       return deleteNewsEvent(newsId);
-//     },
-//     onSuccess: (data) => {
-//       if (data?.success) {
-//         toast.success(data.success);
-//         queryClient.invalidateQueries({ queryKey: ["news-and-events"] });
-//       }
-//     },
-//     onError: (error: any) => {
-//       toast.error(error.message || "An error occurred");
-//     },
-//   });
-// }
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return deleteOrder(orderId);
+    },
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success(data.success);
+        queryClient.invalidateQueries({ queryKey: ["orders"] });
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "An error occurred");
+    },
+  });
+}

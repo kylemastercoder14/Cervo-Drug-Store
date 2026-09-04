@@ -6,14 +6,15 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CellAction } from "./cell-action";
 
-export type BannerColumn = {
+export type LogColumn = {
   id: string;
   action: string;
   createdAt: string;
 };
 
-export const columns: ColumnDef<BannerColumn>[] = [
+export const columns: ColumnDef<LogColumn>[] = [
   {
     accessorKey: "action",
     header: ({ column }) => {
@@ -43,5 +44,10 @@ export const columns: ColumnDef<BannerColumn>[] = [
         </Button>
       );
     },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];

@@ -5,11 +5,18 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { columns, LaboratoryServiceColumn } from "./column";
 import { format } from "date-fns";
-import { useGetLaboratoryServiceCategories } from "@/data/laboratory-services";
+import {
+  useDeleteLaboratoryServiceCategory,
+  useGetLaboratoryServiceCategories,
+} from "@/data/laboratory-services";
 
 const LaboratoryServiceClient = () => {
   const { data: laboratoryServiceData, error, isLoading } =
     useGetLaboratoryServiceCategories();
+  const {
+    mutateAsync: deleteLaboratoryServiceCategory,
+    isPending: isDeleting,
+  } = useDeleteLaboratoryServiceCategory();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -48,6 +55,13 @@ const LaboratoryServiceClient = () => {
       searchKey="name"
       columns={columns}
       data={formattedData}
+      enableBatchDelete
+      batchDeleteLoading={isDeleting}
+      onBatchDelete={async (ids) => {
+        await Promise.all(
+          ids.map((id) => deleteLaboratoryServiceCategory(id))
+        );
+      }}
     />
   );
 };

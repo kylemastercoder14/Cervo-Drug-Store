@@ -5,10 +5,12 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, InventoryColumn } from "./column";
 import { format } from "date-fns";
-import { useGetInventory } from "@/data/inventory";
+import { useDeleteInventory, useGetInventory } from "@/data/inventory";
 
 const InventoryClient = () => {
   const { data: inventoryData, error, isLoading } = useGetInventory();
+  const { mutateAsync: deleteInventory, isPending: isDeleting } =
+    useDeleteInventory();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -43,6 +45,11 @@ const InventoryClient = () => {
         searchKey="banner"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteInventory(id)));
+        }}
       />
     </>
   );

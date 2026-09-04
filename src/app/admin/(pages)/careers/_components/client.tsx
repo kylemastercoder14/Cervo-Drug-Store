@@ -5,10 +5,12 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, CareerColumn } from "./column";
 import { format } from "date-fns";
-import { useGetCareers } from "@/data/career";
+import { useDeleteCareer, useGetCareers } from "@/data/career";
 
 const CareerClient = () => {
   const { data: careerData, error, isLoading } = useGetCareers();
+  const { mutateAsync: deleteCareer, isPending: isDeleting } =
+    useDeleteCareer();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -44,6 +46,11 @@ const CareerClient = () => {
         searchKey="jobTitle"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteCareer(id)));
+        }}
       />
     </>
   );

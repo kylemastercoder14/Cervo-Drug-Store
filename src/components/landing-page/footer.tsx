@@ -5,11 +5,16 @@ import React from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { useGetBranches } from "@/data/branch";
 
 const Footer = () => {
+  const { data: branchData, isLoading } = useGetBranches();
+  const branches = branchData?.data || [];
+
   const handleClick = () => {
     toast.success("Subscribed to newsletter!");
   };
+
   return (
     <>
       <footer className="bg-black lg:px-20 px-3 gap-20 text-white py-8 grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1">
@@ -27,12 +32,9 @@ const Footer = () => {
           <p className="text-md text-muted-foreground mb-3">
             Subscribe to our newsletter to get the best deals and promos.
           </p>
-          <p></p>
           <div className="flex items-center gap-2">
             <Input placeholder="Type your email address" />
-            <Button onClick={handleClick} >
-              Subscribe
-            </Button>
+            <Button onClick={handleClick}>Subscribe</Button>
           </div>
         </div>
         <div className="flex flex-col">
@@ -64,22 +66,52 @@ const Footer = () => {
         </div>
         <div className="flex flex-col">
           <p className="font-semibold text-xl mb-2">Opening Hours</p>
-          <p className="text-muted-foreground text-md font-semibold">
-            Mon-Sat 7:00am to 8:30pm
-          </p>
+          {isLoading ? (
+            <p className="text-muted-foreground text-md font-semibold">
+              Loading store hours...
+            </p>
+          ) : branches.length > 0 ? (
+            <div className="space-y-2">
+              {branches.map((branch) => (
+                <div key={branch.id}>
+                  <p className="text-white text-md font-semibold">
+                    {branch.name}
+                  </p>
+                  <p className="text-muted-foreground text-sm font-semibold">
+                    {branch.storeHours}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-md font-semibold">
+              Store hours unavailable
+            </p>
+          )}
+
           <p className="font-semibold text-xl mt-3 mb-2">Branches</p>
-          <p className="text-muted-foreground text-md font-semibold">
-            <span className="text-lg">•</span> No. 472-A Elisco Rd., Brgy. San
-            Joaquin, Pasig City
-          </p>
-          <p className="text-muted-foreground text-md font-semibold">
-            <span className="text-lg">•</span> 152-A 12th Avenue, J.P Rizal
-            Ext., East Rembo, Taguig City
-          </p>
-          <p className="text-muted-foreground text-md font-semibold">
-            <span className="text-lg">•</span> 7F. Manalo St. Ligid-Tipas,
-            Taguig City
-          </p>
+          {isLoading ? (
+            <p className="text-muted-foreground text-md font-semibold">
+              Loading branches...
+            </p>
+          ) : branches.length > 0 ? (
+            <div className="space-y-2">
+              {branches.map((branch) => (
+                <div key={branch.id}>
+                  <p className="text-muted-foreground text-md font-semibold">
+                    <span className="text-lg">&bull;</span> {branch.address}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {branch.contactNumber} | {branch.email}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-md font-semibold">
+              No branches available
+            </p>
+          )}
         </div>
       </footer>
       {/* <div className="bg-white px-4 xl:px-60 py-5 grid xl:grid-cols-3 grid-cols-1 xl:gap-20 gap-10">

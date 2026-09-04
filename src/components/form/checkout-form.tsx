@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { useGetBranches } from "@/data/branch";
+import { useGetPaymentMethods } from "@/data/payment-method";
 
 interface CheckoutFormProps extends User {
   address: Address[];
@@ -120,6 +123,9 @@ const CheckoutForm = ({
   const [pendingSubmission, setPendingSubmission] = useState<
     z.infer<typeof CheckoutValidation> | null
   >(null);
+  const { data: branchData, isLoading: isLoadingBranches } = useGetBranches();
+  const { data: paymentMethodData, isLoading: isLoadingPaymentMethods } =
+    useGetPaymentMethods();
 
   const selectedAddressData = useMemo(
     () => user?.address.find((address) => address.id === selectedAddress) || null,
@@ -138,6 +144,18 @@ const CheckoutForm = ({
   const isPrescriptionRequired = items.some(
     (item) => item.isPrescriptionRequired
   );
+  const branchOptions =
+    branchData?.data?.map((branch) => ({
+      label: `${branch.name} - ${branch.address}`,
+      value: branch.name,
+    })) || [];
+  const paymentMethods =
+    paymentMethodData?.data?.filter((paymentMethod) => paymentMethod.isActive) ||
+    [];
+  const paymentMethodOptions = paymentMethods.map((paymentMethod) => ({
+    label: `${paymentMethod.type} - ${paymentMethod.name}`,
+    value: `${paymentMethod.type} - ${paymentMethod.name}`,
+  }));
 
   const form = useForm<z.infer<typeof CheckoutValidation>>({
     resolver: zodResolver(CheckoutValidation),
@@ -147,9 +165,16 @@ const CheckoutForm = ({
       acceptPolicy: false,
       prescription: "",
       branch: "",
+      paymentMethod: "",
       recipientRemarks: "",
     },
   });
+  const selectedPaymentMethodValue = form.watch("paymentMethod");
+  const selectedPaymentMethod = paymentMethods.find(
+    (paymentMethod) =>
+      `${paymentMethod.type} - ${paymentMethod.name}` ===
+      selectedPaymentMethodValue
+  );
 
   useEffect(() => {
     const contactNumber =
@@ -297,26 +322,14 @@ const CheckoutForm = ({
                     label="Branch"
                     name="branch"
                     placeholder="Select Branch"
-                    dynamicOptions={[
-                      {
-                        label:
-                          "No. 472-A Elisco Rd., Brgy. San Joaquin, Pasig City",
-                        value:
-                          "No. 472-A Elisco Rd., Brgy. San Joaquin, Pasig City",
-                      },
-                      {
-                        label:
-                          "152-A 12th Avenue, J.P Rizal Ext., East Rembo, Taguig City",
-                        value:
-                          "152-A 12th Avenue, J.P Rizal Ext., East Rembo, Taguig City",
-                      },
-                      {
-                        label: "7F. Manalo St. Ligid-Tipas, Taguig City",
-                        value: "7F. Manalo St. Ligid-Tipas, Taguig City",
-                      },
-                    ]}
+                    dynamicOptions={branchOptions}
                     isRequired={true}
-                    disabled={isLoading}
+                    disabled={isLoading || isLoadingBranches}
+                    description={
+                      !isLoadingBranches && branchOptions.length === 0
+                        ? "No branches are available for checkout."
+                        : undefined
+                    }
                   />
                 </div>
                 <div className="grid gap-3">
@@ -435,6 +448,60 @@ const CheckoutForm = ({
                   </div>
                 </>
               )}
+
+              <p className="mb-5 mt-10 border-b border-zinc-300 pb-3">
+                Payment Method
+              </p>
+              <div className="grid gap-3">
+                <CustomFormField
+                  control={form.control}
+                  fieldType={FormFieldType.SELECT}
+                  label="Payment Method"
+                  name="paymentMethod"
+                  placeholder="Select Payment Method"
+                  dynamicOptions={paymentMethodOptions}
+                  isRequired={true}
+                  disabled={isLoading || isLoadingPaymentMethods}
+                  description={
+                    !isLoadingPaymentMethods && paymentMethodOptions.length === 0
+                      ? "No payment methods are available."
+                      : undefined
+                  }
+                />
+                {selectedPaymentMethod && (
+                  <div className="rounded-lg border border-zinc-200 bg-white p-4">
+                    <div className="grid gap-1 text-sm text-zinc-700">
+                      <p>
+                        <span className="font-semibold text-zinc-900">
+                          Account Name:
+                        </span>{" "}
+                        {selectedPaymentMethod.accountName}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-zinc-900">
+                          Account Number:
+                        </span>{" "}
+                        {selectedPaymentMethod.accountNumber}
+                      </p>
+                    </div>
+                    {selectedPaymentMethod.qrCode && (
+                      <div className="mt-4">
+                        <p className="mb-2 text-sm font-semibold text-zinc-900">
+                          QR Code
+                        </p>
+                        <div className="relative h-64 w-full overflow-hidden rounded-md border bg-zinc-100">
+                          <Image
+                            src={selectedPaymentMethod.qrCode}
+                            alt={`${selectedPaymentMethod.name} QR code`}
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="mt-6 rounded-lg border border-zinc-200 bg-white p-4">
                 <div className="flex items-center justify-between gap-3">

@@ -8,7 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -40,7 +39,7 @@ const ProductClient = ({ products }: { products: ProductClientProps[] }) => {
   const [filteredProducts, setFilteredProducts] =
     React.useState<ProductClientProps[]>(products);
   const [availability, setAvailability] = React.useState("all");
-  const [priceRange, setPriceRange] = React.useState([1, maxPrice]);
+  const [priceRange, setPriceRange] = React.useState([0, maxPrice]);
   const [sortBy, setSortBy] = React.useState("All");
   const [visibleProducts, setVisibleProducts] = React.useState(20);
   const [showScrollToTop, setShowScrollToTop] = React.useState(false);
@@ -57,6 +56,11 @@ const ProductClient = ({ products }: { products: ProductClientProps[] }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  React.useEffect(() => {
+    setPriceRange([0, maxPrice]);
+    setVisibleProducts(20);
+  }, [maxPrice, products]);
 
   React.useEffect(() => {
     let tempProducts = [...products];
@@ -197,7 +201,7 @@ const ProductClient = ({ products }: { products: ProductClientProps[] }) => {
                   }
                 />
                 <p className="mt-2 text-muted-foreground text-sm">
-                  Adjust the price by sliding. Minimum: ₱1, Maximum: ₱
+                  Adjust the price by sliding. Minimum: ₱0, Maximum: ₱
                   {maxPrice.toFixed(2)}.
                 </p>
               </AccordionContent>
@@ -241,7 +245,8 @@ const ProductClient = ({ products }: { products: ProductClientProps[] }) => {
               </Select>
             </div>
             <p>
-              {visibleProducts} of {products.length} products
+              {Math.min(visibleProducts, filteredProducts.length)} of{" "}
+              {filteredProducts.length} products
             </p>
           </div>
           <div className="grid lg:grid-cols-4 grid-cols-1 gap-5 mt-5">

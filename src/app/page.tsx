@@ -7,11 +7,16 @@ import ImageSlider from "@/components/landing-page/image-slider";
 import Navbar from "@/components/landing-page/navbar";
 import PromotionContent from "@/components/landing-page/promotion-content";
 import { Button } from "@/components/ui/button";
+import { syncFacebookPostsForWebsite } from "@/lib/facebook-public-sync";
 import Link from "next/link";
 import React from "react";
 import LaboratoryServicesSection from "@/components/landing-page/laboratory";
 
-const Home = () => {
+export const dynamic = "force-dynamic";
+
+const Home = async () => {
+  await syncFacebookPostsForWebsite("public:home");
+
   return (
     <div className="flex relative min-h-screen w-full flex-col">
       <Navbar />

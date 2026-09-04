@@ -2,7 +2,7 @@
 
 import { Inbox, X } from "lucide-react";
 import Image from "next/image";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { UploadError, upload } from "@/lib/upload";
@@ -18,8 +18,6 @@ const ImageUpload = ({
   guidelines?: React.ReactNode;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>(defaultValue);
-  const pasteTargetRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(() => {
     setImageUrl(defaultValue);
   }, [defaultValue]);
@@ -141,7 +139,7 @@ const ImageUpload = ({
     return false;
   }, [handleUploadFile]);
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps, rootRef } = useDropzone({
     accept: {
       "image/png": [".png"],
       "image/jpg": [".jpg", ".jpeg"],
@@ -161,9 +159,9 @@ const ImageUpload = ({
 
   useEffect(() => {
     if (!imageUrl) {
-      pasteTargetRef.current?.focus();
+      rootRef.current?.focus();
     }
-  }, [imageUrl]);
+  }, [imageUrl, rootRef]);
 
   const handleRemoveImage = () => {
     setImageUrl("");
@@ -177,20 +175,22 @@ const ImageUpload = ({
         {...getRootProps({
           className:
             "relative border-dashed border-2 rounded-xl cursor-pointer bg-zinc-100 py-8 flex justify-center items-center flex-col outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        })}
-        onClick={() => pasteTargetRef.current?.focus()}
-        onPaste={handlePaste}
-        onKeyDown={async (event) => {
-          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "v") {
-            const didUpload = await handlePasteFromClipboardApi();
+          onClick: () => rootRef.current?.focus(),
+          onPaste: handlePaste,
+          onKeyDown: async (event) => {
+            if (
+              (event.ctrlKey || event.metaKey) &&
+              event.key.toLowerCase() === "v"
+            ) {
+              const didUpload = await handlePasteFromClipboardApi();
 
-            if (didUpload) {
-              event.preventDefault();
+              if (didUpload) {
+                event.preventDefault();
+              }
             }
-          }
-        }}
-        ref={pasteTargetRef}
-        tabIndex={imageUrl ? -1 : 0}
+          },
+          tabIndex: imageUrl ? -1 : 0,
+        })}
       >
         <input {...getInputProps()} />
         {imageUrl ? (
@@ -200,7 +200,10 @@ const ImageUpload = ({
                 variant="destructive"
                 type="button"
                 size="icon"
-                onClick={handleRemoveImage}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleRemoveImage();
+                }}
               >
                 <X className="w-4 h-4" />
               </Button>

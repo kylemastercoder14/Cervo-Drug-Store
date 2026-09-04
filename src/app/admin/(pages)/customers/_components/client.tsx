@@ -5,10 +5,12 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, CustomerColumn } from "./column";
 import { format } from "date-fns";
-import { useGetCustomers } from "@/data/customers";
+import { useDeleteCustomer, useGetCustomers } from "@/data/customers";
 
 const CustomerClient = () => {
   const { data: customerData, error, isLoading } = useGetCustomers();
+  const { mutateAsync: deleteCustomer, isPending: isDeleting } =
+    useDeleteCustomer();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -38,9 +40,14 @@ const CustomerClient = () => {
     <>
       <DataTable
         loading={isLoading}
-        searchKey="banner"
+        searchKey="name"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteCustomer(id)));
+        }}
       />
     </>
   );

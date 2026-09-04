@@ -14,7 +14,8 @@ import db from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
-import { Package, MapPin, User } from "lucide-react";
+import { Package, MapPin, Settings, User } from "lucide-react";
+import CompleteOrderButton from "./complete-order-button";
 
 const getStatusLabel = (status: string) => {
   switch (status) {
@@ -26,6 +27,9 @@ const getStatusLabel = (status: string) => {
       return status;
   }
 };
+
+const canCompleteOrder = (status: string) =>
+  ["SHIPPED", "DELIVERED"].includes(status.toUpperCase());
 
 const MyProfile = async () => {
   const { userId } = auth();
@@ -173,11 +177,16 @@ const MyProfile = async () => {
                             {order.OrderItems.length > 1 ? "items" : "item"}
                           </p>
                         </div>
-                        <Link href={`/track-order/${order.id}`}>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          {canCompleteOrder(order.status) && (
+                            <CompleteOrderButton orderId={order.id} />
+                          )}
+                          <Link href={`/track-order/${order.id}`}>
                           <Button disabled={order.status === "CANCELLED"} variant="default" size="sm">
                             Track Order →
                           </Button>
-                        </Link>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -255,6 +264,12 @@ const MyProfile = async () => {
               <Link href="/my-profile/addresses" className="block">
                 <Button className="w-full" variant="outline">
                   Manage Addresses ({user?.address.length || 0})
+                </Button>
+              </Link>
+              <Link href="/my-profile/account-settings" className="mt-3 block">
+                <Button className="w-full gap-2" variant="default">
+                  <Settings className="h-4 w-4" />
+                  Account Settings
                 </Button>
               </Link>
             </div>

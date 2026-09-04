@@ -3,12 +3,13 @@
 import { DataTable } from "@/components/ui/data-table";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { columns, BannerColumn } from "./column";
+import { columns, LogColumn } from "./column";
 import { format } from "date-fns";
-import { useGetLogs } from "@/data/logs";
+import { useDeleteLog, useGetLogs } from "@/data/logs";
 
 const LogClient = () => {
   const { data: logsData, error, isLoading } = useGetLogs();
+  const { mutateAsync: deleteLog, isPending: isDeleting } = useDeleteLog();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ const LogClient = () => {
     }
   }, [error]);
 
-  const formattedData: BannerColumn[] =
+  const formattedData: LogColumn[] =
     logsData?.data?.map((item) => ({
       id: item.id,
       action: item.action,
@@ -35,9 +36,14 @@ const LogClient = () => {
     <>
       <DataTable
         loading={isLoading}
-        searchKey="banner"
+        searchKey="action"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteLog(id)));
+        }}
       />
     </>
   );

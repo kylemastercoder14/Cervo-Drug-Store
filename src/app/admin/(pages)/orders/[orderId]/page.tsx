@@ -40,6 +40,14 @@ const OrderId = async (
           product: true,
         },
       },
+      transactionRemarks: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          admin: true,
+        },
+      },
     },
   });
 
@@ -47,9 +55,21 @@ const OrderId = async (
     return <div>Order not found</div>;
   }
 
+  const branchStaffCount = data.branch
+    ? await db.admin.count({
+        where: {
+          branch: data.branch,
+        },
+      })
+    : 0;
+  const requiresManualSignatory = branchStaffCount === 1;
+
   return (
     <div className='py-5'>
-      <OrderForm data={data} />
+      <OrderForm
+        data={data}
+        requiresManualSignatory={requiresManualSignatory}
+      />
     </div>
   );
 };

@@ -5,10 +5,12 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, PromotionColumn } from "./column";
 import { format } from "date-fns";
-import { useGetPromotions } from "@/data/promotion";
+import { useDeletePromotion, useGetPromotions } from "@/data/promotion";
 
 const PromotionClient = () => {
   const { data: promotionData, error, isLoading } = useGetPromotions();
+  const { mutateAsync: deletePromotion, isPending: isDeleting } =
+    useDeletePromotion();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -40,6 +42,11 @@ const PromotionClient = () => {
         searchKey="promotion"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deletePromotion(id)));
+        }}
       />
     </>
   );

@@ -13,6 +13,7 @@ import CustomFormField from "../globals/custom-formfield";
 import { FormFieldType } from "@/constants";
 import { Modal } from "../ui/modal";
 import { useSaveStaff } from "@/data/manage-staff";
+import { useGetBranches } from "@/data/branch";
 
 const StaffForm = ({
   initialData,
@@ -26,6 +27,12 @@ const StaffForm = ({
     ? "Make sure to click save changes after you update the staff."
     : "Please fill the required fields to add a new staff.";
   const action = initialData ? "Save Changes" : "Save Staff";
+  const { data: branchData, isLoading: isLoadingBranches } = useGetBranches();
+  const branchOptions =
+    branchData?.data?.map((branch) => ({
+      value: branch.name,
+      label: branch.name,
+    })) || [];
 
   const form = useForm<z.infer<typeof StaffValidation>>({
     resolver: zodResolver(StaffValidation),
@@ -39,6 +46,7 @@ const StaffForm = ({
           email: "",
           password: "",
           role: "",
+          branch: "",
         },
   });
 
@@ -109,6 +117,21 @@ const StaffForm = ({
                     { value: "Staff", label: "Staff" },
                   ]}
                   disabled={isSaving}
+                />
+                <CustomFormField
+                  control={form.control}
+                  fieldType={FormFieldType.SELECT}
+                  label="Branch"
+                  placeholder="Select Branch"
+                  isRequired={true}
+                  name="branch"
+                  dynamicOptions={branchOptions}
+                  disabled={isSaving || isLoadingBranches}
+                  description={
+                    !isLoadingBranches && branchOptions.length === 0
+                      ? "No branches are available. Add a branch first."
+                      : undefined
+                  }
                 />
                 <Button type="submit" disabled={isSaving}>
                   {isSaving && <Loader className="animate-spin w-4 h-4" />}

@@ -1,11 +1,11 @@
 {
   "ok": true,
   "mode": "facebook-to-system",
-  "source": "admin:news-page",
+  "source": "public:home",
   "publishedToFacebookCount": 0,
   "importedFromFacebookCount": 25,
   "publishErrors": [],
   "importErrors": [],
-  "ranAt": "2026-06-09T06:00:02.393Z",
+  "ranAt": "2026-09-04T12:08:43.925Z",
   "message": "Facebook sync completed successfully."
 }

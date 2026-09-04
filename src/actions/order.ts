@@ -6,9 +6,59 @@ import type { CartItem } from "@/hooks/use-cart";
 import { CheckoutValidation } from "@/lib/validators";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
+import { getUserFromCookies } from "@/hooks/use-user";
 
 type OrderCartItem = Partial<CartItem> & {
   productId?: string;
+};
+
+type OrderTransactionMeta = {
+  staffName?: string;
+  remarks?: string;
+};
+
+const normalizeOrderTransactionMeta = async (
+  orderId: string,
+  meta?: OrderTransactionMeta,
+) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  const order = await db.orders.findUnique({
+    where: {
+      id: orderId,
+    },
+    select: {
+      branch: true,
+    },
+  });
+
+  if (!order) {
+    throw new Error("Order not found.");
+  }
+
+  const branchStaffCount = order.branch
+    ? await db.admin.count({
+        where: {
+          branch: order.branch,
+        },
+      })
+    : 0;
+  const requiresManualSignatory = branchStaffCount === 1;
+  const staffName = meta?.staffName?.trim() || user.name;
+
+  if (requiresManualSignatory && !meta?.staffName?.trim()) {
+    throw new Error("Staff or signatory name is required.");
+  }
+
+  return {
+    user,
+    staffName,
+    remarks: requiresManualSignatory ? meta?.remarks?.trim() || null : null,
+  };
 };
 
 export const createOrder = async (
@@ -28,7 +78,7 @@ export const createOrder = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { prescription, email, branch } = validatedField.data;
+  const { prescription, email, branch, paymentMethod } = validatedField.data;
   const cartItems = Array.isArray(items) ? items : [];
   const validOrderItems = cartItems
     .map((item) => ({
@@ -84,7 +134,7 @@ export const createOrder = async (
           contactNumber: validatedField.data.contactNumber,
           addressId: selectedAddress,
           totalAmount: totalPrice,
-          method: orderOption,
+          method: paymentMethod,
           orderOption: orderOption,
           prescription,
           branch: branch || "",
@@ -170,12 +220,38 @@ export const getAllOrders = async () => {
 
 export const completeOrder = async (orderId: string) => {
   try {
+    const { userId } = auth();
+
+    if (!userId) {
+      return { error: "Unauthorized." };
+    }
+
+    const existingOrder = await db.orders.findUnique({
+      where: {
+        id: orderId,
+      },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+      },
+    });
+
+    if (!existingOrder || existingOrder.userId !== userId) {
+      return { error: "Order not found." };
+    }
+
+    if (!["SHIPPED", "DELIVERED"].includes(existingOrder.status.toUpperCase())) {
+      return { error: "Only delivered orders can be completed." };
+    }
+
     const order = await db.orders.update({
       where: {
         id: orderId,
       },
       data: {
-        status: "Order Completed",
+        status: "COMPLETED",
+        completedAt: new Date(),
       },
       select: {
         id: true,
@@ -197,9 +273,15 @@ export const completeOrder = async (orderId: string) => {
 
 export const submitShippingFeeOffer = async (
   orderId: string,
-  deliveryFee: number
+  deliveryFee: number,
+  meta?: OrderTransactionMeta
 ) => {
   try {
+    const { user, staffName, remarks } = await normalizeOrderTransactionMeta(
+      orderId,
+      meta,
+    );
+
     if (!Number.isFinite(deliveryFee) || deliveryFee <= 0) {
       return { error: "Please enter a valid shipping fee amount." };
     }
@@ -226,20 +308,34 @@ export const submitShippingFeeOffer = async (
       };
     }
 
-    const updatedOrder = await db.orders.update({
-      where: { id: orderId },
-      data: {
-        deliveryFee,
-        status: "AWAITING_SHIPPING_FEE_CONFIRMATION",
-        processingAt: null,
-        shippedAt: null,
-        completedAt: null,
-      },
-      select: {
-        id: true,
-        deliveryFee: true,
-        status: true,
-      },
+    const updatedOrder = await db.$transaction(async (tx) => {
+      const orderData = await tx.orders.update({
+        where: { id: orderId },
+        data: {
+          deliveryFee,
+          status: "AWAITING_SHIPPING_FEE_CONFIRMATION",
+          processingAt: null,
+          shippedAt: null,
+          completedAt: null,
+        },
+        select: {
+          id: true,
+          deliveryFee: true,
+          status: true,
+        },
+      });
+
+      await tx.orderTransactionRemark.create({
+        data: {
+          orderId,
+          adminId: user.id,
+          staffName,
+          status: "AWAITING_SHIPPING_FEE_CONFIRMATION",
+          remarks,
+        },
+      });
+
+      return orderData;
     });
 
     return {
@@ -249,6 +345,41 @@ export const submitShippingFeeOffer = async (
   } catch (error: any) {
     return {
       error: `Failed to update shipping fee. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteOrder = async (orderId: string) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
+  if (!orderId) {
+    return { error: "Order ID is required." };
+  }
+
+  try {
+    const data = await db.orders.delete({
+      where: {
+        id: orderId,
+      },
+    });
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} deleted an order ${
+          data.orderNumber
+        } at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    });
+
+    return { success: "Order deleted successfully", data };
+  } catch (error: any) {
+    return {
+      error: `Failed to delete order. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -313,7 +444,15 @@ export const respondToShippingFeeOffer = async (
   }
 };
 
-export async function updateOrderStatus(orderId: string, status: string) {
+export async function updateOrderStatus(
+  orderId: string,
+  status: string,
+  meta?: OrderTransactionMeta,
+) {
+  const { user, staffName, remarks } = await normalizeOrderTransactionMeta(
+    orderId,
+    meta,
+  );
   const now = new Date();
   const existingOrder = await db.orders.findUnique({
     where: { id: orderId },
@@ -374,17 +513,31 @@ export async function updateOrderStatus(orderId: string, status: string) {
       break;
   }
 
-  const order = await db.orders.update({
-    where: { id: orderId },
-    data: updateData,
-    select: {
-      id: true,
-      status: true,
-      processingAt: true,
-      shippedAt: true,
-      completedAt: true,
-      updatedAt: true,
-    },
+  const order = await db.$transaction(async (tx) => {
+    const orderData = await tx.orders.update({
+      where: { id: orderId },
+      data: updateData,
+      select: {
+        id: true,
+        status: true,
+        processingAt: true,
+        shippedAt: true,
+        completedAt: true,
+        updatedAt: true,
+      },
+    });
+
+    await tx.orderTransactionRemark.create({
+      data: {
+        orderId,
+        adminId: user.id,
+        staffName,
+        status,
+        remarks,
+      },
+    });
+
+    return orderData;
   });
 
   return order;

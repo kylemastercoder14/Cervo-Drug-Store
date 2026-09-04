@@ -81,6 +81,80 @@ export const logout = async () => {
   (await cookies()).set("Authorization", "", { maxAge: 0, path: "/" });
 };
 
+export const updateCurrentAdminAccount = async (values: {
+  name: string;
+  email: string;
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+}) => {
+  const { user } = await getUserFromCookies();
+
+  if (!user) {
+    return { error: "User not found." };
+  }
+
+  const name = values.name?.trim();
+  const email = values.email?.trim();
+  const currentPassword = values.currentPassword?.trim();
+  const newPassword = values.newPassword?.trim();
+  const confirmPassword = values.confirmPassword?.trim();
+
+  if (!name) {
+    return { error: "Name is required." };
+  }
+
+  if (!email) {
+    return { error: "Email is required." };
+  }
+
+  if (newPassword || confirmPassword || currentPassword) {
+    if (!currentPassword) {
+      return { error: "Current password is required." };
+    }
+
+    if (user.password !== currentPassword) {
+      return { error: "Current password is incorrect." };
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      return { error: "New password must be at least 6 characters." };
+    }
+
+    if (newPassword !== confirmPassword) {
+      return { error: "New passwords do not match." };
+    }
+  }
+
+  try {
+    const updatedAdmin = await db.admin.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        name,
+        email,
+        ...(newPassword ? { password: newPassword } : {}),
+      },
+    });
+
+    await db.logs.create({
+      data: {
+        action: `${user.name} updated account settings at ${new Date().toLocaleString()}`,
+        adminId: user.id,
+      },
+    });
+
+    return { success: "Account settings updated successfully.", data: updatedAdmin };
+  } catch (error: any) {
+    return {
+      error: `Failed to update account settings. Please try again. ${
+        error.message || ""
+      }`,
+    };
+  }
+};
+
 export const createStaff = async (values: z.infer<typeof StaffValidation>) => {
   const { user } = await getUserFromCookies();
 
@@ -95,7 +169,7 @@ export const createStaff = async (values: z.infer<typeof StaffValidation>) => {
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, email, password, role } = validatedField.data;
+  const { name, email, password, role, branch } = validatedField.data;
 
   try {
     const data = await db.admin.create({
@@ -104,6 +178,7 @@ export const createStaff = async (values: z.infer<typeof StaffValidation>) => {
         email,
         password,
         role,
+        branch,
       },
     });
 
@@ -145,7 +220,7 @@ export const updateStaff = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, email, password, role } = validatedField.data;
+  const { name, email, password, role, branch } = validatedField.data;
 
   try {
     const data = await db.admin.update({
@@ -157,6 +232,7 @@ export const updateStaff = async (
         email,
         password,
         role,
+        branch,
       },
     });
 

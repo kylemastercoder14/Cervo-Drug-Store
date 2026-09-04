@@ -1,6 +1,7 @@
 import Footer from "@/components/landing-page/footer";
 import Navbar from "@/components/landing-page/navbar";
 import db from "@/lib/db";
+import { syncFacebookPostsForWebsite } from "@/lib/facebook-public-sync";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +12,8 @@ type BlogDetailsPageProps = {
     blogId: string;
   };
 };
+
+export const dynamic = "force-dynamic";
 
 const formatDate = (date: Date) =>
   date.toLocaleDateString("en-US", {
@@ -23,6 +26,8 @@ const richTextClassName =
   "text-base leading-8 text-slate-700 [&_a]:font-medium [&_a]:text-[#437634] [&_blockquote]:my-5 [&_blockquote]:border-l-4 [&_blockquote]:border-[#437634] [&_blockquote]:bg-[#f4f8f2] [&_blockquote]:py-3 [&_blockquote]:pl-4 [&_h1]:mb-4 [&_h1]:mt-6 [&_h1]:text-3xl [&_h1]:font-bold [&_h2]:mb-3 [&_h2]:mt-6 [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:mb-2 [&_h3]:mt-5 [&_h3]:text-xl [&_h3]:font-semibold [&_ol]:mb-4 [&_ol]:ml-6 [&_ol]:list-decimal [&_p]:mb-4 [&_strong]:font-semibold [&_ul]:mb-4 [&_ul]:ml-6 [&_ul]:list-disc";
 
 const BlogDetailsPage = async ({ params }: BlogDetailsPageProps) => {
+  await syncFacebookPostsForWebsite("public:blog-detail");
+
   const blog = await db.news.findUnique({
     where: {
       id: params.blogId,

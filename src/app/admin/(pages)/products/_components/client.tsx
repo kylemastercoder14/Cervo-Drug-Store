@@ -14,11 +14,13 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, ProductColumn } from "./column";
 import { format } from "date-fns";
-import { useGetProducts } from "@/data/product";
+import { useDeleteProduct, useGetProducts } from "@/data/product";
 import { formatPrice } from "@/lib/utils";
 
 const ProductClient = () => {
   const { data: productData, error, isLoading } = useGetProducts();
+  const { mutateAsync: deleteProduct, isPending: isDeleting } =
+    useDeleteProduct();
   const [isMounted, setIsMounted] = useState(false);
   const [imageFilter, setImageFilter] = useState("all");
   const [prescriptionFilter, setPrescriptionFilter] = useState("all");
@@ -179,6 +181,11 @@ const ProductClient = () => {
         searchKey="name"
         columns={columns}
         data={filteredData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteProduct(id)));
+        }}
       />
     </div>
   );

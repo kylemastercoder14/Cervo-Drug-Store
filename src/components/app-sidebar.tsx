@@ -20,13 +20,16 @@ import {
   IconFolders,
   IconLogs,
   IconMedicineSyrup,
+  IconCreditCard,
   IconPhoto,
   IconUser,
   IconUsersGroup,
   IconWallet,
   IconBook,
   IconBriefcase,
+  IconBuildingStore,
   IconMicroscope,
+  IconSettings,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { Admin } from "@prisma/client";
@@ -73,9 +76,19 @@ const data = {
       icon: IconWallet,
     },
     {
+      title: "Payment Methods",
+      url: "/admin/payment-methods",
+      icon: IconCreditCard,
+    },
+    {
       title: "Inventory",
       url: "/admin/inventory",
       icon: IconFolders,
+    },
+    {
+      title: "Branch Management",
+      url: "/admin/branch-management",
+      icon: IconBuildingStore,
     },
     {
       title: "News & Events",
@@ -105,6 +118,11 @@ const data = {
       title: "Logs",
       url: "/admin/logs",
       icon: IconLogs,
+    },
+    {
+      title: "Account Settings",
+      url: "/admin/account-settings",
+      icon: IconSettings,
     },
     {
       title: "Documentation",

@@ -80,6 +80,7 @@ export const CheckoutValidation = z.object({
     message: "You must accept the terms and conditions",
   }),
   branch: z.string().min(1, { message: "Branch is required" }),
+  paymentMethod: z.string().min(1, { message: "Payment method is required" }),
   prescription: z.string().optional(),
   recipientRemarks: z.string().optional(),
 });
@@ -96,6 +97,27 @@ export const PromotionValidation = z.object({
 export const CategoryValidation = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   image: z.string().min(1, { message: "Category image is required" }),
+});
+
+export const BranchValidation = z.object({
+  name: z.string().min(1, { message: "Branch name is required" }),
+  address: z.string().min(1, { message: "Branch address is required" }),
+  storeHours: z.string().min(1, { message: "Store hours are required" }),
+  contactNumber: z.string().min(1, { message: "Contact number is required" }),
+  email: z
+    .string()
+    .email({ message: "Enter a valid email address" })
+    .min(1, { message: "Email address is required" }),
+  manager: z.string().min(1, { message: "Branch manager is required" }),
+});
+
+export const PaymentMethodValidation = z.object({
+  type: z.string().min(1, { message: "Payment type is required" }),
+  name: z.string().min(1, { message: "Payment method name is required" }),
+  accountName: z.string().min(1, { message: "Account name is required" }),
+  accountNumber: z.string().min(1, { message: "Account number is required" }),
+  qrCode: z.string().optional(),
+  isActive: z.boolean().optional(),
 });
 
 export const ProductValidation = z.object({
@@ -135,4 +157,5 @@ export const StaffValidation = z.object({
   email: z.string().min(1, { message: "Email address is required" }),
   password: z.string().min(1, { message: "Password is required" }),
   role: z.string().min(1, { message: "Role is required" }),
+  branch: z.string().min(1, { message: "Branch is required" }),
 });

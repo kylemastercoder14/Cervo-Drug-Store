@@ -5,10 +5,12 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, BannerColumn } from "./column";
 import { format } from "date-fns";
-import { useGetBanners } from "@/data/banner";
+import { useDeleteBanner, useGetBanners } from "@/data/banner";
 
 const BannerClient = () => {
   const { data: bannerData, error, isLoading } = useGetBanners();
+  const { mutateAsync: deleteBanner, isPending: isDeleting } =
+    useDeleteBanner();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -38,6 +40,11 @@ const BannerClient = () => {
         searchKey="banner"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteBanner(id)));
+        }}
       />
     </>
   );

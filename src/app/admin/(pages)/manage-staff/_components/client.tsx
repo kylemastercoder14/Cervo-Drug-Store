@@ -5,10 +5,11 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, StaffColumn } from "./column";
 import { format } from "date-fns";
-import { useGetStaff } from "@/data/manage-staff";
+import { useDeleteStaff, useGetStaff } from "@/data/manage-staff";
 
 const StaffClient = () => {
   const { data: staffData, error, isLoading } = useGetStaff();
+  const { mutateAsync: deleteStaff, isPending: isDeleting } = useDeleteStaff();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ const StaffClient = () => {
       name: item.name,
       email: item.email,
       role: item.role,
+      branch: item.branch || "N/A",
       password: item.password,
       createdAt: format(item.createdAt, "MMMM do, yyyy"),
     })) || [];
@@ -41,6 +43,11 @@ const StaffClient = () => {
         searchKey="banner"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteStaff(id)));
+        }}
       />
     </>
   );

@@ -5,10 +5,15 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { columns, ApplicationColumn } from "./column";
 import { format } from "date-fns";
-import { useGetApplications } from "@/data/career-application";
+import {
+  useDeleteApplication,
+  useGetApplications,
+} from "@/data/career-application";
 
 const ApplicationClient = () => {
   const { data: applicationData, error, isLoading } = useGetApplications();
+  const { mutateAsync: deleteApplication, isPending: isDeleting } =
+    useDeleteApplication();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -46,6 +51,11 @@ const ApplicationClient = () => {
         searchKey="firstName"
         columns={columns}
         data={formattedData}
+        enableBatchDelete
+        batchDeleteLoading={isDeleting}
+        onBatchDelete={async (ids) => {
+          await Promise.all(ids.map((id) => deleteApplication(id)));
+        }}
       />
     </>
   );

@@ -10,6 +10,7 @@ import {
 import {
   IconLockFilled,
   IconLogout,
+  IconSettings,
   IconUser,
   IconUserFilled,
 } from "@tabler/icons-react";
@@ -41,6 +42,12 @@ const UserDropdown = () => {
             >
               <IconLockFilled size={20} color="black" />
               <span className="ml-2">My Account</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => router.push("/my-profile/account-settings")}
+            >
+              <IconSettings size={20} color="black" />
+              <span className="ml-2">Account Settings</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
               <IconLogout size={20} color="black" />

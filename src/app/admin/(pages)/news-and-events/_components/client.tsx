@@ -17,9 +17,10 @@ import {
   Search,
   Sparkles,
   Star,
+  Trash,
   TriangleAlert,
 } from "lucide-react";
-import { useGetNewsEvent } from "@/data/news-event";
+import { useDeleteNewsEvent, useGetNewsEvent } from "@/data/news-event";
 import { NewsEventColumn } from "./column";
 import { CellAction } from "./cell-action";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +35,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import AlertModal from "@/components/ui/alert-modal";
 
 const RECENT_DAYS = 30;
 const PREVIEW_LIMIT = 260;
@@ -59,11 +62,15 @@ const stripHtml = (value: string) =>
 
 const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
   const { data: newsEventData, error, isLoading } = useGetNewsEvent();
+  const { mutateAsync: deleteNewsEvent, isPending: isDeleting } =
+    useDeleteNewsEvent();
   const [isMounted, setIsMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [filterBy, setFilterBy] = useState("all");
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -159,6 +166,12 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
   }, [filterBy, formattedData, searchTerm, sortBy]);
 
   const latestNewsId = filteredAndSortedData[0]?.id;
+  const visibleIds = filteredAndSortedData.map((item) => item.id);
+  const hasVisibleItems = visibleIds.length > 0;
+  const isAllVisibleSelected =
+    hasVisibleItems && visibleIds.every((id) => selectedIds.includes(id));
+  const isSomeVisibleSelected =
+    visibleIds.some((id) => selectedIds.includes(id)) && !isAllVisibleSelected;
 
   const toggleExpanded = (id: string) => {
     setExpandedIds((current) =>
@@ -168,12 +181,49 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
     );
   };
 
+  const toggleSelected = (id: string) => {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((itemId) => itemId !== id)
+        : [...current, id]
+    );
+  };
+
+  const toggleSelectAllVisible = (checked: boolean) => {
+    setSelectedIds((current) => {
+      if (!checked) {
+        return current.filter((id) => !visibleIds.includes(id));
+      }
+
+      return Array.from(new Set([...current, ...visibleIds]));
+    });
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    await Promise.all(selectedIds.map((id) => deleteNewsEvent(id)));
+    setSelectedIds([]);
+    setBatchDeleteOpen(false);
+  };
+
   if (!isMounted) {
     return null;
   }
 
   return (
     <div className="space-y-5">
+      <AlertModal
+        isOpen={batchDeleteOpen}
+        onClose={() => setBatchDeleteOpen(false)}
+        loading={isDeleting}
+        onConfirm={handleBatchDelete}
+        title={`Delete ${selectedIds.length} selected item${
+          selectedIds.length === 1 ? "" : "s"
+        }?`}
+      />
       <div className="rounded-xl border bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-3">
@@ -240,6 +290,11 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
 
       <div className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-2">
+          <Checkbox
+            checked={isAllVisibleSelected || (isSomeVisibleSelected && "indeterminate")}
+            onCheckedChange={(value) => toggleSelectAllVisible(!!value)}
+            aria-label="Select all visible posts"
+          />
           <Badge variant="outline" className="gap-2 rounded-full px-3 py-1 text-xs">
             <Newspaper className="h-3.5 w-3.5" />
             {formattedData.length} total posts
@@ -247,6 +302,16 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
           <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs">
             Card view
           </Badge>
+          <Button
+            disabled={selectedIds.length === 0 || isDeleting}
+            onClick={() => setBatchDeleteOpen(true)}
+            size="sm"
+            type="button"
+            variant="destructive"
+          >
+            <Trash className="mr-2 h-4 w-4" />
+            Delete selected
+          </Button>
         </div>
 
         <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
@@ -330,6 +395,7 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
             recentThreshold.setDate(recentThreshold.getDate() - RECENT_DAYS);
             const isRecent = itemDate >= recentThreshold;
             const shouldClamp = plainContent.length > PREVIEW_LIMIT;
+            const isSelected = selectedIds.includes(item.id);
 
             return (
             <Card
@@ -342,6 +408,13 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
               ].join(" ")}
             >
               <div className="relative h-60 w-full overflow-hidden bg-zinc-100">
+                <div className="absolute left-4 top-4 z-10 rounded-md bg-white/90 p-2 shadow-sm">
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => toggleSelected(item.id)}
+                    aria-label={`Select ${item.title}`}
+                  />
+                </div>
                 {item.videoUrl ? (
                   <video
                     src={item.videoUrl}
@@ -369,7 +442,7 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
                       : "bg-gradient-to-t from-black/35 to-transparent",
                   ].join(" ")}
                 />
-                <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+                <div className="absolute left-16 top-4 flex flex-wrap gap-2">
                   {isLatest && (
                     <Badge className="rounded-full bg-[#437634] px-3 py-1 text-white hover:bg-[#437634]">
                       <Star className="mr-1 h-3.5 w-3.5" />

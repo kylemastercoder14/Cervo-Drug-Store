@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { OrderItems, Products, User, Address } from "@prisma/client";
+import { OrderItems, Products, User, Address, Admin } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import {
 import { ArrowLeft } from "lucide-react";
 import { submitShippingFeeOffer, updateOrderStatus } from "@/actions/order";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +31,15 @@ import {
 interface OrderItemWithProduct extends OrderItems {
   product: Products;
 }
+
+type OrderTransactionRemarkWithAdmin = {
+  id: string;
+  staffName: string;
+  status: string;
+  remarks: string | null;
+  createdAt: Date;
+  admin: Admin | null;
+};
 
 interface OrderFormProps {
   id: string;
@@ -52,9 +63,16 @@ interface OrderFormProps {
   user: User;
   address: Address;
   OrderItems: OrderItemWithProduct[];
+  transactionRemarks: OrderTransactionRemarkWithAdmin[];
 }
 
-const OrderForm = ({ data }: { data: OrderFormProps }) => {
+const OrderForm = ({
+  data,
+  requiresManualSignatory,
+}: {
+  data: OrderFormProps;
+  requiresManualSignatory: boolean;
+}) => {
   const router = useRouter();
   const [orderStatus, setOrderStatus] = React.useState(
     data?.status || "PENDING"
@@ -63,6 +81,13 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
   const [shippingFeeInput, setShippingFeeInput] = React.useState(
     data.deliveryFee ? String(data.deliveryFee) : ""
   );
+  const [transactionOpen, setTransactionOpen] = React.useState(false);
+  const [transactionMode, setTransactionMode] = React.useState<
+    "status" | "shipping-fee" | null
+  >(null);
+  const [pendingStatus, setPendingStatus] = React.useState<string | null>(null);
+  const [staffName, setStaffName] = React.useState("");
+  const [transactionRemarks, setTransactionRemarks] = React.useState("");
   const isDeliveryOrder = data.orderOption !== "Pick-Up";
   const requiresShippingFeeConfirmation =
     data.orderOption === "In-House Rider" ||
@@ -141,14 +166,84 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
 
   const normalizedStatus = data.status.toUpperCase();
 
-  const handleStatusChange = async (value: string) => {
-    setOrderStatus(value);
+  const resetTransactionPrompt = () => {
+    setTransactionOpen(false);
+    setTransactionMode(null);
+    setPendingStatus(null);
+    setStaffName("");
+    setTransactionRemarks("");
+  };
+
+  const handleStatusChange = (value: string) => {
+    if (!requiresManualSignatory) {
+      setOrderStatus(value);
+      setLoading(true);
+
+      updateOrderStatus(data.id, value)
+        .then(() => {
+          router.refresh();
+          toast.success("Order status updated");
+        })
+        .catch((error) => {
+          setOrderStatus(data.status);
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to update order status."
+          );
+        })
+        .finally(() => setLoading(false));
+      return;
+    }
+
+    setPendingStatus(value);
+    setTransactionMode("status");
+    setTransactionOpen(true);
+  };
+
+  const handleConfirmTransaction = async () => {
+    if (!staffName.trim()) {
+      toast.error("Staff or signatory name is required.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await updateOrderStatus(data.id, value);
+      if (transactionMode === "status" && pendingStatus) {
+        await updateOrderStatus(data.id, pendingStatus, {
+          staffName,
+          remarks: transactionRemarks,
+        });
+        setOrderStatus(pendingStatus);
+        toast.success("Order status updated");
+      }
+
+      if (transactionMode === "shipping-fee") {
+        const parsedFee = Number(shippingFeeInput);
+
+        if (!shippingFeeInput || Number.isNaN(parsedFee) || parsedFee <= 0) {
+          toast.error("Please enter a valid shipping fee amount.");
+          setLoading(false);
+          return;
+        }
+
+        const result = await submitShippingFeeOffer(data.id, parsedFee, {
+          staffName,
+          remarks: transactionRemarks,
+        });
+
+        if (result.error) {
+          toast.error(result.error);
+          setLoading(false);
+          return;
+        }
+
+        toast.success(result.success);
+      }
+
+      resetTransactionPrompt();
       router.refresh();
-      toast.success("Order status updated");
     } catch (error) {
       setOrderStatus(data.status);
       toast.error(
@@ -169,21 +264,90 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
       return;
     }
 
-    setLoading(true);
-    const result = await submitShippingFeeOffer(data.id, parsedFee);
+    if (!requiresManualSignatory) {
+      setLoading(true);
+      const result = await submitShippingFeeOffer(data.id, parsedFee);
 
-    if (result.error) {
-      toast.error(result.error);
+      if (result.error) {
+        toast.error(result.error);
+        setLoading(false);
+        return;
+      }
+
+      toast.success(result.success);
+      router.refresh();
       setLoading(false);
       return;
     }
 
-    toast.success(result.success);
-    router.refresh();
-    setLoading(false);
+    setTransactionMode("shipping-fee");
+    setTransactionOpen(true);
   };
   return (
     <>
+      <Dialog
+        open={transactionOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            setTransactionOpen(true);
+            return;
+          }
+
+          resetTransactionPrompt();
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {transactionMode === "shipping-fee"
+                ? "Shipping Fee Signatory"
+                : "Order Status Signatory"}
+            </DialogTitle>
+            <DialogDescription>
+              Add staff or signatory details for this order transaction.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="staff-signatory">Staff / Signatory</Label>
+              <Input
+                id="staff-signatory"
+                value={staffName}
+                onChange={(event) => setStaffName(event.target.value)}
+                placeholder="Enter staff or signatory name"
+                disabled={loading}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="transaction-remarks">Remarks</Label>
+              <Textarea
+                id="transaction-remarks"
+                value={transactionRemarks}
+                onChange={(event) => setTransactionRemarks(event.target.value)}
+                placeholder="Add transaction remarks"
+                disabled={loading}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={resetTransactionPrompt}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleConfirmTransaction}
+                disabled={loading}
+              >
+                Save Transaction
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className="flex items-center gap-3 mb-5">
         <Button variant="ghost" onClick={() => router.push("/admin/orders")}>
           <ArrowLeft className="size-4" />
@@ -290,6 +454,7 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
             </div>
             <p>Branch: {data.branch || "N/A"}</p>
             <p>Order Option: {data.orderOption}</p>
+            <p>Payment Method: {data.method || "N/A"}</p>
             <p>
               Prescription:{" "}
               {data.prescription ? (
@@ -392,6 +557,46 @@ const OrderForm = ({ data }: { data: OrderFormProps }) => {
               </p>
             </div>
           )}
+
+          <div className="bg-white border shadow rounded-sm p-5">
+            <h3 className="text-base font-bold">Transaction Remarks</h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Staff/signatory history for this order.
+            </p>
+            <div className="mt-4 space-y-3">
+              {data.transactionRemarks.length > 0 ? (
+                data.transactionRemarks.map((item) => (
+                  <div key={item.id} className="rounded-md border bg-gray-50 p-3">
+                    <div className="flex flex-col justify-between gap-1 sm:flex-row">
+                      <p className="font-semibold text-gray-900">
+                        {item.staffName}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatDate(item.createdAt)}
+                      </p>
+                    </div>
+                    <p className="mt-1 text-sm text-gray-700">
+                      Status: <span className="font-medium">{item.status}</span>
+                    </p>
+                    {item.admin && (
+                      <p className="text-xs text-gray-500">
+                        Recorded by {item.admin.name}
+                      </p>
+                    )}
+                    {item.remarks && (
+                      <p className="mt-2 whitespace-pre-line text-sm text-gray-700">
+                        {item.remarks}
+                      </p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">
+                  No transaction remarks recorded yet.
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Order Items */}
           <div className="bg-white border shadow rounded-sm p-5 overflow-x-auto">

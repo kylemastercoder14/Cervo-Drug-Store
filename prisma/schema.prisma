@@ -58,10 +58,12 @@ model Admin {
   email     String
   password  String
   role      String   @default("Staff")
+  branch    String   @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  logs Logs[]
+  logs                    Logs[]
+  orderTransactionRemarks OrderTransactionRemark[]
 }
 
 model Banner {
@@ -77,6 +79,30 @@ model Promotions {
   isFeatured Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model Branch {
+  id            String   @id @default(cuid())
+  name          String
+  address       String   @db.Text
+  storeHours    String
+  contactNumber String
+  email         String
+  manager       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PaymentMethod {
+  id            String   @id @default(cuid())
+  type          String
+  name          String
+  accountName   String
+  accountNumber String
+  qrCode        String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Categories {
@@ -139,6 +165,21 @@ model Orders {
   address    Address      @relation(fields: [addressId], references: [id], onDelete: Cascade)
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   OrderItems OrderItems[]
+  transactionRemarks OrderTransactionRemark[]
+}
+
+model OrderTransactionRemark {
+  id        String   @id @default(cuid())
+  orderId   String
+  adminId   String?
+  staffName String
+  status    String
+  remarks   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order Orders @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  admin Admin? @relation(fields: [adminId], references: [id], onDelete: SetNull)
 }
 
 model OrderItems {

@@ -7,20 +7,46 @@ import { Input } from "@/components/ui/input";
 import { useGetOrders } from "@/data/orders";
 import { format } from "date-fns";
 import { formatPrice } from "@/lib/utils";
+import { useGetBranches } from "@/data/branch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type ReportOrder = {
+  id: string;
+  orderNumber: string;
+  email: string;
+  totalAmount: number;
+  status: string;
+  method: string;
+  branch: string | null;
+  createdAt: Date;
+  user?: {
+    firstName: string;
+    lastName: string;
+  } | null;
+};
 
 const DashboardReport: React.FC = () => {
   const { data: ordersData, isLoading } = useGetOrders();
+  const { data: branchData, isLoading: isLoadingBranches } = useGetBranches();
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
+  const [branch, setBranch] = useState<string>("all");
 
   const filteredOrders = useMemo(() => {
-    const orders = ordersData?.data ?? [];
-    if (!from && !to) return orders;
+    const orders = (ordersData?.data ?? []) as ReportOrder[];
+    const hasBranchFilter = branch !== "all";
+    if (!from && !to && !hasBranchFilter) return orders;
 
     const fromDate = from ? new Date(from) : null;
     const toDate = to ? new Date(to) : null;
 
-    return orders.filter((order: any) => {
+    return orders.filter((order) => {
       const created = new Date(order.createdAt);
       if (fromDate && created < fromDate) return false;
       if (toDate) {
@@ -28,13 +54,14 @@ const DashboardReport: React.FC = () => {
         endOfDay.setHours(23, 59, 59, 999);
         if (created > endOfDay) return false;
       }
+      if (hasBranchFilter && order.branch !== branch) return false;
       return true;
     });
-  }, [ordersData, from, to]);
+  }, [ordersData, from, to, branch]);
 
   const handlePrint = () => {
     if (!filteredOrders.length) {
-      window.alert("No data to print for the selected date range.");
+      window.alert("No data to print for the selected filters.");
       return;
     }
 
@@ -42,7 +69,7 @@ const DashboardReport: React.FC = () => {
     if (!printWindow) return;
 
     const rowsHtml = filteredOrders
-      .map((order: any, index: number) => {
+      .map((order, index: number) => {
         const created = format(new Date(order.createdAt), "yyyy-MM-dd");
         const customerName = `${order.user?.firstName ?? ""} ${
           order.user?.lastName ?? ""
@@ -56,6 +83,9 @@ const DashboardReport: React.FC = () => {
           <td style="padding:4px 8px;border:1px solid #ccc;">${customerName}</td>
           <td style="padding:4px 8px;border:1px solid #ccc;">${
             order.email ?? ""
+          }</td>
+          <td style="padding:4px 8px;border:1px solid #ccc;">${
+            order.branch ?? ""
           }</td>
           <td style="padding:4px 8px;border:1px solid #ccc;text-align:right;">${formatPrice(
             order.totalAmount ?? 0
@@ -72,6 +102,7 @@ const DashboardReport: React.FC = () => {
 
     const fromLabel = from || "All";
     const toLabel = to || "All";
+    const branchLabel = branch === "all" ? "All" : branch;
 
     printWindow.document.write(`
       <html>
@@ -88,6 +119,7 @@ const DashboardReport: React.FC = () => {
         <body>
           <h1>Cervo Drug Store - Orders Report</h1>
           <p>Date Range: ${fromLabel} to ${toLabel}</p>
+          <p>Branch: ${branchLabel}</p>
           <table>
             <thead>
               <tr>
@@ -96,6 +128,7 @@ const DashboardReport: React.FC = () => {
                 <th>Date</th>
                 <th>Customer</th>
                 <th>Email</th>
+                <th>Branch</th>
                 <th>Total Amount</th>
                 <th>Status</th>
                 <th>Method</th>
@@ -140,6 +173,26 @@ const DashboardReport: React.FC = () => {
               className="h-9 w-40"
             />
           </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Branch</span>
+            <Select
+              value={branch}
+              onValueChange={setBranch}
+              disabled={isLoadingBranches}
+            >
+              <SelectTrigger className="h-9 w-52">
+                <SelectValue placeholder="All branches" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All branches</SelectItem>
+                {branchData?.data?.map((item) => (
+                  <SelectItem key={item.id} value={item.name}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -148,6 +201,7 @@ const DashboardReport: React.FC = () => {
               onClick={() => {
                 setFrom("");
                 setTo("");
+                setBranch("all");
               }}
             >
               Clear
@@ -165,7 +219,7 @@ const DashboardReport: React.FC = () => {
       </CardHeader>
       <CardContent>
         <p className="text-xs text-muted-foreground">
-          Select a date range and click <span className="font-semibold">Print Report</span>{" "}
+          Select filters and click <span className="font-semibold">Print Report</span>{" "}
           to generate a printable table of orders.
         </p>
       </CardContent>

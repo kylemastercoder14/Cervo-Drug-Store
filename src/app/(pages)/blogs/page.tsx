@@ -1,11 +1,16 @@
 import Footer from "@/components/landing-page/footer";
 import Navbar from "@/components/landing-page/navbar";
 import db from "@/lib/db";
+import { syncFacebookPostsForWebsite } from "@/lib/facebook-public-sync";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 const BlogsPage = async () => {
+  await syncFacebookPostsForWebsite("public:blogs");
+
   const blogs = await db.news.findMany({
     orderBy: {
       createdAt: "desc",

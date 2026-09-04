@@ -11,6 +11,7 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
   getSortedRowModel,
+  RowSelectionState,
 } from "@tanstack/react-table";
 
 import {
@@ -31,6 +32,7 @@ import {
   ChevronsRight,
   Loader2,
   Search,
+  Trash,
 } from "lucide-react";
 import {
   Select,
@@ -39,8 +41,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
+import { Checkbox } from "./checkbox";
+import AlertModal from "./alert-modal";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { id: string }, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey: string;
@@ -48,9 +52,13 @@ interface DataTableProps<TData, TValue> {
   isFiltering?: boolean;
   filterColumn?: string;
   filterValues?: string[];
+  filterPlaceholder?: string;
+  enableBatchDelete?: boolean;
+  onBatchDelete?: (ids: string[]) => Promise<void> | void;
+  batchDeleteLoading?: boolean;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { id: string }, TValue>({
   columns,
   data,
   searchKey,
@@ -58,16 +66,54 @@ export function DataTable<TData, TValue>({
   loading,
   filterColumn,
   filterValues,
+  filterPlaceholder = "Filter by programs",
+  enableBatchDelete,
+  onBatchDelete,
+  batchDeleteLoading = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const [batchDeleteOpen, setBatchDeleteOpen] = React.useState(false);
   const [selectedFilterValue, setSelectedFilterValue] =
     React.useState<string>("");
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const tableColumns = React.useMemo<ColumnDef<TData, TValue>[]>(() => {
+    if (!enableBatchDelete) {
+      return columns;
+    }
+
+    const selectColumn: ColumnDef<TData, TValue> = {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    };
+
+    return [selectColumn, ...columns];
+  }, [columns, enableBatchDelete]);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: tableColumns,
+    getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -76,6 +122,7 @@ export function DataTable<TData, TValue>({
     state: {
       columnFilters,
       sorting,
+      rowSelection,
     },
     initialState: {
       pagination: {
@@ -83,8 +130,22 @@ export function DataTable<TData, TValue>({
       },
     },
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
     getSortedRowModel: getSortedRowModel(),
   });
+
+  const selectedRows = table.getFilteredSelectedRowModel().rows;
+  const selectedIds = selectedRows.map((row) => row.original.id);
+
+  const handleBatchDelete = async () => {
+    if (!onBatchDelete || selectedIds.length === 0) {
+      return;
+    }
+
+    await onBatchDelete(selectedIds);
+    setRowSelection({});
+    setBatchDeleteOpen(false);
+  };
 
   const handleDataChange = (value: string) => {
     setSelectedFilterValue(value);
@@ -126,6 +187,17 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="overflow-x-auto">
+      {enableBatchDelete && (
+        <AlertModal
+          isOpen={batchDeleteOpen}
+          onClose={() => setBatchDeleteOpen(false)}
+          loading={batchDeleteLoading}
+          onConfirm={handleBatchDelete}
+          title={`Delete ${selectedIds.length} selected item${
+            selectedIds.length === 1 ? "" : "s"
+          }?`}
+        />
+      )}
       <div className="flex gap-3 items-center py-4">
         <div className="flex no-print relative items-center">
           <Search className="absolute left-3 top-[33%] transform -translate-1/2 text-muted-foreground w-4 h-4" />
@@ -146,10 +218,10 @@ export function DataTable<TData, TValue>({
                 defaultValue={selectedFilterValue}
                 onValueChange={handleDataChange}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full truncate overflow-hidden">
                   <SelectValue
-                    placeholder="Filter by programs"
-                    className="w-full shad-select-trigger"
+                    placeholder={filterPlaceholder}
+                    className="w-full truncate shad-select-trigger"
                   />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,6 +239,18 @@ export function DataTable<TData, TValue>({
               </Button>
             )}
           </>
+        )}
+        {enableBatchDelete && (
+          <Button
+            disabled={selectedIds.length === 0 || batchDeleteLoading}
+            onClick={() => setBatchDeleteOpen(true)}
+            size="sm"
+            type="button"
+            variant="destructive"
+          >
+            <Trash className="w-4 h-4 mr-2" />
+            Delete selected
+          </Button>
         )}
       </div>
       <div className="rounded-md border max-w-full overflow-x-auto">
@@ -192,7 +276,7 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24">
+                <TableCell colSpan={tableColumns.length} className="h-24">
                   <div className="flex items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin" />
                   </div>
@@ -217,7 +301,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={tableColumns.length}
                   className="h-24 text-center"
                 >
                   No results.

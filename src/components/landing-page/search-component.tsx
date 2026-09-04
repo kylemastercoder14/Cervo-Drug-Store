@@ -27,8 +27,17 @@ const SearchComponent = ({
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleSearch = () => {
-    onSearch(searchTerm.trim());
+    const query = searchTerm.trim();
+
+    if (!query) {
+      router.push("/products");
+      setShowDropdown(false);
+      return;
+    }
+
+    onSearch(query);
     setShowDropdown(false);
+    router.push(`/products?search=${encodeURIComponent(query)}`);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +57,7 @@ const SearchComponent = ({
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         className="lg:w-[300px] w-full"
       />
-      <Button onClick={handleSearch}  size="sm">
+      <Button onClick={handleSearch} size="sm" type="button">
         <IconSearch color="white" />
       </Button>
       {showDropdown && filteredProducts.length > 0 && (
