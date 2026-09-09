@@ -389,10 +389,9 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
       return (
         <FormControl>
           <RichTextEditor
-            description={field.value}
             onChange={field.onChange}
             disabled={disabled}
-            value={field.value}
+            value={field.value || ""}
           />
         </FormControl>
       );

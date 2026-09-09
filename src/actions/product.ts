@@ -17,8 +17,11 @@ const bulkProductRowSchema = z.object({
   image: z.string().optional(),
 });
 
+const normalizeProductName = (name: string) =>
+  name.trim().replace(/\s+/g, " ");
+
 const createProductTag = (name: string) =>
-  name
+  normalizeProductName(name)
     .toLowerCase()
     .replace(/,/g, "")
     .replace(/\s+/g, "-")
@@ -197,12 +200,13 @@ export const createProduct = async (
     categoryTag,
   } = validatedField.data;
 
-  const tags = createProductTag(name);
+  const normalizedName = normalizeProductName(name);
+  const tags = createProductTag(normalizedName);
 
   try {
     const data = await db.products.create({
       data: {
-        name,
+        name: normalizedName,
         description,
         image,
         isFeatured,
@@ -217,6 +221,10 @@ export const createProduct = async (
     return { success: "Product created successfully", data };
   } catch (error: any) {
     console.error("Failed to create product:", error); // Log the error for debugging
+    if (error?.code === "P2002") {
+      return { error: "A product with this name already exists." };
+    }
+
     return {
       error: `Failed to create product. Please try again. ${
         error.message || ""
@@ -252,57 +260,41 @@ export const createProductFromExcel = async (
     image,
   } = validatedField.data;
 
-  const tags = createProductTag(name);
+  const normalizedName = normalizeProductName(name);
+  const tags = createProductTag(normalizedName);
 
   try {
-    const existingProduct = await db.products.findFirst({
-      where: {
-        OR: [{ tags }, { name: { equals: name, mode: "insensitive" } }],
-      },
+    const existingProduct = await db.products.findUnique({ where: { tags } });
+    const productData = {
+      name: normalizedName,
+      description: description || null,
+      image: image || null,
+      isFeatured: isFeatured ?? false,
+      tags,
+      price,
+      isVatItem: isVatItem ?? false,
+      isPrescriptionRequired: isPrescriptionRequired ?? false,
+      categoryTag: categoryTag || null,
+    };
+    const data = await db.products.upsert({
+      where: { tags },
+      update: productData,
+      create: productData,
     });
 
-    if (existingProduct) {
-      const data = await db.products.update({
-        where: {
-          id: existingProduct.id,
-        },
-        data: {
-          name,
-          description: description || undefined,
-          image: image || undefined,
-          isFeatured: isFeatured ?? false,
-          tags,
-          price,
-          isVatItem: isVatItem ?? false,
-          isPrescriptionRequired: isPrescriptionRequired ?? false,
-          categoryTag: categoryTag || null,
-        },
-      });
-
-      return {
-        updated: true,
-        data,
-        message: `${name} already exists and was updated.`,
-      };
-    }
-
-    const data = await db.products.create({
-      data: {
-        name,
-        description: description || undefined,
-        image: image || undefined,
-        isFeatured: isFeatured ?? false,
-        tags,
-        price,
-        isVatItem: isVatItem ?? false,
-        isPrescriptionRequired: isPrescriptionRequired ?? false,
-        categoryTag: categoryTag || null,
-      },
-    });
-
-    return { success: "Product created successfully", data };
+    return existingProduct
+      ? {
+          updated: true,
+          data,
+          message: `${normalizedName} already exists and was updated.`,
+        }
+      : { success: "Product created successfully", data };
   } catch (error: any) {
     console.error("Failed to create product:", error); // Log the error for debugging
+    if (error?.code === "P2002") {
+      return { error: "A product with this name already exists." };
+    }
+
     return {
       error: `Failed to create product. Please try again. ${
         error.message || ""
@@ -347,18 +339,18 @@ export const createBulkProducts = async (data: any[]) => {
         isVatItem,
         image,
       } = validatedField.data;
-      const tags = createProductTag(name);
+      const normalizedName = normalizeProductName(name);
+      const tags = createProductTag(normalizedName);
 
       try {
-        const existingProduct = await db.products.findFirst({
-          where: {
-            OR: [{ tags }, { name: { equals: name, mode: "insensitive" } }],
-          },
+        const existingProduct = await db.products.findUnique({
+          where: { tags },
+          select: { id: true },
         });
         const productData = {
-          name,
-          description: description || undefined,
-          image: image || undefined,
+          name: normalizedName,
+          description: description || null,
+          image: image || null,
           isFeatured: isFeatured ?? false,
           tags,
           price,
@@ -367,21 +359,16 @@ export const createBulkProducts = async (data: any[]) => {
           categoryTag: categoryTag || null,
         };
 
-        if (existingProduct) {
-          await db.products.update({
-            where: {
-              id: existingProduct.id,
-            },
-            data: productData,
-          });
-          updatedCount += 1;
-          continue;
-        }
-
-        await db.products.create({
-          data: productData,
+        await db.products.upsert({
+          where: { tags },
+          update: productData,
+          create: productData,
         });
-        createdCount += 1;
+        if (existingProduct) {
+          updatedCount += 1;
+        } else {
+          createdCount += 1;
+        }
       } catch (error) {
         console.error(`Failed to save bulk product "${name}":`, error);
         errors.push({
@@ -455,7 +442,8 @@ export const updateProduct = async (
     categoryTag,
   } = validatedField.data;
 
-  const tags = createProductTag(name);
+  const normalizedName = normalizeProductName(name);
+  const tags = createProductTag(normalizedName);
 
   try {
     const data = await db.products.update({
@@ -463,7 +451,7 @@ export const updateProduct = async (
         id: productId,
       },
       data: {
-        name,
+        name: normalizedName,
         image,
         tags,
         description,
@@ -486,6 +474,10 @@ export const updateProduct = async (
 
     return { success: "Product updated successfully", data };
   } catch (error: any) {
+    if (error?.code === "P2002") {
+      return { error: "A product with this name already exists." };
+    }
+
     return {
       error: `Failed to update product. Please try again. ${
         error.message || ""

@@ -26,6 +26,7 @@ const ProductForm = ({
 }) => {
   const [categories, setCategories] = useState<Categories[]>([]);
   const [product, setProduct] = useState<any | null>(null);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(Boolean(productId));
 
   const title = productId ? "Edit Product" : "Add Product";
   const description = productId
@@ -60,27 +61,44 @@ const ProductForm = ({
   }, []);
 
   useEffect(() => {
-    if (productId) {
-      const fetchProductById = async () => {
-        const response = await getProductById(productId);
-        if (response.data) {
-          setProduct(response.data);
-          reset({
-            name: response.data.name ?? "",
-            image: response.data.image ?? "",
-            price: response.data.price ?? 0,
-            description: response.data.description ?? "",
-            isFeatured: response.data.isFeatured ?? true,
-            isVatItem: response.data.isVatItem ?? false,
-            isPrescriptionRequired:
-              response.data.isPrescriptionRequired ?? false,
-            categoryTag: response.data.categoryTag ?? undefined,
-          });
-        }
-      };
-
-      fetchProductById();
+    if (!productId) {
+      setIsLoadingProduct(false);
+      return;
     }
+
+    let isCancelled = false;
+
+    const fetchProductById = async () => {
+      setIsLoadingProduct(true);
+      const response = await getProductById(productId);
+
+      if (isCancelled) {
+        return;
+      }
+
+      if (response.data) {
+        setProduct(response.data);
+        reset({
+          name: response.data.name ?? "",
+          image: response.data.image ?? "",
+          price: response.data.price ?? 0,
+          description: response.data.description ?? "",
+          isFeatured: response.data.isFeatured ?? true,
+          isVatItem: response.data.isVatItem ?? false,
+          isPrescriptionRequired:
+            response.data.isPrescriptionRequired ?? false,
+          categoryTag: response.data.categoryTag ?? undefined,
+        });
+      }
+
+      setIsLoadingProduct(false);
+    };
+
+    fetchProductById();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [productId, reset]);
 
   const { mutate: saveProduct, isPending: isSaving } = useSaveProduct(
@@ -100,9 +118,14 @@ const ProductForm = ({
       description={description}
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="mx-auto grid auto-rows-max gap-4">
-            <div className="grid gap-4">
+        {isLoadingProduct ? (
+          <div className="flex min-h-40 items-center justify-center">
+            <Loader className="size-5 animate-spin" />
+          </div>
+        ) : (
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="mx-auto grid auto-rows-max gap-4">
+              <div className="grid gap-4">
               <CustomFormField
                 control={form.control}
                 fieldType={FormFieldType.INPUT}
@@ -183,9 +206,10 @@ const ProductForm = ({
                 {isSaving && <Loader className="animate-spin w-4 h-4" />}
                 {action}
               </Button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        )}
       </Form>
     </Modal>
   );

@@ -1,41 +1,51 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Toolbar from "./tool-bar";
 import Heading from "@tiptap/extension-heading";
 
+const editorExtensions = [
+  StarterKit.configure({}),
+  Heading.configure({
+    HTMLAttributes: {
+      class: "text-xl font-bold",
+      levels: [2],
+    },
+  }),
+];
+
+const editorProps = {
+  attributes: {
+    class:
+      "rounded-md border-zinc-200 text-themeTextGray border min-h-[100px] bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 px-3 py-1 text-sm shadow-sm",
+  },
+};
+
 const RichTextEditor = ({
-  description,
   onChange,
   disabled,
-  value
+  value,
 }: {
-  description: string;
   value: string;
   onChange: (richText: string) => void;
   disabled?: boolean;
 }) => {
+  const latestValue = useRef(value || "");
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({}),
-      Heading.configure({
-        HTMLAttributes: {
-          class: "text-xl font-bold",
-          levels: [2],
-        },
-      }),
-    ],
-    content: description,
-    editorProps: {
-      attributes: {
-        class:
-          "rounded-md border-zinc-200 text-themeTextGray border min-h-[100px] bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 px-3 py-1 text-sm shadow-sm",
-      },
-    },
+    extensions: editorExtensions,
+    content: value || "",
+    editorProps,
     onUpdate({ editor }) {
-      onChange(editor.getHTML());
+      latestValue.current = editor.getHTML();
+    },
+    onBlur({ editor }) {
+      const nextValue = editor.getHTML();
+      latestValue.current = nextValue;
+      onChange(nextValue);
     },
     editable: !disabled,
+    immediatelyRender: false,
+    shouldRerenderOnTransaction: false,
   });
 
   useEffect(() => {
@@ -44,11 +54,7 @@ const RichTextEditor = ({
     }
 
     editor.setEditable(!disabled);
-
-    if (value !== editor.getHTML()) {
-      editor.commands.setContent(value || "", false);
-    }
-  }, [disabled, editor, value]);
+  }, [disabled, editor]);
 
   return (
     <div className="flex flex-col justify-stretch">

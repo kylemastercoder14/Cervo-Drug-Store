@@ -121,7 +121,7 @@ model Products {
   name                   String
   description            String?
   price                  Float
-  tags                   String?
+  tags                   String?  @unique
   isFeatured             Boolean  @default(false)
   isPrescriptionRequired Boolean  @default(false)
   isVatItem              Boolean  @default(false)

@@ -29,6 +29,11 @@ export function useSaveProduct(initialData?: any, onClose?: () => void) {
       }
     },
     onSuccess: (data) => {
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
       if (data.success) {
         toast.success(data.success);
         queryClient.invalidateQueries({ queryKey: ["products"] });
