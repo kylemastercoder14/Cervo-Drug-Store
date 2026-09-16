@@ -8,6 +8,7 @@ import React from "react";
 import CategoryClient from "./_components/client";
 import { getAllCategories } from "@/actions/category";
 import AddCategory from "./_components/add-category";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminCategory = async () => {
   const queryClient = new QueryClient();
@@ -27,7 +28,7 @@ const AdminCategory = async () => {
           title="Manage Categories"
           description="Organize and manage your pharmacy's product categories."
         />
-        <AddCategory />
+        <AdminOnly><AddCategory /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <CategoryClient />

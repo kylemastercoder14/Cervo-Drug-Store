@@ -9,6 +9,7 @@ import React from "react";
 import BannerClient from "./_components/client";
 import { getAllBanner } from "@/actions/banner";
 import AddBanner from "./_components/add-banner";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminBanner = async () => {
   const queryClient = new QueryClient();
@@ -28,7 +29,7 @@ const AdminBanner = async () => {
           title="Manage Banners"
           description="Manage the banners displayed across your platform to keep it fresh and engaging."
         />
-        <AddBanner />
+        <AdminOnly><AddBanner /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <BannerClient />

@@ -8,6 +8,7 @@ import React from "react";
 import BranchClient from "./_components/client";
 import { getAllBranches } from "@/actions/branch";
 import AddBranch from "./_components/add-branch";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminBranchManagement = async () => {
   const queryClient = new QueryClient();
@@ -25,7 +26,7 @@ const AdminBranchManagement = async () => {
           title="Branch Management"
           description="Create, update, and manage Cervo Drug Store branches."
         />
-        <AddBranch />
+        <AdminOnly><AddBranch /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <BranchClient />

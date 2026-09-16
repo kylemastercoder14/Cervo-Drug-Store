@@ -15,12 +15,14 @@ import { Eye, MoreHorizontal, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDeleteCustomer } from "@/data/customers";
+import { useAdminAccess } from "@/components/admin-access-provider";
 
 interface CellActionProps {
   data: CustomerColumn;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
+  const { isAdmin } = useAdminAccess();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const { mutate: deleteCustomer, isPending: isDeleting } =
@@ -36,12 +38,14 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        loading={isDeleting}
-        onConfirm={onDelete}
-      />
+      {isAdmin && (
+        <AlertModal
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          loading={isDeleting}
+          onConfirm={onDelete}
+        />
+      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -57,11 +61,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <Eye className="w-4 h-4 mr-2" />
             View
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="w-4 h-4 mr-2" />
-            Delete
-          </DropdownMenuItem>
+          {isAdmin && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setOpen(true)}>
+                <Trash className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>

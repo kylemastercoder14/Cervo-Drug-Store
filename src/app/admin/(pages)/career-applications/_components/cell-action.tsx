@@ -15,12 +15,14 @@ import { useState } from "react";
 import AlertModal from "@/components/ui/alert-modal";
 import ApplicationDetailModal from "./application-detail-modal";
 import { useDeleteApplication, useUpdateApplicationStatus } from "@/data/career-application";
+import { useAdminAccess } from "@/components/admin-access-provider";
 
 interface CellActionProps {
   data: ApplicationColumn;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
+  const { isAdmin } = useAdminAccess();
   const [open, setOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const { mutate: deleteApplication, isPending: isDeleting } = useDeleteApplication();
@@ -45,18 +47,21 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        loading={isDeleting}
-        onConfirm={onDelete}
-      />
+      {isAdmin && (
+        <AlertModal
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          loading={isDeleting}
+          onConfirm={onDelete}
+        />
+      )}
       {detailOpen && (
         <ApplicationDetailModal
           applicationId={data.id}
           isOpen={detailOpen}
           onClose={() => setDetailOpen(false)}
           onStatusChange={onStatusChange}
+          canEdit={isAdmin}
         />
       )}
       <DropdownMenu>
@@ -71,11 +76,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <Eye className="w-4 h-4 mr-2" />
             View Details
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="w-4 h-4 mr-2" />
-            Delete
-          </DropdownMenuItem>
+          {isAdmin && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setOpen(true)}>
+                <Trash className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>

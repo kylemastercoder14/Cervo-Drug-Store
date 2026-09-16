@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { PaymentMethodValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -28,10 +28,10 @@ export const getAllPaymentMethods = async () => {
 export const createPaymentMethod = async (
   values: z.infer<typeof PaymentMethodValidation>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = PaymentMethodValidation.safeParse(values);
@@ -79,10 +79,10 @@ export const updatePaymentMethod = async (
   values: z.infer<typeof PaymentMethodValidation>,
   paymentMethodId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!paymentMethodId) {
@@ -134,10 +134,10 @@ export const updatePaymentMethod = async (
 };
 
 export const deletePaymentMethod = async (paymentMethodId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!paymentMethodId) {

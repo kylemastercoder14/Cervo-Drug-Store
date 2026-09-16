@@ -23,6 +23,7 @@ import {
 import { useDeleteNewsEvent, useGetNewsEvent } from "@/data/news-event";
 import { NewsEventColumn } from "./column";
 import { CellAction } from "./cell-action";
+import { AdminOnly } from "@/components/admin-access-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -486,7 +487,7 @@ const NewsEventClient = ({ syncStatus }: { syncStatus: SyncStatus }) => {
                     </CardTitle>
                   </div>
                   <CardAction className="mt-0">
-                    <CellAction data={item} />
+                    <AdminOnly><CellAction data={item} /></AdminOnly>
                   </CardAction>
                 </div>
               </CardHeader>

@@ -8,6 +8,7 @@ import React from "react";
 import LaboratoryServiceClient from "./_components/client";
 import { getAllLaboratoryServiceCategories } from "@/actions/laboratory-services";
 import AddLaboratoryService from "./_components/add-laboratory-service";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminLaboratoryServices = async () => {
   const queryClient = new QueryClient();
@@ -26,7 +27,7 @@ const AdminLaboratoryServices = async () => {
           title="Manage Laboratory Services"
           description="Create categories like Serology or Hematology and manage the services shown on the website."
         />
-        <AddLaboratoryService />
+        <AdminOnly><AddLaboratoryService /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <LaboratoryServiceClient />

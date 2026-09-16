@@ -8,6 +8,7 @@ import React from "react";
 import PaymentMethodClient from "./_components/client";
 import { getAllPaymentMethods } from "@/actions/payment-method";
 import AddPaymentMethod from "./_components/add-payment-method";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminPaymentMethods = async () => {
   const queryClient = new QueryClient();
@@ -25,7 +26,7 @@ const AdminPaymentMethods = async () => {
           title="Payment Methods"
           description="Create and manage bank, e-wallet, and credit card payment options."
         />
-        <AddPaymentMethod />
+        <AdminOnly><AddPaymentMethod /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <PaymentMethodClient />

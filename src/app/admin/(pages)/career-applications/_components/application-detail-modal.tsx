@@ -16,19 +16,22 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { CareerApplication } from "@prisma/client";
 
 const ApplicationDetailModal = ({
   applicationId,
   isOpen,
   onClose,
   onStatusChange,
+  canEdit,
 }: {
   applicationId: string;
   isOpen: boolean;
   onClose: () => void;
   onStatusChange: (status: string, remarks?: string) => void;
+  canEdit: boolean;
 }) => {
-  const [application, setApplication] = useState<any>(null);
+  const [application, setApplication] = useState<CareerApplication | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [remarks, setRemarks] = useState<string>("");
@@ -153,7 +156,7 @@ const ApplicationDetailModal = ({
             </div>
           </div>
 
-          <div className="border-t pt-4 space-y-4">
+          {canEdit && <div className="border-t pt-4 space-y-4">
             <div>
               <Label className="text-sm font-medium mb-2 block">Update Status</Label>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -190,7 +193,7 @@ const ApplicationDetailModal = ({
             >
               Update Status & Send Email
             </Button>
-          </div>
+          </div>}
         </div>
       </DialogContent>
     </Dialog>

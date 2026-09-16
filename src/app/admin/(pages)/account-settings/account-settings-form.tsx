@@ -10,8 +10,10 @@ import { updateCurrentAdminAccount } from "@/actions/manage-staff";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAdminAccess } from "@/components/admin-access-provider";
 
 const AccountSettingsForm = ({ admin }: { admin: Admin }) => {
+  const { isAdmin } = useAdminAccess();
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
   const [form, setForm] = React.useState({
@@ -67,7 +69,7 @@ const AccountSettingsForm = ({ admin }: { admin: Admin }) => {
               id="admin-name"
               value={form.name}
               onChange={(event) => updateField("name", event.target.value)}
-              disabled={isPending}
+              disabled={isPending || !isAdmin}
             />
           </div>
 
@@ -78,13 +80,13 @@ const AccountSettingsForm = ({ admin }: { admin: Admin }) => {
               type="email"
               value={form.email}
               onChange={(event) => updateField("email", event.target.value)}
-              disabled={isPending}
+              disabled={isPending || !isAdmin}
             />
           </div>
         </div>
       </div>
 
-      <div className="rounded-lg border bg-white p-6 shadow-sm">
+      {isAdmin && <div className="rounded-lg border bg-white p-6 shadow-sm">
         <div className="mb-6 flex items-start gap-3">
           <div className="rounded-md bg-green-50 p-2 text-green-700">
             <ShieldCheck className="h-5 w-5" />
@@ -142,7 +144,7 @@ const AccountSettingsForm = ({ admin }: { admin: Admin }) => {
             Save Settings
           </Button>
         </div>
-      </div>
+      </div>}
     </form>
   );
 };

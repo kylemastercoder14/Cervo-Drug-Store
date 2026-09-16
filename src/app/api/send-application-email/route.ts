@@ -3,8 +3,18 @@ import { sendEmail } from "@/lib/email";
 import { render } from "@react-email/render";
 import ApplicationStatusEmail from "@/emails/application-status-email";
 import React from "react";
+import { getAdminForMutation } from "@/hooks/use-user";
 
 export async function POST(req: NextRequest) {
+  const { user } = await getAdminForMutation();
+
+  if (!user) {
+    return NextResponse.json(
+      { error: "Admin permission required." },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { to, applicantName, position, status, remarks } = body;
@@ -57,10 +67,13 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, messageId: result.messageId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in send-application-email route:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to send email" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to send email",
+      },
       { status: 500 }
     );
   }

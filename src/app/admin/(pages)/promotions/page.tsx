@@ -9,6 +9,7 @@ import React from "react";
 import { getAllPromotion } from "@/actions/promotion";
 import PromotionClient from "./_components/client";
 import AddPromotion from "./_components/add-promotion";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminPromotion = async () => {
   const queryClient = new QueryClient();
@@ -28,7 +29,7 @@ const AdminPromotion = async () => {
           title="Manage Promotions"
           description="Manage the promotions and discounts displayed across your platform."
         />
-        <AddPromotion />
+        <AdminOnly><AddPromotion /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <PromotionClient />

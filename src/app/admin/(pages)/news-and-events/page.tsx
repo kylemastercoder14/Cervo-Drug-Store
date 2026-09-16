@@ -9,14 +9,20 @@ import { getAllNewsEvents } from "@/actions/news-events";
 import { getFacebookSyncStatus, runFacebookNewsSync } from "@/lib/facebook-sync";
 import NewsEventClient from "./_components/client";
 import AddNewsEvents from "./_components/add-news-event";
+import { AdminOnly } from "@/components/admin-access-provider";
+import { getUserFromCookies } from "@/hooks/use-user";
+import { isAdminRole } from "@/lib/admin-access";
 
 const AdminNewsAndEvents = async () => {
   const queryClient = new QueryClient();
+  const { user } = await getUserFromCookies();
 
-  try {
-    await runFacebookNewsSync("facebook-to-system", "admin:news-page");
-  } catch (error) {
-    console.error("Failed to sync Facebook posts before rendering news page:", error);
+  if (isAdminRole(user?.role)) {
+    try {
+      await runFacebookNewsSync("facebook-to-system", "admin:news-page");
+    } catch (error) {
+      console.error("Failed to sync Facebook posts before rendering news page:", error);
+    }
   }
 
   const syncStatus = await getFacebookSyncStatus();
@@ -37,7 +43,7 @@ const AdminNewsAndEvents = async () => {
           description="Effortlessly manage your news and events by viewing, adding, and updating them in real-time."
         />
 
-        <AddNewsEvents />
+        <AdminOnly><AddNewsEvents /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <NewsEventClient syncStatus={syncStatus} />

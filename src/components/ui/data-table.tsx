@@ -43,6 +43,7 @@ import {
 } from "./select";
 import { Checkbox } from "./checkbox";
 import AlertModal from "./alert-modal";
+import { useAdminAccess } from "@/components/admin-access-provider";
 
 interface DataTableProps<TData extends { id: string }, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -71,6 +72,8 @@ export function DataTable<TData extends { id: string }, TValue>({
   onBatchDelete,
   batchDeleteLoading = false,
 }: DataTableProps<TData, TValue>) {
+  const { canManage } = useAdminAccess();
+  const allowBatchDelete = Boolean(enableBatchDelete && canManage);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [batchDeleteOpen, setBatchDeleteOpen] = React.useState(false);
@@ -80,7 +83,7 @@ export function DataTable<TData extends { id: string }, TValue>({
     []
   );
   const tableColumns = React.useMemo<ColumnDef<TData, TValue>[]>(() => {
-    if (!enableBatchDelete) {
+    if (!allowBatchDelete) {
       return columns;
     }
 
@@ -108,7 +111,7 @@ export function DataTable<TData extends { id: string }, TValue>({
     };
 
     return [selectColumn, ...columns];
-  }, [columns, enableBatchDelete]);
+  }, [columns, allowBatchDelete]);
 
   const table = useReactTable({
     data,
@@ -187,7 +190,7 @@ export function DataTable<TData extends { id: string }, TValue>({
 
   return (
     <div className="overflow-x-auto">
-      {enableBatchDelete && (
+      {allowBatchDelete && (
         <AlertModal
           isOpen={batchDeleteOpen}
           onClose={() => setBatchDeleteOpen(false)}
@@ -240,7 +243,7 @@ export function DataTable<TData extends { id: string }, TValue>({
             )}
           </>
         )}
-        {enableBatchDelete && (
+        {allowBatchDelete && (
           <Button
             disabled={selectedIds.length === 0 || batchDeleteLoading}
             onClick={() => setBatchDeleteOpen(true)}

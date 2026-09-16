@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { LaboratoryServiceValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -71,10 +71,10 @@ export const getLaboratoryServiceCategoryBySlug = async (slug: string) => {
 export const createLaboratoryServiceCategory = async (
   values: z.infer<typeof LaboratoryServiceValidation>,
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = LaboratoryServiceValidation.safeParse(values);
@@ -127,10 +127,10 @@ export const updateLaboratoryServiceCategory = async (
   values: z.infer<typeof LaboratoryServiceValidation>,
   categoryId: string,
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!categoryId) {
@@ -187,10 +187,10 @@ export const updateLaboratoryServiceCategory = async (
 };
 
 export const deleteLaboratoryServiceCategory = async (categoryId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!categoryId) {

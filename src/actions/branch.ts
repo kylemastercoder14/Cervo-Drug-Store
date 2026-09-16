@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { BranchValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -28,10 +28,10 @@ export const getAllBranches = async () => {
 export const createBranch = async (
   values: z.infer<typeof BranchValidation>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = BranchValidation.safeParse(values);
@@ -69,10 +69,10 @@ export const updateBranch = async (
   values: z.infer<typeof BranchValidation>,
   branchId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!branchId) {
@@ -114,10 +114,10 @@ export const updateBranch = async (
 };
 
 export const deleteBranch = async (branchId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!branchId) {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { CategoryValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -67,10 +67,10 @@ export const getCategoryByTag = async (tag: string) => {
 export const createCategory = async (
   values: z.infer<typeof CategoryValidation>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = CategoryValidation.safeParse(values);
@@ -120,10 +120,10 @@ export const updateCategory = async (
   values: z.infer<typeof CategoryValidation>,
   categoryId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!categoryId) {
@@ -177,10 +177,10 @@ export const updateCategory = async (
 };
 
 export const deleteCategory = async (categoryId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!categoryId) {

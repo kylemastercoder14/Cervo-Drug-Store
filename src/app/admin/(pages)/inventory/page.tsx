@@ -8,6 +8,7 @@ import React from "react";
 import InventoryClient from "./_components/client";
 import { getAllInventory } from "@/actions/inventory";
 import AddInventory from "./_components/add-inventory";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminInventory = async () => {
   const queryClient = new QueryClient();
@@ -28,7 +29,7 @@ const AdminInventory = async () => {
           description="Effortlessly manage your inventory items by viewing, adding, and updating them in real-time."
         />
 
-        <AddInventory />
+        <AdminOnly><AddInventory /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <InventoryClient />

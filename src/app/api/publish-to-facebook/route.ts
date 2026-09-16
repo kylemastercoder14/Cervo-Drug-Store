@@ -5,8 +5,18 @@ import {
   normalizeFacebookError,
   publishFacebookPageNews,
 } from "@/lib/facebook";
+import { getAdminForMutation } from "@/hooks/use-user";
 
 export async function POST(req: NextRequest) {
+  const { user } = await getAdminForMutation();
+
+  if (!user) {
+    return NextResponse.json(
+      { error: "Admin permission required." },
+      { status: 403 },
+    );
+  }
+
   const pageId = process.env.FACEBOOK_PAGE_ID?.trim();
 
   if (!pageId) {

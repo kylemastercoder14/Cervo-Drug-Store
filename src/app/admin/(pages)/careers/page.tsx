@@ -8,6 +8,7 @@ import React from "react";
 import { getAllCareers } from "@/actions/career";
 import CareerClient from "./_components/client";
 import AddCareer from "./_components/add-career";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminCareers = async () => {
   const queryClient = new QueryClient();
@@ -27,7 +28,7 @@ const AdminCareers = async () => {
           title="Manage Careers"
           description="Manage job postings and career opportunities."
         />
-        <AddCareer />
+        <AdminOnly><AddCareer /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <CareerClient />

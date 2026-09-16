@@ -1,6 +1,6 @@
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 
 export const getAllLogs = async () => {
@@ -23,10 +23,10 @@ export const getAllLogs = async () => {
 };
 
 export const deleteLog = async (logId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!logId) {

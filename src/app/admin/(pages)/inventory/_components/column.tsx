@@ -3,6 +3,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
+import { AdminOnly } from "@/components/admin-access-provider";
+
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
 import { ChevronsUpDown } from "lucide-react";
@@ -131,6 +133,6 @@ export const columns: ColumnDef<InventoryColumn>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => <CellAction data={row.original} />,
+    cell: ({ row }) => <AdminOnly><CellAction data={row.original} /></AdminOnly>,
   },
 ];

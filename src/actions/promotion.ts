@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { PromotionValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -50,10 +50,10 @@ export const getFeaturedPromotion = async () => {
 export const createPromotion = async (
   values: z.infer<typeof PromotionValidation>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = PromotionValidation.safeParse(values);
@@ -96,10 +96,10 @@ export const updatePromotion = async (
   values: z.infer<typeof PromotionValidation>,
   promotionId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!promotionId) {
@@ -146,10 +146,10 @@ export const updatePromotion = async (
 };
 
 export const deletePromotion = async (promotionId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!promotionId) {

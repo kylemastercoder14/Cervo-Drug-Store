@@ -7,6 +7,7 @@ import {
 import React from "react";
 import { getAllStaff } from "@/actions/manage-staff";
 import AddStaff from "./_components/add-staff";
+import { AdminOnly } from "@/components/admin-access-provider";
 import StaffClient from "./_components/client";
 
 const AdminManageStaff = async () => {
@@ -28,7 +29,7 @@ const AdminManageStaff = async () => {
           description="Effortlessly manage your staff by viewing, adding, and updating them in real-time."
         />
 
-        <AddStaff />
+        <AdminOnly><AddStaff /></AdminOnly>
       </div>
       <HydrationBoundary state={dehydratedState}>
         <StaffClient />

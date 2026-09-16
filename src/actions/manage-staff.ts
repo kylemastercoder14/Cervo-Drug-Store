@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { StaffValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -88,10 +88,10 @@ export const updateCurrentAdminAccount = async (values: {
   newPassword?: string;
   confirmPassword?: string;
 }) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const name = values.name?.trim();
@@ -156,10 +156,10 @@ export const updateCurrentAdminAccount = async (values: {
 };
 
 export const createStaff = async (values: z.infer<typeof StaffValidation>) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = StaffValidation.safeParse(values);
@@ -203,10 +203,10 @@ export const updateStaff = async (
   values: z.infer<typeof StaffValidation>,
   staffId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!staffId) {
@@ -254,10 +254,10 @@ export const updateStaff = async (
 };
 
 export const deleteStaff = async (staffId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!staffId) {

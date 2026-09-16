@@ -10,6 +10,7 @@ import ProductClient from "./_components/client";
 import AddProduct from "./_components/add-product";
 import BulkUploadProducts from "./_components/bulk-upload-products";
 import ExportProducts from "./_components/export-products";
+import { AdminOnly } from "@/components/admin-access-provider";
 
 const AdminProducts = async () => {
   const queryClient = new QueryClient();
@@ -31,8 +32,10 @@ const AdminProducts = async () => {
         />
         <div className="flex items-center gap-2">
           <ExportProducts />
-          <BulkUploadProducts />
-          <AddProduct />
+          <AdminOnly>
+            <BulkUploadProducts />
+            <AddProduct />
+          </AdminOnly>
         </div>
       </div>
       <HydrationBoundary state={dehydratedState}>

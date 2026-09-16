@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { InventoryValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -31,10 +31,10 @@ export const getAllInventory = async () => {
 export const createInventory = async (
   values: z.infer<typeof InventoryValidation>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = InventoryValidation.safeParse(values);
@@ -93,10 +93,10 @@ export const updateInventory = async (
   values: z.infer<typeof InventoryValidation>,
   inventoryId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!inventoryId) {
@@ -146,10 +146,10 @@ export const updateInventory = async (
 };
 
 export const deleteInventory = async (inventoryId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!inventoryId) {

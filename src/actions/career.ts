@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { z } from "zod";
 
@@ -89,10 +89,10 @@ export const getCareerById = async (careerId: string) => {
 };
 
 export const createCareer = async (values: z.infer<typeof CareerValidation>) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = CareerValidation.safeParse(values);
@@ -147,10 +147,10 @@ export const updateCareer = async (
   values: z.infer<typeof CareerValidation>,
   careerId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!careerId) {
@@ -208,10 +208,10 @@ export const updateCareer = async (
 };
 
 export const deleteCareer = async (careerId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!careerId) {
@@ -322,10 +322,10 @@ export const updateApplicationStatus = async (
   status: string,
   remarks?: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!applicationId) {
@@ -392,10 +392,10 @@ export const updateApplicationStatus = async (
 };
 
 export const deleteApplication = async (applicationId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!applicationId) {

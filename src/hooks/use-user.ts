@@ -1,6 +1,7 @@
 import db from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { ADMIN_ONLY_ERROR, isAdminRole } from "@/lib/admin-access";
 
 // Since this is running in a server component, we should treat it as a utility, not a hook
 export const getUserFromCookies = async () => {
@@ -37,4 +38,18 @@ export const getUserFromCookies = async () => {
     console.error(error);
     return { error: "Invalid or expired token" };
   }
+};
+
+export const getAdminForMutation = async () => {
+  const result = await getUserFromCookies();
+
+  if (!result.user) {
+    return result;
+  }
+
+  if (!isAdminRole(result.user.role)) {
+    return { error: ADMIN_ONLY_ERROR };
+  }
+
+  return result;
 };

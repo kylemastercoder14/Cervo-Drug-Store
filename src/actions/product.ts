@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { ProductValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -176,10 +176,10 @@ export const getProductsByCategory = async (categoryTag: string) => {
 export const createProduct = async (
   values: z.infer<typeof ProductValidation>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = ProductValidation.safeParse(values);
@@ -236,10 +236,10 @@ export const createProduct = async (
 export const createProductFromExcel = async (
   values: z.infer<typeof bulkProductRowSchema>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = bulkProductRowSchema.safeParse(values);
@@ -304,10 +304,10 @@ export const createProductFromExcel = async (
 };
 
 export const createBulkProducts = async (data: any[]) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   try {
@@ -414,10 +414,10 @@ export const updateProduct = async (
   values: z.infer<typeof ProductValidation>,
   productId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!productId) {
@@ -487,10 +487,10 @@ export const updateProduct = async (
 };
 
 export const deleteProduct = async (productId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!productId) {

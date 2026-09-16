@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import {
   fetchFacebookPageFeed,
@@ -34,10 +34,10 @@ export const getAllNewsEvents = async () => {
 export const createNewsEvent = async (
   values: z.infer<typeof NewsEventValidation>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = NewsEventValidation.safeParse(values);
@@ -81,10 +81,10 @@ export const updateNewsEvent = async (
   values: z.infer<typeof NewsEventValidation>,
   newsId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!newsId) {
@@ -132,10 +132,10 @@ export const updateNewsEvent = async (
 };
 
 export const deleteNewsEvent = async (newsId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!newsId) {
@@ -169,10 +169,10 @@ export const deleteNewsEvent = async (newsId: string) => {
 };
 
 export const publishExistingNewsEventsToFacebook = async () => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const pageId = process.env.FACEBOOK_PAGE_ID?.trim();
@@ -255,10 +255,10 @@ export const publishExistingNewsEventsToFacebook = async () => {
 };
 
 export const syncFacebookPostsToNews = async () => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const pageId = process.env.FACEBOOK_PAGE_ID?.trim();
@@ -307,10 +307,10 @@ export const syncNewsEventUpdateToFacebook = async (
   newsId: string,
   values: z.infer<typeof NewsEventValidation>,
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const pageId = process.env.FACEBOOK_PAGE_ID?.trim();

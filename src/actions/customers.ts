@@ -1,6 +1,6 @@
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 
 export const getAllCustomers = async () => {
@@ -23,10 +23,10 @@ export const getAllCustomers = async () => {
 };
 
 export const deleteCustomer = async (customerId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!customerId) {

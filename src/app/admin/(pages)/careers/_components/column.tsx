@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
+import { AdminOnly } from "@/components/admin-access-provider";
+
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
 import { Badge } from "@/components/ui/badge";
@@ -114,7 +116,7 @@ export const columns: ColumnDef<CareerColumn>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => <CellAction data={row.original} />,
+    cell: ({ row }) => <AdminOnly><CellAction data={row.original} /></AdminOnly>,
   },
 ];
 

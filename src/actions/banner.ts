@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getUserFromCookies } from "@/hooks/use-user";
+import { getAdminForMutation } from "@/hooks/use-user";
 import db from "@/lib/db";
 import { BannerValidation } from "@/lib/validators";
 import { z } from "zod";
@@ -28,10 +28,10 @@ export const getAllBanner = async () => {
 export const createBanner = async (
   values: z.infer<typeof BannerValidation>
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   const validatedField = BannerValidation.safeParse(values);
@@ -73,10 +73,10 @@ export const updateBanner = async (
   values: z.infer<typeof BannerValidation>,
   bannerId: string
 ) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!bannerId) {
@@ -122,10 +122,10 @@ export const updateBanner = async (
 };
 
 export const deleteBanner = async (bannerId: string) => {
-  const { user } = await getUserFromCookies();
+  const { user, error: accessError } = await getAdminForMutation();
 
   if (!user) {
-    return { error: "User not found." };
+    return { error: accessError || "User not found." };
   }
 
   if (!bannerId) {
